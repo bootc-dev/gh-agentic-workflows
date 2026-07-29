@@ -18,9 +18,15 @@ jobs:
       contents: write
       pull-requests: write
     steps:
+      - name: Generate App token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.GH_AW_APP_CLIENT_ID }}
+          private-key: ${{ secrets.GH_AW_APP_PRIVATE_KEY }}
       - name: Mark the PR ready for review
         env:
-          GH_TOKEN: ${{ secrets.GH_AW_CI_TRIGGER_TOKEN }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           set -euo pipefail
           # drafter.md opens PRs as drafts; gh pr merge refuses drafts outright.
@@ -28,7 +34,7 @@ jobs:
             --repo "${{ github.repository }}"
       - name: Squash-merge the PR
         env:
-          GH_TOKEN: ${{ secrets.GH_AW_CI_TRIGGER_TOKEN }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           set -euo pipefail
           gh pr merge "${{ github.event.pull_request.number }}" \
@@ -37,7 +43,7 @@ jobs:
       - name: Remove ai/lgtm label (best-effort, PR may already be merged/gone)
         if: always()
         env:
-          GH_TOKEN: ${{ secrets.GH_AW_CI_TRIGGER_TOKEN }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           gh pr edit "${{ github.event.pull_request.number }}" \
             --repo "${{ github.repository }}" \

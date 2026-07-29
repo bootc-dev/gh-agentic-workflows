@@ -26,13 +26,14 @@ tools:
     toolsets: [default]
 
 safe-outputs:
+  github-app:
+    client-id: ${{ vars.GH_AW_APP_CLIENT_ID }}
+    private-key: ${{ secrets.GH_AW_APP_PRIVATE_KEY }}
   remove-labels:
     max: 1
     allowed: ["ai/fixme"]
-    github-token: ${{ secrets.GH_AW_CI_TRIGGER_TOKEN }}
   push-to-pull-request-branch:
     max: 1
-    github-token: ${{ secrets.GH_AW_CI_TRIGGER_TOKEN }}
 
 timeout-minutes: 15
 ---

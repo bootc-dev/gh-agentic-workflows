@@ -75,12 +75,16 @@ issue labeled            pull_request              label: ai/fixme          labe
 
 A few things here are non-obvious and were hard-won getting this to actually work:
 
-- **Token scoping matters — nest it, don't hoist it.** The PAT used to retrigger
-  downstream workflows (`GH_AW_CI_TRIGGER_TOKEN`) must be set under the specific
-  safe-output key that needs it (e.g. `add-labels: github-token: ...` or
-  `push-to-pull-request-branch: github-token: ...`), never at the `safe-outputs:` root.
-  A root-level token leaks into the untrusted agent job's sandbox and checkout steps,
-  which defeats the point of gh-aw's safe-output isolation.
+- **`github-app:` is safe at the `safe-outputs:` root — that's specific to how gh-aw
+  handles App auth.** gh-aw mints the App installation token only inside the trusted
+  safe-outputs job (after the untrusted agent job has already finished), so declaring
+  `github-app:` once at the `safe-outputs:` root applies to every handler below it
+  without ever reaching the agent job's sandbox. This is *not* generally true of a raw
+  token string: the earlier version of this repo used a PAT
+  (`GH_AW_CI_TRIGGER_TOKEN` via `github-token: ...`), which had to be nested under each
+  individual safe-output key (e.g. `add-labels: github-token: ...`) instead of the root,
+  precisely because a root-level plain `github-token:` leaks into the untrusted agent
+  job's environment. `github-app:` doesn't have that problem, so it belongs at the root.
 - **`label_command:` plus a custom top-level `if:` drops the label match.** gh-aw's
   `label_command:` trigger is the natural-looking choice for "run when label X is
   applied," but combining it with a custom top-level `if:` (needed here to also check
@@ -102,16 +106,35 @@ A few things here are non-obvious and were hard-won getting this to actually wor
 ## Repository setup checklist
 
 1. Create three labels: `agent-code`, `ai/fixme`, `ai/lgtm`.
-2. Add a `GH_AW_CI_TRIGGER_TOKEN` repository secret: a PAT (or GitHub App installation
-   token) for a real user/bot account with write access to the repo. It must **not** be
-   the default `GITHUB_TOKEN` — see "GITHUB_TOKEN doesn't retrigger workflows" above.
-3. Make sure `gh aw compile` runs cleanly against the `.md` files (see below).
+2. Register a GitHub App to act as the pipeline's bot identity (this must be a real App,
+   not the default `GITHUB_TOKEN` — see "GITHUB_TOKEN doesn't retrigger workflows"
+   above):
+   - Go to Settings → Developer settings → GitHub Apps → New GitHub App.
+   - Grant repository permissions: Contents (Read & Write), Issues (Read & Write), Pull
+     requests (Read & Write). Metadata (Read) is auto-granted.
+   - Set the webhook to inactive — it isn't needed, since this App is only used to mint
+     API tokens for Actions, not to receive events.
+   - Set installability to "Only on this account".
+   - After creating it, capture the **Client ID** (not the numeric App ID) from the
+     App's General settings page.
+   - Generate and download a private key from the same page.
+   - Install the App on this specific repository.
+   - Store the credentials on the repo: `gh variable set GH_AW_APP_CLIENT_ID --body
+     "<client-id>"` (a non-secret repo variable) and `gh secret set
+     GH_AW_APP_PRIVATE_KEY < path/to/key.pem` (a secret).
+
+   (The App used for this specific demo instance is `cgwaltersbot`; the steps above are
+   written generically so you can register your own App if adapting this repo.)
+3. Make sure `gh aw compile` runs cleanly against the `.md` files (see below) — run `gh
+   aw compile drafter review fix --approve` after any workflow edit.
 4. Note that a single shared bot identity for the drafter and reviewer is *why* the
-   label-based design exists in the first place. If you use two genuinely distinct
-   identities instead — for example a separate GitHub App installation for the reviewer
-   — you could use native `REQUEST_CHANGES`/`APPROVE` reviews and skip the label
-   indirection. The label approach still works fine in that case too, and is simpler to
-   set up, so it's a reasonable default either way.
+   label-based design exists in the first place — the App installation above is that
+   shared identity: PRs, reviews, and label changes all show up as
+   `<app-slug>[bot]`. If you use two genuinely distinct identities instead — for example
+   a second, separate App installation used only by the reviewer — you could use native
+   `REQUEST_CHANGES`/`APPROVE` reviews and skip the label indirection. The label
+   approach still works fine with one shared identity, and is simpler to set up, so it's
+   a reasonable default either way.
 
 ## Adapting to your project
 

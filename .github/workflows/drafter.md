@@ -23,10 +23,12 @@ tools:
     toolsets: [issues]
 
 safe-outputs:
+  github-app:
+    client-id: ${{ vars.GH_AW_APP_CLIENT_ID }}
+    private-key: ${{ secrets.GH_AW_APP_PRIVATE_KEY }}
   create-pull-request:
     max: 1
     branch-prefix: agent/
-    github-token: ${{ secrets.GH_AW_CI_TRIGGER_TOKEN }}
 
 timeout-minutes: 15
 ---

@@ -23,16 +23,17 @@ tools:
     toolsets: [default]
 
 safe-outputs:
+  github-app:
+    client-id: ${{ vars.GH_AW_APP_CLIENT_ID }}
+    private-key: ${{ secrets.GH_AW_APP_PRIVATE_KEY }}
   submit-pull-request-review:
     max: 1
   add-labels:
     max: 1
     allowed: ["ai/fixme", "ai/lgtm"]
-    github-token: ${{ secrets.GH_AW_CI_TRIGGER_TOKEN }}
   remove-labels:
     max: 2
     allowed: ["ai/fixme", "ai/lgtm"]
-    github-token: ${{ secrets.GH_AW_CI_TRIGGER_TOKEN }}
 
 timeout-minutes: 15
 ---
