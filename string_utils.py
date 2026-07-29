@@ -28,6 +28,15 @@ def word_count(text: str) -> dict:
     return counts
 
 
+def count_vowels_6895903(text: str) -> int:
+    """Count the vowels (a, e, i, o, u) in ``text``.
+
+    Matching is case-insensitive, so for example ``"Hello World"`` contains
+    three vowels (``e``, ``o``, ``o``).
+    """
+    return sum(char in "aeiou" for char in text.lower())
+
+
 def reverse_words_13710540(text: str) -> str:
     """Reverse the order of words in ``text`` while keeping each word intact.
 
