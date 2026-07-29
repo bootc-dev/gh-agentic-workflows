@@ -2,7 +2,12 @@
 
 import unittest
 
-from string_utils import slugify, word_count, reverse_words_13710540
+from string_utils import (
+    slugify,
+    word_count,
+    reverse_words_13710540,
+    count_vowels_6895903,
+)
 
 
 class WordCountTests(unittest.TestCase):
@@ -49,6 +54,22 @@ class ReverseWordsTests(unittest.TestCase):
         # Runs of whitespace collapse to single spaces and leading/trailing
         # whitespace is dropped, since bare str.split() discards empty tokens.
         self.assertEqual(reverse_words_13710540("  the   quick  "), "quick the")
+
+
+class CountVowelsTests(unittest.TestCase):
+    def test_canonical_example(self):
+        # The example from the issue: "Hello World" has three vowels.
+        self.assertEqual(count_vowels_6895903("Hello World"), 3)
+
+    def test_empty_string(self):
+        self.assertEqual(count_vowels_6895903(""), 0)
+
+    def test_case_insensitive(self):
+        # All five vowels in both cases are counted.
+        self.assertEqual(count_vowels_6895903("AEIOUaeiou"), 10)
+
+    def test_no_vowels(self):
+        self.assertEqual(count_vowels_6895903("rhythm xyz!"), 0)
 
 
 class SlugifyTests(unittest.TestCase):
