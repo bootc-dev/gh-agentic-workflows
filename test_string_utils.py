@@ -2,7 +2,7 @@
 
 import unittest
 
-from string_utils import slugify, word_count
+from string_utils import slugify, word_count, reverse_words_13710540
 
 
 class WordCountTests(unittest.TestCase):
@@ -30,6 +30,25 @@ class WordCountTests(unittest.TestCase):
             word_count("abc 123 abc 123 123"),
             {"abc": 2, "123": 3},
         )
+
+
+class ReverseWordsTests(unittest.TestCase):
+    def test_canonical_example(self):
+        self.assertEqual(
+            reverse_words_13710540("the quick brown fox"),
+            "fox brown quick the",
+        )
+
+    def test_empty_string(self):
+        self.assertEqual(reverse_words_13710540(""), "")
+
+    def test_single_word(self):
+        self.assertEqual(reverse_words_13710540("hello"), "hello")
+
+    def test_whitespace_is_collapsed(self):
+        # Runs of whitespace collapse to single spaces and leading/trailing
+        # whitespace is dropped, since bare str.split() discards empty tokens.
+        self.assertEqual(reverse_words_13710540("  the   quick  "), "quick the")
 
 
 class SlugifyTests(unittest.TestCase):
