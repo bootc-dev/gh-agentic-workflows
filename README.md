@@ -65,7 +65,10 @@ issue labeled            pull_request              label: ai/fixme          labe
   can't retrigger itself), reads the reviewer's feedback from the PR's reviews, pushes a
   fix commit to the same branch via `push-to-pull-request-branch`, and stops. Pushing a
   new commit fires `review.md` again, closing the loop. An iteration cap (checked via
-  `git rev-list --count` against `main`) prevents runaway fix/review cycling.
+  `gh pr view --json commits`, counting commits on the PR through the GitHub API) caps
+  the loop at 2 fix iterations; if it's already been hit, `fix.md` posts a PR comment
+  explaining that a human needs to take over instead of silently doing nothing — see
+  "Troubleshooting / Operations" below.
 - **`merge.yml`** — triggers on the `ai/lgtm` label. A deliberately plain, non-gh-aw
   Actions workflow: merging is mechanical once the reviewer has already made the
   judgment call, so no LLM is involved. Marks the draft PR ready, squash-merges it, and
@@ -152,6 +155,37 @@ A few things here are non-obvious and were hard-won getting this to actually wor
    `REQUEST_CHANGES`/`APPROVE` reviews and skip the label indirection. The label
    approach still works fine with one shared identity, and is simpler to set up, so it's
    a reasonable default either way.
+
+## Troubleshooting / Operations
+
+**How to tell if a PR is stuck.** `fix.md`'s iteration cap (3, i.e. 2 automated fix
+attempts) is enforced by counting commits on the PR via `gh pr view --json commits`. When
+that cap is hit, `fix.md` removes `ai/fixme` (so it can't retrigger) and posts a PR
+comment explaining that automated fixing has stopped, but does **not** apply any label. A
+PR that has neither `ai/fixme` nor `ai/lgtm`, but does have a bot comment about the
+iteration cap, is stuck and waiting on a human — it is not "in progress," and nothing
+will move it forward on its own.
+
+**What not to do.** Toggling the originating issue's `agent-code` label off and back on
+does *not* resume work on the stuck PR — `drafter.md` triggers on that label and will
+open a brand-new, separate PR for the same issue, leaving the original stuck PR untouched
+and orphaned. Don't do this; it just produces a duplicate.
+
+**How to actually rescue a stuck PR.** Because the iteration cap is a running commit
+count on the branch that only ever grows, re-applying `ai/fixme` to a capped PR does
+**not** give the loop a clean extra attempt: `fix.md` will immediately see the same (or
+higher) commit count, hit the cap again, and post another comment without ever touching
+the code. The reliable options are:
+
+- Push a fix commit to the branch yourself, then apply `ai/lgtm` directly once you're
+  confident it's ready — this bypasses `fix.md`/`review.md` entirely and goes straight to
+  `merge.yml`.
+- Or just close the PR if it's not worth pursuing further.
+
+(If you really want the automated fix loop itself to run again rather than finishing by
+hand, you'd need to reduce the branch's commit count back below the cap first, e.g. by
+squashing the existing commits, before re-applying `ai/fixme` — at that point you're
+almost as far along as just finishing the fix yourself, so this is rarely worth it.)
 
 ## Adapting to your project
 
