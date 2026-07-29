@@ -8,6 +8,7 @@ description: |
 on:
   pull_request:
     types: [labeled]
+  bots: ["cgwaltersbot[bot]"]
 
 if: |
   github.event.label.name == 'ai/fixme' &&

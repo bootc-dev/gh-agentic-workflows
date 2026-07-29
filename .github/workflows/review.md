@@ -7,6 +7,7 @@ description: |
 on:
   pull_request:
     types: [opened, synchronize]
+  bots: ["cgwaltersbot[bot]"]
 
 if: startsWith(github.event.pull_request.head.ref, 'agent/')
 

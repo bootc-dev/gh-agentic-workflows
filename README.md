@@ -102,6 +102,19 @@ A few things here are non-obvious and were hard-won getting this to actually wor
   — add an explicit check yourself, e.g.
   `github.event.pull_request.head.repo.id == github.repository_id`. `merge.yml` in this
   repo already includes it; keep it if you adapt the file.
+- **A GitHub App bot actor always fails gh-aw's default role check.** gh-aw's
+  `pre_activation` job gates every run on `on.roles` (default `admin`, `maintainer`,
+  `write`), checked via `GET /repos/{owner}/{repo}/collaborators/{username}/permission`.
+  A GitHub App installation isn't a collaborator in that ACL model — its access comes
+  from the installation grant, not collaborator status — so that endpoint always reports
+  `none` for an App bot actor, and the check always fails. Since `review.md` and
+  `fix.md` trigger on `pull_request` events that can be authored or labeled by the
+  shared App bot itself (drafter.md's PR, or fix.md's own labeling via review.md's
+  `add-labels`), both need `on.bots: ["cgwaltersbot[bot]"]` to bypass the role check for
+  that specific identity. The failure mode is deceptive: the `pre_activation` job
+  reports success (it did its job, correctly gating the run off) while everything
+  downstream silently never runs — the overall run conclusion looks fine, so you have to
+  check job-level status, not run-level status, to notice it.
 
 ## Repository setup checklist
 
@@ -125,9 +138,13 @@ A few things here are non-obvious and were hard-won getting this to actually wor
 
    (The App used for this specific demo instance is `cgwaltersbot`; the steps above are
    written generically so you can register your own App if adapting this repo.)
-3. Make sure `gh aw compile` runs cleanly against the `.md` files (see below) — run `gh
+3. Add `bots: ["<your-app-slug>[bot]"]` to the `on:` blocks of `review.md` and `fix.md`
+   (not `drafter.md` — see "Design notes and gotchas" above), matching your App's
+   actual bot slug. Without this, both workflows' `pre_activation` job will always
+   reject the shared App bot's role check and silently no-op forever.
+4. Make sure `gh aw compile` runs cleanly against the `.md` files (see below) — run `gh
    aw compile drafter review fix --approve` after any workflow edit.
-4. Note that a single shared bot identity for the drafter and reviewer is *why* the
+5. Note that a single shared bot identity for the drafter and reviewer is *why* the
    label-based design exists in the first place — the App installation above is that
    shared identity: PRs, reviews, and label changes all show up as
    `<app-slug>[bot]`. If you use two genuinely distinct identities instead — for example
