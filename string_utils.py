@@ -26,3 +26,12 @@ def word_count(text: str) -> dict:
     for word in _WORD_RE.findall(text.lower()):
         counts[word] = counts.get(word, 0) + 1
     return counts
+
+
+def reverse_words_13710540(text: str) -> str:
+    """Reverse the order of words in ``text`` while keeping each word intact.
+
+    Words are split on whitespace and rejoined with a single space, so for
+    example ``"the quick brown fox"`` becomes ``"fox brown quick the"``.
+    """
+    return " ".join(reversed(text.split()))
