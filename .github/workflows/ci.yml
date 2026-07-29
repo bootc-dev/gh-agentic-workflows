@@ -1,0 +1,40 @@
+name: Check lock drift
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# This is a plain (non-gh-aw) workflow: checks that compiled .lock.yml files
+# are up to date with their .md sources.
+jobs:
+  check-drift:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install gh-aw extension
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          gh extension install github/gh-aw
+
+      - name: Compile workflows
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          gh aw compile drafter review fix --approve
+
+      - name: Check for lock drift
+        run: |
+          set -euo pipefail
+          git diff --exit-code -- .github/workflows/ || {
+            echo "::error::Compiled .lock.yml files are out of sync with their .md sources — run 'gh aw compile drafter review fix --approve' locally and commit the result."
+            exit 1
+          }
