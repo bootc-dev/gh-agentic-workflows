@@ -1,0 +1,50 @@
+name: Auto-merge agent PRs
+on:
+  pull_request:
+    types: [labeled]
+
+# This is a plain (non-gh-aw) workflow: merging is a mechanical action, not
+# a judgment call, so no LLM agent is involved here. review.md (a gh-aw
+# workflow) is the sole judge of readiness and signals it by adding the
+# ai/lgtm label; this workflow just acts on that signal.
+jobs:
+  merge:
+    if: |
+      github.event.label.name == 'ai/lgtm' &&
+      startsWith(github.event.pull_request.head.ref, 'agent/') &&
+      github.event.pull_request.head.repo.id == github.repository_id
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Generate App token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.GH_AW_APP_CLIENT_ID }}
+          private-key: ${{ secrets.GH_AW_APP_PRIVATE_KEY }}
+      - name: Mark the PR ready for review
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          set -euo pipefail
+          # drafter.md opens PRs as drafts; gh pr merge refuses drafts outright.
+          gh pr ready "${{ github.event.pull_request.number }}" \
+            --repo "${{ github.repository }}"
+      - name: Squash-merge the PR
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          set -euo pipefail
+          gh pr merge "${{ github.event.pull_request.number }}" \
+            --repo "${{ github.repository }}" \
+            --squash --delete-branch
+      - name: Remove ai/lgtm label (best-effort, PR may already be merged/gone)
+        if: always()
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          gh pr edit "${{ github.event.pull_request.number }}" \
+            --repo "${{ github.repository }}" \
+            --remove-label ai/lgtm || true
