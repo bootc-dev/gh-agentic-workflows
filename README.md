@@ -209,6 +209,32 @@ This is a demo/reference implementation, not a hardened product. There's no dash
 no multi-repo support, and the iteration cap and validation steps are intentionally
 simple.
 
+## End-to-end pipeline verification
+
+`tests/e2e.sh` scripts the manual procedure used to verify this pipeline works
+end to end: it files a fresh issue against a live repository, then polls the
+real GitHub API and reports each stage — PR opened, review posted,
+`ai/fixme`/`ai/lgtm` applied, fix commit pushed, re-review, merge — as it
+happens.
+
+This is **not** a unit test. It exercises the live gh-aw workflows against
+the real GitHub API and burns real Anthropic API credits, and a full run
+(especially the `needs-fix` scenario, which drives a full fix/re-review
+round trip) has been observed to take 20 minutes or more end to end. It's a
+manual verification tool for a human — or an agent, on explicit request —
+to run deliberately; it is not wired into any GitHub Actions trigger and
+must not run automatically on every push.
+
+```
+./tests/e2e.sh --repo cgwalters/gh-aw-fullsend-mini --scenario needs-fix
+```
+
+Two scenarios are supported: `needs-fix` (default) files a task that tells
+the drafter to skip unit tests and the reviewer to flag it, exercising the
+full fix loop; `clean` files a plain task with no deliberate gap, expected
+to reach `ai/lgtm` on the first review. See `./tests/e2e.sh --help` for all
+flags.
+
 ## Side note on AI
 
 This repository was built and tested with [OpenCode](https://opencode.ai)-coordinated
