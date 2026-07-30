@@ -45,7 +45,11 @@ safe-outputs:
     # touch protected files without the request_review gate. See "Letting
     # the agent edit protected files" in README.md.
     protected-files:
-      policy: ${{ contains(github.event.pull_request.labels.*.name, 'agent/workflow-edits-allowed') && 'allowed' || 'request_review' }}
+      # See drafter.md for why this uses case() instead of the more common
+      # "cond && 'allowed' || 'request_review'" ternary idiom: gh-aw's
+      # compiler HTML-escapes && to \u0026\u0026 when JSON-encoding this
+      # value, which breaks GitHub Actions' expression parser.
+      policy: ${{ case(contains(github.event.pull_request.labels.*.name, 'agent/workflow-edits-allowed'), 'allowed', 'request_review') }}
 
 timeout-minutes: 15
 ---

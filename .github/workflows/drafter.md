@@ -38,7 +38,13 @@ safe-outputs:
     # this specific run to edit them without that gate. This must not become
     # the default — see "Letting the agent edit protected files" in README.md.
     protected-files:
-      policy: ${{ contains(github.event.issue.labels.*.name, 'agent/workflow-edits-allowed') && 'allowed' || 'request_review' }}
+      # case(), not "cond && 'allowed' || 'request_review'": gh-aw's compiler
+      # JSON-encodes this string with Go's default HTML-escaping, which turns
+      # a literal && into \u0026\u0026 and produces an expression GitHub
+      # Actions can't parse (silently breaking the whole workflow file at
+      # push time, no job even attempts to run). case() has no &, <, or >,
+      # so it survives that encoding intact.
+      policy: ${{ case(contains(github.event.issue.labels.*.name, 'agent/workflow-edits-allowed'), 'allowed', 'request_review') }}
 
 timeout-minutes: 15
 ---
