@@ -14,6 +14,34 @@ if: |
   github.event.label.name == 'agent/fixme' &&
   startsWith(github.event.pull_request.head.ref, 'agent/')
 
+# gh-aw's default `pull_request`-triggered concurrency group is keyed only by
+# workflow name + PR number, not by which label fired the run. That's fine
+# for gh-aw's own `label_command:`/label-trigger-shorthand triggers (which
+# thread the label name into the group automatically) but this workflow uses
+# a plain `pull_request: types: [labeled]` trigger instead (see the "Your
+# task" note below for why), so it doesn't get that treatment. The `on:
+# labeled` trigger above fires at the Actions level on *any* label change to
+# the PR -- the `if:` above only filters which runs actually do real work,
+# after the run has already started -- so add_working_label's own
+# `--add-label agent/fix-working` call is itself a `labeled` event that
+# starts a second run in the *same* default concurrency group. Confirmed
+# live: that second run's job-level `if:` conditions correctly evaluate
+# false and skip real work, but `cancel-in-progress: true` on the shared
+# group cancels the first run's in-progress `activation`/`agent` jobs
+# (mid-LLM-fix) the instant the second run starts, regardless of what the
+# second run's own conditions decide -- observed via the GitHub API as the
+# first run's `agent` job showing `conclusion: cancelled` with
+# `started_at == completed_at`. Keying the group on the triggering label
+# name isolates the two: a real `agent/fixme` run and its own
+# self-retriggered `agent/fix-working` run land in different groups and
+# never cancel each other. `|| github.run_id` on the label term (not just
+# the PR-number term) keeps any non-label-triggered run of this workflow,
+# should one ever exist, out of every label-keyed group instead of
+# colliding on an empty string.
+concurrency:
+  group: "gh-aw-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref || github.run_id }}-${{ github.event.label.name || github.run_id }}"
+  cancel-in-progress: true
+
 permissions:
   contents: read
   issues: read
