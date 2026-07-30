@@ -113,8 +113,16 @@ rather than a bare literal:
 
 ```yaml
 protected-files:
-  policy: ${{ contains(github.event.issue.labels.*.name, 'agent/workflow-edits-allowed') && 'allowed' || 'request_review' }}
+  policy: ${{ case(contains(github.event.issue.labels.*.name, 'agent/workflow-edits-allowed'), 'allowed', 'request_review') }}
 ```
+
+Note this uses `case()` rather than the more common `cond && 'allowed' || 'request_review'`
+ternary idiom: gh-aw's compiler JSON-encodes this policy string with Go's default
+HTML-escaping, which turns a literal `&&` into `\u0026\u0026` inside the heredoc-embedded
+config blob. GitHub Actions' expression parser can't parse that, so the whole compiled
+workflow gets rejected as invalid on push — see
+[the fix for #21](https://github.com/cgwalters/gh-aw-fullsend-mini/commit/0735a1c).
+`case()` avoids `&`, `<`, and `>` entirely, so it survives serialization intact.
 
 Applying the `agent/workflow-edits-allowed` label to the *issue* — before or alongside
 `agent-code` — pre-authorizes that specific `drafter.md` run to write protected files
