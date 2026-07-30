@@ -84,7 +84,7 @@ jobs:
         with:
           client-id: ${{ vars.GH_AW_APP_CLIENT_ID }}
           private-key: ${{ secrets.GH_AW_APP_PRIVATE_KEY }}
-      - name: Add agent/working label
+      - name: Add agent/draft-working label
         # ISSUE_NUMBER/REPO must be passed via env: rather than inlined
         # directly into the run: script below (as `${{ github.* }}`): gh-aw's
         # compiler sanitizes any inline `${{ github.* }}` expressions it
@@ -101,10 +101,16 @@ jobs:
           REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-          gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --add-label agent/working || true
+          gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --add-label agent/draft-working || true
   remove_working_label:
-    needs: [activation, agent, detection, safe_outputs]
-    if: always()
+    needs: [pre_activation, activation, agent, detection, safe_outputs]
+    # Only tear down the label this same run put up: gating on this run's own
+    # pre_activation output (not just "always()") stops a run whose real work
+    # never started from clearing an in-progress signal it never set. See
+    # review.md/fix.md, which share this exact job pair and label scheme on
+    # PRs -- a bare `if: always()` there was found to strip a *different*,
+    # still-running workflow's label out from under it.
+    if: always() && needs.pre_activation.outputs.activated == 'true'
     runs-on: ubuntu-latest
     permissions:
       issues: write
@@ -115,15 +121,15 @@ jobs:
         with:
           client-id: ${{ vars.GH_AW_APP_CLIENT_ID }}
           private-key: ${{ secrets.GH_AW_APP_PRIVATE_KEY }}
-      - name: Remove agent/working label (best-effort)
-        # See the "Add agent/working label" step above for why
+      - name: Remove agent/draft-working label (best-effort)
+        # See the "Add agent/draft-working label" step above for why
         # ISSUE_NUMBER/REPO are passed via env: instead of inlined in run:.
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           REPO: ${{ github.repository }}
         run: |
-          gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --remove-label agent/working || true
+          gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --remove-label agent/draft-working || true
 
 timeout-minutes: 15
 ---

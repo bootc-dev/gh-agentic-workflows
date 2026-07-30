@@ -60,7 +60,7 @@ jobs:
         with:
           client-id: ${{ vars.GH_AW_APP_CLIENT_ID }}
           private-key: ${{ secrets.GH_AW_APP_PRIVATE_KEY }}
-      - name: Add agent/working label
+      - name: Add agent/review-working label
         # PR_NUMBER/REPO must be passed via env: rather than inlined
         # directly into the run: script below (as `${{ github.* }}`): see
         # drafter.md's equivalent step for why -- gh-aw's compiler silently
@@ -73,10 +73,14 @@ jobs:
           REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-          gh pr edit "$PR_NUMBER" --repo "$REPO" --add-label agent/working || true
+          gh pr edit "$PR_NUMBER" --repo "$REPO" --add-label agent/review-working || true
   remove_working_label:
-    needs: [activation, agent, detection, safe_outputs]
-    if: always()
+    needs: [pre_activation, activation, agent, detection, safe_outputs]
+    # Only tear down the label this same run put up: gating on this run's own
+    # pre_activation output (not just "always()") stops a run whose real work
+    # never started from clearing an in-progress signal it never set. See
+    # fix.md's equivalent job for the live incident this defends against.
+    if: always() && needs.pre_activation.outputs.activated == 'true'
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
@@ -87,15 +91,15 @@ jobs:
         with:
           client-id: ${{ vars.GH_AW_APP_CLIENT_ID }}
           private-key: ${{ secrets.GH_AW_APP_PRIVATE_KEY }}
-      - name: Remove agent/working label (best-effort)
-        # See the "Add agent/working label" step above for why
+      - name: Remove agent/review-working label (best-effort)
+        # See the "Add agent/review-working label" step above for why
         # PR_NUMBER/REPO are passed via env: instead of inlined in run:.
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
         run: |
-          gh pr edit "$PR_NUMBER" --repo "$REPO" --remove-label agent/working || true
+          gh pr edit "$PR_NUMBER" --repo "$REPO" --remove-label agent/review-working || true
 
 timeout-minutes: 15
 ---

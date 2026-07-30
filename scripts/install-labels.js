@@ -34,8 +34,18 @@ const LABELS = [
     color: '0E8A16', // green
   },
   {
-    name: 'agent/working',
-    description: 'An agent is actively working on this issue/PR',
+    name: 'agent/draft-working',
+    description: 'The drafter agent is actively working on this issue',
+    color: 'FBCA04', // yellow
+  },
+  {
+    name: 'agent/review-working',
+    description: 'The review agent is actively working on this PR',
+    color: 'FBCA04', // yellow
+  },
+  {
+    name: 'agent/fix-working',
+    description: 'The fix agent is actively working on this PR',
     color: 'FBCA04', // yellow
   },
   {

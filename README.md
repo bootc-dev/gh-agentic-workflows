@@ -112,15 +112,24 @@ A few things here are non-obvious and were hard-won getting this to actually wor
   (e.g. `claude-sonnet-4-5-20250929`) instead of a floating alias, then recompile. If
   workflows that were working suddenly start failing with a pricing-lookup error, this is
   almost certainly why.
-- **`agent/working` is added and removed via frontmatter `jobs:`, not safe-outputs.**
-  All three workflows carry an `agent/working` label on the issue/PR for the duration of
-  a run, using two custom jobs declared directly in each `.md` file's `jobs:` block:
-  `add_working_label` (depends on `pre_activation`, which gh-aw's compiler
-  automatically threads into `activation`'s own dependencies, so `agent` transitively
-  waits for it) adds the label, and `remove_working_label` (`if: always()`) removes it
-  regardless of success or failure. safe-outputs handlers only run when the agent job
-  succeeds, which can't guarantee cleanup on failure or timeout — a plain job with
-  `if: always()` can.
+- **A per-workflow `agent/*-working` label is added and removed via frontmatter
+  `jobs:`, not safe-outputs.** Each workflow carries its own working label on the
+  issue/PR for the duration of a run — `agent/draft-working` (drafter.md),
+  `agent/review-working` (review.md), `agent/fix-working` (fix.md) — using two custom
+  jobs declared directly in each `.md` file's `jobs:` block: `add_working_label`
+  (depends on `pre_activation`, which gh-aw's compiler automatically threads into
+  `activation`'s own dependencies, so `agent` transitively waits for it) adds the
+  label, and `remove_working_label` removes it, gated on `needs.pre_activation.outputs.activated
+  == 'true'` so a run only clears the label it actually set (not another workflow's,
+  and not one it never added because its own activation gate failed). The labels are
+  per-workflow rather than shared: `review.md` and `fix.md` both used to add/remove a
+  single `agent/working` label on the same PR, and a run whose real work was skipped
+  could still unconditionally strip the *other* workflow's still-in-progress signal —
+  confirmed live, where `fix.md`'s cleanup removed the label 11 seconds after
+  `review.md` set it, while `review.md`'s agent job kept running several more minutes.
+  safe-outputs handlers only run when the agent job succeeds, which can't guarantee
+  cleanup on failure or timeout — a plain job with `if: always()` (further gated as
+  above) can.
 
 ### Letting the agent edit protected files
 
@@ -212,10 +221,11 @@ now at least readable by the agent, but it was never the intended recovery path.
 
 ## Repository setup checklist
 
-1. Create five labels: `agent/code`, `agent/fixme`, `agent/lgtm`, `agent/working`,
-   `agent/workflow-edits-allowed` (see "Letting the agent edit protected files" above).
-   `agent/working` just needs to exist; its color is cosmetic (see "`agent/working` is
-   added and removed via frontmatter `jobs:`" above).
+1. Create seven labels: `agent/code`, `agent/fixme`, `agent/lgtm`, `agent/draft-working`,
+   `agent/review-working`, `agent/fix-working`, `agent/workflow-edits-allowed` (see
+   "Letting the agent edit protected files" above). The three `agent/*-working` labels
+   just need to exist; their color is cosmetic (see "a per-workflow `agent/*-working`
+   label is added and removed via frontmatter `jobs:`" above).
 
    The easiest way is to run the included install script via the **Install Labels** workflow
    in the Actions tab, or manually via:
@@ -227,8 +237,12 @@ now at least readable by the agent, but it was never the intended recovery path.
      --description "Reviewer agent found issues that need fixing"
    gh label create "agent/lgtm" --color 0E8A16 \
      --description "Reviewer agent approved; ready to auto-merge"
-   gh label create "agent/working" --color FBCA04 \
-     --description "An agent is actively working on this issue/PR"
+   gh label create "agent/draft-working" --color FBCA04 \
+     --description "The drafter agent is actively working on this issue"
+   gh label create "agent/review-working" --color FBCA04 \
+     --description "The review agent is actively working on this PR"
+   gh label create "agent/fix-working" --color FBCA04 \
+     --description "The fix agent is actively working on this PR"
    gh label create "agent/workflow-edits-allowed" --color 5319E7 \
      --description "Pre-authorizes agent runs to edit protected files without the request_review gate"
    ```
