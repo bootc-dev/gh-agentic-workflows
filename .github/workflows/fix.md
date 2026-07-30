@@ -184,6 +184,14 @@ cause a duplicate re-trigger.
 
 - Only ever modify the existing PR branch via `push-to-pull-request-branch`
   — never push directly to `main` and never open a new PR.
+- Always add a new commit; never `git commit --amend` an existing commit on
+  this branch. `push-to-pull-request-branch` can only convey new file
+  changes — an amend that only changes a commit message (no file diff) has
+  nothing in it for that mechanism to push, and will silently look
+  successful while the branch stays exactly as it was. (This should be rare
+  in practice: see review.md, which doesn't request fixes purely over
+  commit message wording, since messages don't survive the final squash
+  merge anyway.)
 - Respect the iteration cap in step 2 without exception.
 - Always remove `agent/fixme` (step 1), even if the iteration cap causes you
   to stop before making any code changes.

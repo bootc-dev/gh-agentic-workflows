@@ -95,9 +95,22 @@ jobs:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           set -euo pipefail
-          gh pr merge "${{ github.event.pull_request.number }}" \
-            --repo "${{ github.repository }}" \
-            --squash --delete-branch
+          pr="${{ github.event.pull_request.number }}"
+          repo="${{ github.repository }}"
+          # Pin the squash commit's message to the PR's title/body rather
+          # than gh's default (title + the raw commit log concatenated).
+          # Commits on an agent-authored branch are WIP checkpoints from a
+          # review/fix loop, not meant to be final history -- review.md
+          # already scrutinizes the PR's title/body directly, so this is
+          # what should end up in the permanent log, not intermediate
+          # commit messages. It also means review.md never needs to demand
+          # a fix commit purely to reword an earlier commit message.
+          title=$(gh pr view "$pr" --repo "$repo" --json title --jq .title)
+          gh pr view "$pr" --repo "$repo" --json body --jq .body \
+            > /tmp/merge-pr-body.txt
+          gh pr merge "$pr" --repo "$repo" \
+            --squash --delete-branch \
+            --subject "$title" --body-file /tmp/merge-pr-body.txt
       - name: Remove agent/lgtm label (best-effort, PR may already be merged/gone)
         if: always()
         env:

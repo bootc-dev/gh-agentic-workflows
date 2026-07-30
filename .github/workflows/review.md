@@ -139,3 +139,10 @@ The code agent has opened or updated pull request
 - Be specific in your feedback when applying `agent/fixme` — it will be read
   by another agent (`fix.md`) that will attempt to address it
   automatically.
+- Don't apply `agent/fixme` solely over the wording of an existing commit
+  message on this branch. `merge.yml` squashes every commit using this PR's
+  title and body, not the raw commit log, so individual commit messages
+  never appear in the final history — review the code and the PR
+  description, not commit-by-commit hygiene. (`fix.md` also has no way to
+  reword an existing commit without a real file change to attach it to, so
+  this kind of feedback would be a dead end anyway.)
