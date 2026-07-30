@@ -60,6 +60,59 @@ safe-outputs:
       # so it survives that encoding intact.
       policy: ${{ case(contains(github.event.issue.labels.*.name, 'agent/workflow-edits-allowed'), 'allowed', 'request_review') }}
 
+# Track that an agent is actively working on this issue via a plain label,
+# added/removed by dedicated jobs rather than safe-outputs: removal must
+# happen unconditionally (including on agent failure/timeout), which
+# safe-outputs' success-gated handlers can't guarantee. See "Tracking active
+# agent runs" in README.md.
+jobs:
+  # Depending on pre_activation (not activation) is what makes gh-aw's compiler
+  # automatically thread this job into activation's own needs, so agent (which
+  # needs activation) transitively waits for the label to be added first -
+  # no separate `jobs.agent.needs:` override required (and if one is added,
+  # the compiler silently ignores it for jobs already wired via pre_activation).
+  add_working_label:
+    needs: pre_activation
+    if: needs.pre_activation.outputs.activated == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Generate App token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.GH_AW_APP_CLIENT_ID }}
+          private-key: ${{ secrets.GH_AW_APP_PRIVATE_KEY }}
+      - name: Add agent/working label
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          set -euo pipefail
+          gh issue edit "${{ github.event.issue.number }}" \
+            --repo "${{ github.repository }}" \
+            --add-label agent/working || true
+  remove_working_label:
+    needs: [activation, agent, detection, safe_outputs]
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Generate App token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.GH_AW_APP_CLIENT_ID }}
+          private-key: ${{ secrets.GH_AW_APP_PRIVATE_KEY }}
+      - name: Remove agent/working label (best-effort)
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          gh issue edit "${{ github.event.issue.number }}" \
+            --repo "${{ github.repository }}" \
+            --remove-label agent/working || true
+
 timeout-minutes: 15
 ---
 

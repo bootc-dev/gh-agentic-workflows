@@ -95,6 +95,15 @@ A few things here are non-obvious and were hard-won getting this to actually wor
   (e.g. `claude-sonnet-4-5-20250929`) instead of a floating alias, then recompile. If
   workflows that were working suddenly start failing with a pricing-lookup error, this is
   almost certainly why.
+- **`agent/working` is added and removed via frontmatter `jobs:`, not safe-outputs.**
+  All three workflows carry an `agent/working` label on the issue/PR for the duration of
+  a run, using two custom jobs declared directly in each `.md` file's `jobs:` block:
+  `add_working_label` (depends on `pre_activation`, which gh-aw's compiler
+  automatically threads into `activation`'s own dependencies, so `agent` transitively
+  waits for it) adds the label, and `remove_working_label` (`if: always()`) removes it
+  regardless of success or failure. safe-outputs handlers only run when the agent job
+  succeeds, which can't guarantee cleanup on failure or timeout — a plain job with
+  `if: always()` can.
 
 ### Letting the agent edit protected files
 
@@ -186,8 +195,10 @@ now at least readable by the agent, but it was never the intended recovery path.
 
 ## Repository setup checklist
 
-1. Create four labels: `agent/code`, `agent/fixme`, `agent/lgtm`,
+1. Create five labels: `agent/code`, `agent/fixme`, `agent/lgtm`, `agent/working`,
    `agent/workflow-edits-allowed` (see "Letting the agent edit protected files" above).
+   `agent/working` just needs to exist; its color is cosmetic (see "`agent/working` is
+   added and removed via frontmatter `jobs:`" above).
 2. Register a GitHub App to act as the pipeline's bot identity (this must be a real App,
    not the default `GITHUB_TOKEN` — see "GITHUB_TOKEN doesn't retrigger workflows"
    above):
