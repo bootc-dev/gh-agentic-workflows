@@ -16,7 +16,9 @@ permissions:
   issues: read
   pull-requests: read
 
-engine: claude
+engine:
+  id: claude
+  model: claude-sonnet-5
 
 tools:
   bash: ["*"]
