@@ -85,13 +85,23 @@ jobs:
           client-id: ${{ vars.GH_AW_APP_CLIENT_ID }}
           private-key: ${{ secrets.GH_AW_APP_PRIVATE_KEY }}
       - name: Add agent/working label
+        # ISSUE_NUMBER/REPO must be passed via env: rather than inlined
+        # directly into the run: script below (as `${{ github.* }}`): gh-aw's
+        # compiler sanitizes any inline `${{ github.* }}` expressions it
+        # finds in run: scripts by extracting them into new env vars, but its
+        # extraction pass rebuilds the step's entire env: map from scratch
+        # using a type assertion that doesn't match how custom-job steps'
+        # env: block is typed by this point in compilation -- so it silently
+        # drops GH_TOKEN (and anything else already here) instead of merging.
+        # Keeping every `${{ github.* }}` reference out of run: sidesteps the
+        # bug entirely, since there's then nothing for that pass to extract.
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-          gh issue edit "${{ github.event.issue.number }}" \
-            --repo "${{ github.repository }}" \
-            --add-label agent/working || true
+          gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --add-label agent/working || true
   remove_working_label:
     needs: [activation, agent, detection, safe_outputs]
     if: always()
@@ -106,12 +116,14 @@ jobs:
           client-id: ${{ vars.GH_AW_APP_CLIENT_ID }}
           private-key: ${{ secrets.GH_AW_APP_PRIVATE_KEY }}
       - name: Remove agent/working label (best-effort)
+        # See the "Add agent/working label" step above for why
+        # ISSUE_NUMBER/REPO are passed via env: instead of inlined in run:.
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
         run: |
-          gh issue edit "${{ github.event.issue.number }}" \
-            --repo "${{ github.repository }}" \
-            --remove-label agent/working || true
+          gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --remove-label agent/working || true
 
 timeout-minutes: 15
 ---

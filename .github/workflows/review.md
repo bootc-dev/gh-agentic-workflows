@@ -61,13 +61,19 @@ jobs:
           client-id: ${{ vars.GH_AW_APP_CLIENT_ID }}
           private-key: ${{ secrets.GH_AW_APP_PRIVATE_KEY }}
       - name: Add agent/working label
+        # PR_NUMBER/REPO must be passed via env: rather than inlined
+        # directly into the run: script below (as `${{ github.* }}`): see
+        # drafter.md's equivalent step for why -- gh-aw's compiler silently
+        # drops GH_TOKEN (and anything else already in this env: block)
+        # when it sanitizes an inline `${{ github.* }}` expression it finds
+        # in run:, due to a type-assertion bug in that compiler pass.
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-          gh pr edit "${{ github.event.pull_request.number }}" \
-            --repo "${{ github.repository }}" \
-            --add-label agent/working || true
+          gh pr edit "$PR_NUMBER" --repo "$REPO" --add-label agent/working || true
   remove_working_label:
     needs: [activation, agent, detection, safe_outputs]
     if: always()
@@ -82,12 +88,14 @@ jobs:
           client-id: ${{ vars.GH_AW_APP_CLIENT_ID }}
           private-key: ${{ secrets.GH_AW_APP_PRIVATE_KEY }}
       - name: Remove agent/working label (best-effort)
+        # See the "Add agent/working label" step above for why
+        # PR_NUMBER/REPO are passed via env: instead of inlined in run:.
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
         run: |
-          gh pr edit "${{ github.event.pull_request.number }}" \
-            --repo "${{ github.repository }}" \
-            --remove-label agent/working || true
+          gh pr edit "$PR_NUMBER" --repo "$REPO" --remove-label agent/working || true
 
 timeout-minutes: 15
 ---
