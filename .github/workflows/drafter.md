@@ -1,6 +1,6 @@
 ---
 description: |
-  Autonomous implementation agent. When an issue is labeled 'agent-code',
+  Autonomous implementation agent. When an issue is labeled 'agent/code',
   this agent reads the issue, explores the repo, implements the change,
   validates it with the repo's own build tooling, and opens a pull
   request for human review via the create-pull-request safe-output.
@@ -9,7 +9,7 @@ on:
   issues:
     types: [labeled]
 
-if: github.event.label.name == 'agent-code'
+if: github.event.label.name == 'agent/code'
 
 permissions:
   contents: read
@@ -28,13 +28,20 @@ safe-outputs:
   github-app:
     client-id: ${{ vars.GH_AW_APP_CLIENT_ID }}
     private-key: ${{ secrets.GH_AW_APP_PRIVATE_KEY }}
+    # Without this, the minted installation token only gets contents/issues/
+    # pull-requests, and GitHub server-side rejects any push that touches
+    # .github/workflows/* with "refusing to allow a GitHub App to create or
+    # update workflow ... without `workflows` permission" - even though the
+    # App installation itself has the Workflows permission granted.
+    permissions:
+      workflows: write
   create-pull-request:
     max: 1
     branch-prefix: agent/
     # Protected files (README.md, workflow definitions, etc.) normally fall
     # back to `request_review`: the PR is opened but flagged for mandatory
     # human review before merge. Applying `agent/workflow-edits-allowed` to
-    # the originating issue *before* it's labeled `agent-code` pre-authorizes
+    # the originating issue *before* it's labeled `agent/code` pre-authorizes
     # this specific run to edit them without that gate. This must not become
     # the default — see "Letting the agent edit protected files" in README.md.
     protected-files:

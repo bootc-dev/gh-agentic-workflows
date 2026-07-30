@@ -1,8 +1,8 @@
 ---
 description: |
   Reviewer agent. Automatically reviews pull requests authored by the code
-  agent and signals readiness via labels: 'ai/fixme' when changes are
-  needed, 'ai/lgtm' when the PR is ready to merge.
+  agent and signals readiness via labels: 'agent/fixme' when changes are
+  needed, 'agent/lgtm' when the PR is ready to merge.
 
 on:
   pull_request:
@@ -33,10 +33,10 @@ safe-outputs:
     max: 1
   add-labels:
     max: 1
-    allowed: ["ai/fixme", "ai/lgtm"]
+    allowed: ["agent/fixme", "agent/lgtm"]
   remove-labels:
     max: 2
-    allowed: ["ai/fixme", "ai/lgtm"]
+    allowed: ["agent/fixme", "agent/lgtm"]
 
 timeout-minutes: 15
 ---
@@ -52,14 +52,14 @@ The code agent has opened or updated pull request
 2. Review it for correctness, quality, safety, and adherence to repository
    conventions.
 3. Decide on exactly one of two outcomes:
-   - **Needs more work**: remove the `ai/lgtm` label if present, submit a
+   - **Needs more work**: remove the `agent/lgtm` label if present, submit a
      `submit-pull-request-review` with `event: COMMENT` and concrete,
      actionable feedback describing exactly what needs to change, then add
-     the `ai/fixme` label.
-   - **Looks good, ready to merge**: remove the `ai/fixme` label if
+     the `agent/fixme` label.
+   - **Looks good, ready to merge**: remove the `agent/fixme` label if
      present, submit a `submit-pull-request-review` with `event: COMMENT`
      noting what you checked and that it looks good, then add the
-     `ai/lgtm` label.
+     `agent/lgtm` label.
 
    Always use `event: COMMENT` for the review itself — never
    `REQUEST_CHANGES` or `APPROVE`. GitHub silently downgrades both of those
@@ -73,10 +73,10 @@ The code agent has opened or updated pull request
 
 - Submit exactly one review via `submit-pull-request-review`, always with
   `event: COMMENT`.
-- `ai/fixme` and `ai/lgtm` are mutually exclusive — the PR must have
+- `agent/fixme` and `agent/lgtm` are mutually exclusive — the PR must have
   exactly one of them applied after you finish, never both and never
   neither. Always remove the other one first (removal of a label that
   isn't present is a harmless no-op).
-- Be specific in your feedback when applying `ai/fixme` — it will be read
+- Be specific in your feedback when applying `agent/fixme` — it will be read
   by another agent (`fix.md`) that will attempt to address it
   automatically.

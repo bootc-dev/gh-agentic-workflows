@@ -46,7 +46,7 @@ Options:
                               the full fix/re-review loop.
                             clean - files a plain task with no
                               deliberate gap, expected to sail through
-                              to ai/lgtm on first review.
+                              to agent/lgtm on first review.
   --timeout <seconds>     Overall time budget across all stages. Default:
                           1800 (30 minutes) -- a full needs-fix round trip
                           (drafter, review, fix, re-review, merge) has been
@@ -224,7 +224,7 @@ log "Repo: $REPO"
 log "Scenario: $SCENARIO"
 log "Task: ${FUNC_NAME} (timeout: ${TIMEOUT_SECONDS}s)"
 
-ISSUE_URL=$(gh issue create --repo "$REPO" --title "$ISSUE_TITLE" --label agent-code --body "$ISSUE_BODY")
+ISSUE_URL=$(gh issue create --repo "$REPO" --title "$ISSUE_TITLE" --label agent/code --body "$ISSUE_BODY")
 ISSUE_NUM="${ISSUE_URL##*/}"
 log "Filed issue #${ISSUE_NUM}: ${ISSUE_URL}"
 
@@ -268,14 +268,14 @@ get_commit_count() {
     gh pr view "$PR_NUM" --repo "$REPO" --json commits --jq '.commits | length'
 }
 
-# Waits for one of ai/fixme / ai/lgtm to be present on the PR's labels.
+# Waits for one of agent/fixme / agent/lgtm to be present on the PR's labels.
 # Echoes the label name found.
 wait_for_review_label() {
     local stage_desc="$1"
     local found=""
     while [[ -z "$found" ]]; do
         found=$(gh pr view "$PR_NUM" --repo "$REPO" --json labels \
-            --jq '[.labels[].name] | map(select(. == "ai/fixme" or . == "ai/lgtm"))[0] // empty')
+            --jq '[.labels[].name] | map(select(. == "agent/fixme" or . == "agent/lgtm"))[0] // empty')
         if [[ -n "$found" ]]; then
             echo "$found"
             return 0
@@ -284,14 +284,14 @@ wait_for_review_label() {
     done
 }
 
-# Waits for fix.md to consume the ai/fixme label (remove it) and push a new
+# Waits for fix.md to consume the agent/fixme label (remove it) and push a new
 # commit. Reports the fix commit once observed.
 wait_for_fix_commit() {
     local base_commit_count="$1"
     local label_gone=false
     local new_commit=false
     while true; do
-        if ! gh pr view "$PR_NUM" --repo "$REPO" --json labels --jq '.labels[].name' | grep -qx 'ai/fixme'; then
+        if ! gh pr view "$PR_NUM" --repo "$REPO" --json labels --jq '.labels[].name' | grep -qx 'agent/fixme'; then
             label_gone=true
         fi
         local current_count
@@ -302,7 +302,7 @@ wait_for_fix_commit() {
         if $label_gone && $new_commit; then
             break
         fi
-        poll_sleep_or_timeout "waiting for fix.md to consume ai/fixme and push a fix commit"
+        poll_sleep_or_timeout "waiting for fix.md to consume agent/fixme and push a fix commit"
     done
 
     local sha message
@@ -319,17 +319,17 @@ wait_for_fix_commit() {
 
 ROUND=0
 while true; do
-    LABEL=$(wait_for_review_label "waiting for ai/fixme or ai/lgtm on PR #${PR_NUM} (round $((ROUND + 1)))")
+    LABEL=$(wait_for_review_label "waiting for agent/fixme or agent/lgtm on PR #${PR_NUM} (round $((ROUND + 1)))")
     log "Label applied: ${LABEL}"
     print_latest_review
 
-    if [[ "$LABEL" == "ai/lgtm" ]]; then
+    if [[ "$LABEL" == "agent/lgtm" ]]; then
         break
     fi
 
     ROUND=$((ROUND + 1))
     if (( ROUND > MAX_FIX_ROUNDS )); then
-        print_summary "FAIL" "exceeded ${MAX_FIX_ROUNDS} ai/fixme rounds without reaching ai/lgtm"
+        print_summary "FAIL" "exceeded ${MAX_FIX_ROUNDS} agent/fixme rounds without reaching agent/lgtm"
         exit 1
     fi
 
