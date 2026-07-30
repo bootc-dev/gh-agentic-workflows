@@ -95,6 +95,16 @@ A few things here are non-obvious and were hard-won getting this to actually wor
   (e.g. `claude-sonnet-4-5-20250929`) instead of a floating alias, then recompile. If
   workflows that were working suddenly start failing with a pricing-lookup error, this is
   almost certainly why.
+- **Agent working label tracking uses manual `.lock.yml` jobs.** All three gh-aw workflows
+  (`drafter.lock.yml`, `review.lock.yml`, `fix.lock.yml`) include two manually-added jobs
+  not present in the original `.md` sources: `add_working_label` (runs after
+  `pre_activation` succeeds and adds the `agent/working` label to the issue/PR) and
+  `remove_working_label` (runs at the end with `if: always()` to remove the label
+  regardless of success or failure). These jobs use plain GitHub Actions steps and the
+  GitHub App token (same pattern as `merge.yml`), **not** gh-aw's safe-outputs mechanism,
+  so cleanup happens even if the agent job fails or times out. Because these are manual
+  modifications to the compiled `.lock.yml` files, they will be lost if you run
+  `gh aw compile` — you'll need to manually re-add them after recompilation.
 
 ### Letting the agent edit protected files
 
@@ -186,8 +196,11 @@ now at least readable by the agent, but it was never the intended recovery path.
 
 ## Repository setup checklist
 
-1. Create four labels: `agent/code`, `agent/fixme`, `agent/lgtm`,
-   `agent/workflow-edits-allowed` (see "Letting the agent edit protected files" above).
+1. Create five labels: `agent/code`, `agent/fixme`, `agent/lgtm`, `agent/working`,
+   `agent/workflow-edits-allowed`. The `agent/working` label is used to track which
+   issues/PRs currently have an agent actively working on them (see "Agent working label
+   tracking" below). The `agent/workflow-edits-allowed` label is described in "Letting
+   the agent edit protected files" above.
 2. Register a GitHub App to act as the pipeline's bot identity (this must be a real App,
    not the default `GITHUB_TOKEN` — see "GITHUB_TOKEN doesn't retrigger workflows"
    above):
