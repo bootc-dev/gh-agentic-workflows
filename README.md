@@ -96,9 +96,41 @@ A few things here are non-obvious and were hard-won getting this to actually wor
   workflows that were working suddenly start failing with a pricing-lookup error, this is
   almost certainly why.
 
+### Letting the agent edit protected files
+
+`drafter.md` and `fix.md` both default to gh-aw's `request_review` policy for protected
+files (`README.md`, the workflow definitions themselves, `.github/aw/actions-lock.json`,
+etc.): the PR still gets opened, but with a mandatory `REQUEST_CHANGES` review blocking
+merge until a human looks at those specific files. This is what issue-driven runs hit if
+the requested change happens to touch, say, `README.md` — see e.g.
+[#19](https://github.com/cgwalters/gh-aw-fullsend-mini/issues/19).
+
+Sometimes you *know* a task legitimately needs to touch protected files — renaming a
+label consistently across `README.md` and the `.md`/`.lock.yml` workflow sources is a
+good example. For that, both files' `protected-files.policy` is a [GitHub Actions
+expression string](https://github.github.io/gh-aw/reference/safe-outputs-pull-requests/#parameterizing-policy-fields-in-reusable-workflows)
+rather than a bare literal:
+
+```yaml
+protected-files:
+  policy: ${{ contains(github.event.issue.labels.*.name, 'agent/workflow-edits-allowed') && 'allowed' || 'request_review' }}
+```
+
+Applying the `agent/workflow-edits-allowed` label to the *issue* — before or alongside
+`agent-code` — pre-authorizes that specific `drafter.md` run to write protected files
+without the review gate; `fix.md` checks the same label on the *pull request* instead, so
+either the drafter PR needs to carry it too (a human can add it after the fact) for
+follow-up fix commits to get the same treatment. Crucially, this is a human decision made
+*before* the agent runs, not something the agent can grant itself: the label has to
+already be present on the triggering issue/PR when the event fires, so a prompt-injected
+or misbehaving agent can't unlock this on its own mid-run. The expression falls back to
+`request_review` whenever the label is absent, which keeps that the default for every
+ordinary run.
+
 ## Repository setup checklist
 
-1. Create three labels: `agent-code`, `ai/fixme`, `ai/lgtm`.
+1. Create four labels: `agent-code`, `ai/fixme`, `ai/lgtm`,
+   `agent/workflow-edits-allowed` (see "Letting the agent edit protected files" above).
 2. Register a GitHub App to act as the pipeline's bot identity (this must be a real App,
    not the default `GITHUB_TOKEN` — see "GITHUB_TOKEN doesn't retrigger workflows"
    above):

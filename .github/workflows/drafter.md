@@ -31,6 +31,14 @@ safe-outputs:
   create-pull-request:
     max: 1
     branch-prefix: agent/
+    # Protected files (README.md, workflow definitions, etc.) normally fall
+    # back to `request_review`: the PR is opened but flagged for mandatory
+    # human review before merge. Applying `agent/workflow-edits-allowed` to
+    # the originating issue *before* it's labeled `agent-code` pre-authorizes
+    # this specific run to edit them without that gate. This must not become
+    # the default — see "Letting the agent edit protected files" in README.md.
+    protected-files:
+      policy: ${{ contains(github.event.issue.labels.*.name, 'agent/workflow-edits-allowed') && 'allowed' || 'request_review' }}
 
 timeout-minutes: 15
 ---
