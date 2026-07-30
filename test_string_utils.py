@@ -7,6 +7,7 @@ from string_utils import (
     word_count,
     reverse_words_13710540,
     count_vowels_6895903,
+    count_vowels_21523607,
 )
 
 
@@ -70,6 +71,22 @@ class CountVowelsTests(unittest.TestCase):
 
     def test_no_vowels(self):
         self.assertEqual(count_vowels_6895903("rhythm xyz!"), 0)
+
+
+class CountVowels21523607Tests(unittest.TestCase):
+    def test_canonical_example(self):
+        # The example from the issue: "Hello World" has three vowels.
+        self.assertEqual(count_vowels_21523607("Hello World"), 3)
+
+    def test_empty_string(self):
+        self.assertEqual(count_vowels_21523607(""), 0)
+
+    def test_case_insensitive(self):
+        # All five vowels in both cases are counted.
+        self.assertEqual(count_vowels_21523607("AEIOUaeiou"), 10)
+
+    def test_no_vowels(self):
+        self.assertEqual(count_vowels_21523607("rhythm xyz!"), 0)
 
 
 class SlugifyTests(unittest.TestCase):
