@@ -60,6 +60,53 @@ safe-outputs:
       # value, which breaks GitHub Actions' expression parser.
       policy: ${{ case(contains(github.event.pull_request.labels.*.name, 'agent/workflow-edits-allowed'), 'allowed', 'request_review') }}
 
+# See drafter.md for why this is a plain job pair instead of safe-outputs.
+jobs:
+  # See drafter.md: depending on pre_activation (not activation) makes gh-aw's
+  # compiler automatically thread this job into activation's own needs, so
+  # agent transitively waits for the label to be added first.
+  add_working_label:
+    needs: pre_activation
+    if: needs.pre_activation.outputs.activated == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Generate App token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.GH_AW_APP_CLIENT_ID }}
+          private-key: ${{ secrets.GH_AW_APP_PRIVATE_KEY }}
+      - name: Add agent/working label
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          set -euo pipefail
+          gh pr edit "${{ github.event.pull_request.number }}" \
+            --repo "${{ github.repository }}" \
+            --add-label agent/working || true
+  remove_working_label:
+    needs: [activation, agent, detection, safe_outputs]
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Generate App token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.GH_AW_APP_CLIENT_ID }}
+          private-key: ${{ secrets.GH_AW_APP_PRIVATE_KEY }}
+      - name: Remove agent/working label (best-effort)
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          gh pr edit "${{ github.event.pull_request.number }}" \
+            --repo "${{ github.repository }}" \
+            --remove-label agent/working || true
+
 timeout-minutes: 15
 ---
 
