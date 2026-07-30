@@ -267,6 +267,19 @@ now at least readable by the agent, but it was never the intended recovery path.
 5. Make sure `gh aw compile` runs cleanly against the `.md` files (see below) — run `gh
    aw compile drafter review fix --approve` after any workflow edit. Pin the gh-aw
    extension version when you do (see "Design notes and gotchas" above).
+6. If validating your project needs network access beyond gh-aw's engine defaults —
+   e.g. `cargo test`/`cargo check` reaching a crate registry, or any other compiled
+   language's package manager — add a `network:` block to `drafter.md`'s and `fix.md`'s
+   frontmatter. gh-aw's agent jobs run behind an egress firewall whose defaults don't
+   include most non-npm package registries; without this, an agent's own build/test
+   commands can silently stall or fail (they may still open a PR anyway, having punted
+   verification to CI). See gh-aw's network documentation for the exact syntax, e.g.:
+   ```yaml
+   network:
+     allowed:
+       - defaults
+       - rust  # or your ecosystem's identifier, or explicit domains
+   ```
 
 ## Troubleshooting and operations
 
