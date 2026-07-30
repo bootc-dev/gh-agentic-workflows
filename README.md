@@ -199,6 +199,24 @@ now at least readable by the agent, but it was never the intended recovery path.
    `agent/workflow-edits-allowed` (see "Letting the agent edit protected files" above).
    `agent/working` just needs to exist; its color is cosmetic (see "`agent/working` is
    added and removed via frontmatter `jobs:`" above).
+
+   The easiest way is to run the included install script via the **Install Labels** workflow
+   in the Actions tab, or manually via:
+
+   ```bash
+   gh label create "agent/code" --color 0E8A16 \
+     --description "Triggers the autonomous drafter agent"
+   gh label create "agent/fixme" --color D93F0B \
+     --description "Reviewer agent found issues that need fixing"
+   gh label create "agent/lgtm" --color 0E8A16 \
+     --description "Reviewer agent approved; ready to auto-merge"
+   gh label create "agent/working" --color FBCA04 \
+     --description "An agent is actively working on this issue/PR"
+   gh label create "agent/workflow-edits-allowed" --color 5319E7 \
+     --description "Pre-authorizes agent runs to edit protected files without the request_review gate"
+   ```
+
+   See [`scripts/README.md`](scripts/README.md) for more installation options.
 2. Register a GitHub App to act as the pipeline's bot identity (this must be a real App,
    not the default `GITHUB_TOKEN` — see "GITHUB_TOKEN doesn't retrigger workflows"
    above):
