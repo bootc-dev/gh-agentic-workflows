@@ -18,7 +18,7 @@ permissions:
 
 engine:
   id: claude
-  model: claude-sonnet-5
+  model: claude-sonnet-4-5-20250929
 
 tools:
   bash: ["*"]
