@@ -139,9 +139,9 @@ cause a duplicate re-trigger.
    safe-output, so it's consumed and can't re-trigger this workflow.
 2. **Enforce the iteration cap.** Run
    `gh pr view ${{ github.event.pull_request.number }} --json commits --jq '.commits | length'`
-   to count the commits on this PR — the same technique `tests/e2e.sh`
-   already uses (its `get_commit_count` helper) to detect fix commits,
-   via the GitHub API rather than a raw `git fetch`. Use `gh`/the API for
+   to count the commits on this PR — comparing the count before and after
+   a fix attempt is how to detect whether a new commit was actually
+   pushed, via the GitHub API rather than a raw `git fetch`. Use `gh`/the API for
    this, not `git fetch`: in the sandboxed agent job, a raw `git fetch`
    against this (private) repo is not guaranteed to have working
    credentials, whereas `gh`/`GH_TOKEN` is always set up for you.
