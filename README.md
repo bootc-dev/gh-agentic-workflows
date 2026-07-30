@@ -7,6 +7,23 @@ Workflows).
 GH-AW, like the underlying raw Github Actions is a very flexible system, this
 demonstrates one possible pipeline.
 
+## Reusing this pipeline in your own repo
+
+Rather than forking this whole repo (see "Adapting to your project" below), you can
+install it as a gh-aw package: `gh aw add cgwalters/gh-agentic-workflows@v0.1.0` pulls in
+`drafter.md`, `review.md`, and `fix.md`, compiling them fresh against your repo, and
+copies `merge.yml` and `install-labels.yml` over verbatim. The installed `.md` files
+arrive hardcoded to this repo's bot identity, so before anything will actually trigger you
+still need to:
+
+- Edit the `bots:`/`trusted-users:` fields in the three installed `.md` files to
+  reference your own GitHub App's bot slug instead of `cgwaltersbot[bot]`.
+- Register your own GitHub App and configure `GH_AW_APP_CLIENT_ID`/`GH_AW_APP_PRIVATE_KEY`.
+- Run the `install-labels.yml` workflow (or `scripts/install-labels.js`) to create the
+  required labels.
+
+See "Repository setup checklist" below for the full details on each of these steps.
+
 ## How it works
 
 Four stages, each a separate workflow:

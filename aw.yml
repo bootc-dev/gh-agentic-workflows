@@ -1,0 +1,12 @@
+manifest-version: "1"
+name: gh-agentic-workflows
+description: >-
+  Autonomous issue -> draft PR -> review -> fix -> merge pipeline built on
+  gh-aw (GitHub Agentic Workflows).
+min-version: v0.81.6
+includes:
+  - .github/workflows/drafter.md
+  - .github/workflows/review.md
+  - .github/workflows/fix.md
+  - .github/workflows/merge.yml
+  - .github/workflows/install-labels.yml
