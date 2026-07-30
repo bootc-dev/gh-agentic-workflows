@@ -1,7 +1,7 @@
 /**
- * Install gh-aw-fullsend-mini labels
+ * Install gh-agentic-workflows labels
  *
- * Defines the labels required by the gh-aw-fullsend-mini autonomous
+ * Defines the labels required by the gh-agentic-workflows autonomous
  * issue → PR → review → fix → merge pipeline, and a helper to create or
  * update them via the GitHub REST API.
  *

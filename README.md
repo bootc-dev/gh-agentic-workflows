@@ -1,4 +1,4 @@
-# gh-aw-fullsend-mini
+# gh-agentic-workflows
 
 A minimal, standalone demonstration of a fully autonomous issue → draft PR → review →
 fix → merge pipeline built on [gh-aw](https://github.com/github/gh-aw) (GitHub Agentic
@@ -6,6 +6,23 @@ Workflows).
 
 GH-AW, like the underlying raw Github Actions is a very flexible system, this
 demonstrates one possible pipeline.
+
+## Reusing this pipeline in your own repo
+
+Rather than forking this whole repo (see "Adapting to your project" below), you can
+install it as a gh-aw package: `gh aw add cgwalters/gh-agentic-workflows@v0.1.0` pulls in
+`drafter.md`, `review.md`, and `fix.md`, compiling them fresh against your repo, and
+copies `merge.yml` and `install-labels.yml` over verbatim. The installed `.md` files
+arrive hardcoded to this repo's bot identity, so before anything will actually trigger you
+still need to:
+
+- Edit the `bots:`/`trusted-users:` fields in the three installed `.md` files to
+  reference your own GitHub App's bot slug instead of `cgwaltersbot[bot]`.
+- Register your own GitHub App and configure `GH_AW_APP_CLIENT_ID`/`GH_AW_APP_PRIVATE_KEY`.
+- Run the `install-labels.yml` workflow (or `scripts/install-labels.js`) to create the
+  required labels.
+
+See "Repository setup checklist" below for the full details on each of these steps.
 
 ## How it works
 
@@ -112,7 +129,7 @@ files (`README.md`, the workflow definitions themselves, `.github/aw/actions-loc
 etc.): the PR still gets opened, but with a mandatory `REQUEST_CHANGES` review blocking
 merge until a human looks at those specific files. This is what issue-driven runs hit if
 the requested change happens to touch, say, `README.md` — see e.g.
-[#19](https://github.com/cgwalters/gh-aw-fullsend-mini/issues/19).
+[#19](https://github.com/cgwalters/gh-agentic-workflows/issues/19).
 
 Sometimes you *know* a task legitimately needs to touch protected files — renaming a
 label consistently across `README.md` and the `.md`/`.lock.yml` workflow sources is a
@@ -130,7 +147,7 @@ ternary idiom: gh-aw's compiler JSON-encodes this policy string with Go's defaul
 HTML-escaping, which turns a literal `&&` into `\u0026\u0026` inside the heredoc-embedded
 config blob. GitHub Actions' expression parser can't parse that, so the whole compiled
 workflow gets rejected as invalid on push — see
-[the fix for #21](https://github.com/cgwalters/gh-aw-fullsend-mini/commit/0735a1c).
+[the fix for #21](https://github.com/cgwalters/gh-agentic-workflows/commit/0735a1c).
 `case()` avoids `&`, `<`, and `>` entirely, so it survives serialization intact.
 
 Applying the `agent/workflow-edits-allowed` label to the *issue* — before or alongside
@@ -154,7 +171,7 @@ permission — *even if the App installation itself has that permission enabled*
 default, so any run that legitimately edits workflow files (like the label rename above)
 fails at the `git push` step with `refusing to allow a GitHub App to create or update
 workflow ... without \`workflows\` permission`, and falls back to filing an issue instead
-of opening a PR — see [#21](https://github.com/cgwalters/gh-aw-fullsend-mini/issues/21).
+of opening a PR — see [#21](https://github.com/cgwalters/gh-agentic-workflows/issues/21).
 
 Both `drafter.md` and `fix.md` request the extra scope explicitly via `safe-outputs.github-app.permissions`:
 
@@ -175,7 +192,7 @@ it — see [gh-aw's integrity filtering docs](https://github.github.io/gh-aw/ref
 Pull requests get a pass (any non-fork PR on a public repo counts as `approved`
 regardless of author), but plain *issues* don't — including the fallback issues our own
 `cgwaltersbot[bot]` files when a safe-output push is rejected (e.g.
-[#26](https://github.com/cgwalters/gh-aw-fullsend-mini/issues/26)).
+[#26](https://github.com/cgwalters/gh-agentic-workflows/issues/26)).
 
 That means relabeling one of those fallback issues to retry a task doesn't work: the
 agent can see the label but gets a filtered, empty view of the issue body describing
@@ -288,7 +305,7 @@ the real GitHub API and reports each stage — PR opened, review posted, `agent/
 `agent/lgtm` applied, fix commit pushed, re-review, merge — as it happens.
 
 ```
-./tests/e2e.sh --repo cgwalters/gh-aw-fullsend-mini --scenario needs-fix
+./tests/e2e.sh --repo cgwalters/gh-agentic-workflows --scenario needs-fix
 ```
 
 This is **not** a unit test: it burns real Anthropic API credits against the live
