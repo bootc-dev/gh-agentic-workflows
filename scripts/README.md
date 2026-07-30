@@ -1,6 +1,6 @@
 # Scripts
 
-This directory contains utility scripts for setting up and managing the gh-aw-fullsend-mini pipeline.
+This directory contains utility scripts for setting up and managing the gh-agentic-workflows pipeline.
 
 ## install-labels.js
 
@@ -41,7 +41,7 @@ you can `require()` after checking out the repo:
 
 ```yaml
 - uses: actions/checkout@v4
-- name: Install gh-aw-fullsend-mini labels
+- name: Install gh-agentic-workflows labels
   uses: actions/github-script@v7
   with:
     script: |

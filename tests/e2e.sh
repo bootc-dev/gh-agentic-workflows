@@ -54,7 +54,7 @@ Options:
   -h, --help              Show this help and exit.
 
 Example:
-  ./tests/e2e.sh --repo cgwalters/gh-aw-fullsend-mini --scenario needs-fix
+  ./tests/e2e.sh --repo cgwalters/gh-agentic-workflows --scenario needs-fix
 EOF
 }
 
