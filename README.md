@@ -157,6 +157,33 @@ github-app:
     workflows: write
 ```
 
+### Trusting the pipeline's own bot
+
+gh-aw filters GitHub content an agent reads by *integrity*: on a public repo, anything
+not authored by an `OWNER`/`MEMBER`/`COLLABORATOR` (or a first-party bot like Dependabot)
+defaults to below the `approved` threshold and is silently dropped before the agent sees
+it — see [gh-aw's integrity filtering docs](https://github.github.io/gh-aw/reference/integrity/).
+Pull requests get a pass (any non-fork PR on a public repo counts as `approved`
+regardless of author), but plain *issues* don't — including the fallback issues our own
+`cgwaltersbot[bot]` files when a safe-output push is rejected (e.g.
+[#26](https://github.com/cgwalters/gh-aw-fullsend-mini/issues/26)).
+
+That means relabeling one of those fallback issues to retry a task doesn't work: the
+agent can see the label but gets a filtered, empty view of the issue body describing
+what to actually do, and correctly no-ops. All three workflows list the bot in
+`tools.github.trusted-users` so its own output is treated as trusted input:
+
+```yaml
+tools:
+  github:
+    min-integrity: approved
+    trusted-users: ["cgwaltersbot[bot]"]
+```
+
+The right way to retry a rejected task is still to fix the label order (see above) or
+apply the bundle manually on the *original* issue/PR — relabeling the fallback issue is
+now at least readable by the agent, but it was never the intended recovery path.
+
 ## Repository setup checklist
 
 1. Create four labels: `agent/code`, `agent/fixme`, `agent/lgtm`,
@@ -188,7 +215,10 @@ github-app:
    (not `drafter.md` — see "Design notes and gotchas" above), matching your App's
    actual bot slug. Without this, both workflows' `pre_activation` job will always
    reject the shared App bot's role check and silently no-op forever.
-4. Make sure `gh aw compile` runs cleanly against the `.md` files (see below) — run `gh
+4. Add the same `<your-app-slug>[bot]` name to `tools.github.trusted-users` in all three
+   `.md` files (see "Trusting the pipeline's own bot" above), so agents can read content
+   the bot itself files, like fallback issues.
+5. Make sure `gh aw compile` runs cleanly against the `.md` files (see below) — run `gh
    aw compile drafter review fix --approve` after any workflow edit. Pin the gh-aw
    extension version when you do (see "Design notes and gotchas" above).
 

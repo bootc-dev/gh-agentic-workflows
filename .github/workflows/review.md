@@ -24,6 +24,10 @@ tools:
   bash: ["*"]
   github:
     toolsets: [default]
+    # See drafter.md: trusts our own bot's authored content (e.g. issues it
+    # files) so it isn't filtered out by integrity checks on this public repo.
+    min-integrity: approved
+    trusted-users: ["cgwaltersbot[bot]"]
 
 safe-outputs:
   github-app:
