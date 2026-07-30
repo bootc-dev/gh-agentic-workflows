@@ -39,6 +39,13 @@ safe-outputs:
     allowed: ["ai/fixme"]
   push-to-pull-request-branch:
     max: 1
+    # Mirrors drafter.md's override: if the PR itself carries
+    # `agent/workflow-edits-allowed` (e.g. the drafter PR was opened under
+    # the override, or a human added it afterwards), fix commits may also
+    # touch protected files without the request_review gate. See "Letting
+    # the agent edit protected files" in README.md.
+    protected-files:
+      policy: ${{ contains(github.event.pull_request.labels.*.name, 'agent/workflow-edits-allowed') && 'allowed' || 'request_review' }}
 
 timeout-minutes: 15
 ---
