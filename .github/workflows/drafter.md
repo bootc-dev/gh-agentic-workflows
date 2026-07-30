@@ -28,6 +28,13 @@ safe-outputs:
   github-app:
     client-id: ${{ vars.GH_AW_APP_CLIENT_ID }}
     private-key: ${{ secrets.GH_AW_APP_PRIVATE_KEY }}
+    # Without this, the minted installation token only gets contents/issues/
+    # pull-requests, and GitHub server-side rejects any push that touches
+    # .github/workflows/* with "refusing to allow a GitHub App to create or
+    # update workflow ... without `workflows` permission" - even though the
+    # App installation itself has the Workflows permission granted.
+    permissions:
+      workflows: write
   create-pull-request:
     max: 1
     branch-prefix: agent/

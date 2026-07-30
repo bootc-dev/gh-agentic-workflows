@@ -32,6 +32,11 @@ safe-outputs:
   github-app:
     client-id: ${{ vars.GH_AW_APP_CLIENT_ID }}
     private-key: ${{ secrets.GH_AW_APP_PRIVATE_KEY }}
+    # See drafter.md: needed so pushes touching .github/workflows/* (e.g. an
+    # override-labeled fix commit) aren't rejected server-side for lacking
+    # the `workflows` permission on the minted token.
+    permissions:
+      workflows: write
   add-comment:
     max: 1
   remove-labels:

@@ -135,6 +135,28 @@ or misbehaving agent can't unlock this on its own mid-run. The expression falls 
 `request_review` whenever the label is absent, which keeps that the default for every
 ordinary run.
 
+### The App token also needs an explicit `workflows` permission
+
+Separately from the protected-files policy above, GitHub enforces a hard server-side rule:
+a GitHub App-authenticated push that touches anything under `.github/workflows/` is
+rejected outright unless the token minting the push was granted the `workflows`
+permission — *even if the App installation itself has that permission enabled*. gh-aw's
+`create-github-app-token` step only requests `contents`/`issues`/`pull-requests` by
+default, so any run that legitimately edits workflow files (like the label rename above)
+fails at the `git push` step with `refusing to allow a GitHub App to create or update
+workflow ... without \`workflows\` permission`, and falls back to filing an issue instead
+of opening a PR — see [#21](https://github.com/cgwalters/gh-aw-fullsend-mini/issues/21).
+
+Both `drafter.md` and `fix.md` request the extra scope explicitly via `safe-outputs.github-app.permissions`:
+
+```yaml
+github-app:
+  client-id: ${{ vars.GH_AW_APP_CLIENT_ID }}
+  private-key: ${{ secrets.GH_AW_APP_PRIVATE_KEY }}
+  permissions:
+    workflows: write
+```
+
 ## Repository setup checklist
 
 1. Create four labels: `agent/code`, `agent/fixme`, `agent/lgtm`,
@@ -144,7 +166,11 @@ ordinary run.
    above):
    - Go to Settings → Developer settings → GitHub Apps → New GitHub App.
    - Grant repository permissions: Contents (Read & Write), Issues (Read & Write), Pull
-     requests (Read & Write). Metadata (Read) is auto-granted.
+     requests (Read & Write), Workflows (Read & Write). Metadata (Read) is auto-granted.
+     Workflows is easy to miss since nothing in this repo's own `permissions:` blocks
+     needs it — it's only required because `drafter.md`/`fix.md` push commits that touch
+     `.github/workflows/*` (see "The App token also needs an explicit `workflows`
+     permission" above).
    - Set the webhook to inactive — it isn't needed, since this App is only used to mint
      API tokens for Actions, not to receive events.
    - Set installability to "Only on this account".
