@@ -12,32 +12,32 @@ demonstrates one possible pipeline.
 Four stages, each a separate workflow:
 
 ```
-issue labeled            pull_request              label: ai/fixme          label: ai/lgtm
-  'agent-code'          opened/synchronize        (pull_request labeled)   (pull_request labeled)
+issue labeled            pull_request              label: agent/fixme          label: agent/lgtm
+  'agent/code'          opened/synchronize        (pull_request labeled)   (pull_request labeled)
        │                       │                          │                        │
        ▼                       ▼                          ▼                        ▼
   drafter.md   ──opens PR──▶ review.md   ──labels──▶   fix.md   ──pushes──▶  (back to review.md)
  (gh-aw agent)            (gh-aw agent)              (gh-aw agent)
                                 │
-                                └──labels 'ai/lgtm'──▶  merge.yml
+                                └──labels 'agent/lgtm'──▶  merge.yml
                                                       (plain Actions workflow)
 ```
 
-- **`drafter.md`** — triggers when an issue is labeled `agent-code`. Reads the issue,
+- **`drafter.md`** — triggers when an issue is labeled `agent/code`. Reads the issue,
   implements the change, validates it with whatever the repo provides, and opens a
   **draft** pull request on an `agent/*` branch via gh-aw's `create-pull-request`
   safe-output.
 - **`review.md`** — triggers on `pull_request: [opened, synchronize]` for `agent/*`
   branches. Reviews the diff, posts a `COMMENT` review with concrete feedback, and
-  applies exactly one of `ai/fixme` (needs work) or `ai/lgtm` (ready to merge), removing
+  applies exactly one of `agent/fixme` (needs work) or `agent/lgtm` (ready to merge), removing
   the other if present.
-- **`fix.md`** — triggers on the `ai/fixme` label. Consumes the label (removes it so it
+- **`fix.md`** — triggers on the `agent/fixme` label. Consumes the label (removes it so it
   can't retrigger itself), reads the reviewer's feedback from the PR's reviews, pushes a
   fix commit to the same branch via `push-to-pull-request-branch`, and stops. Pushing a
   new commit fires `review.md` again, closing the loop. An iteration cap stops the loop
   after 2 automated fix attempts and posts a PR comment asking a human to take over
   instead of silently doing nothing — see "Troubleshooting and operations" below.
-- **`merge.yml`** — triggers on the `ai/lgtm` label. A deliberately plain, non-gh-aw
+- **`merge.yml`** — triggers on the `agent/lgtm` label. A deliberately plain, non-gh-aw
   Actions workflow: merging is mechanical once the reviewer has already made the
   judgment call, so no LLM is involved. Marks the draft PR ready, squash-merges it, and
   deletes the branch.
@@ -62,7 +62,7 @@ A few things here are non-obvious and were hard-won getting this to actually wor
   the `agent/*` branch prefix) silently drops the trigger's own label-name condition —
   the workflow ends up firing on *any* label change. `fix.md` works around this with a
   plain `pull_request: types: [labeled]` trigger and an explicit
-  `if: github.event.label.name == 'ai/fixme'` check instead.
+  `if: github.event.label.name == 'agent/fixme'` check instead.
 - **Draft PRs need an explicit "ready" step.** `drafter.md` opens PRs as drafts, and
   `gh pr merge` refuses drafts outright. `merge.yml` calls `gh pr ready` before
   `gh pr merge`.
@@ -125,7 +125,7 @@ workflow gets rejected as invalid on push — see
 `case()` avoids `&`, `<`, and `>` entirely, so it survives serialization intact.
 
 Applying the `agent/workflow-edits-allowed` label to the *issue* — before or alongside
-`agent-code` — pre-authorizes that specific `drafter.md` run to write protected files
+`agent/code` — pre-authorizes that specific `drafter.md` run to write protected files
 without the review gate; `fix.md` checks the same label on the *pull request* instead, so
 either the drafter PR needs to carry it too (a human can add it after the fact) for
 follow-up fix commits to get the same treatment. Crucially, this is a human decision made
@@ -137,7 +137,7 @@ ordinary run.
 
 ## Repository setup checklist
 
-1. Create four labels: `agent-code`, `ai/fixme`, `ai/lgtm`,
+1. Create four labels: `agent/code`, `agent/fixme`, `agent/lgtm`,
    `agent/workflow-edits-allowed` (see "Letting the agent edit protected files" above).
 2. Register a GitHub App to act as the pipeline's bot identity (this must be a real App,
    not the default `GITHUB_TOKEN` — see "GITHUB_TOKEN doesn't retrigger workflows"
@@ -170,37 +170,37 @@ ordinary run.
 
 **How to tell if a PR is stuck.** `fix.md`'s iteration cap (3, i.e. 2 automated fix
 attempts) is enforced by counting commits on the PR via `gh pr view --json commits`. When
-that cap is hit, `fix.md` removes `ai/fixme` (so it can't retrigger) and posts a PR
+that cap is hit, `fix.md` removes `agent/fixme` (so it can't retrigger) and posts a PR
 comment explaining that automated fixing has stopped, but does **not** apply any label. A
-PR that has neither `ai/fixme` nor `ai/lgtm`, but does have a bot comment about the
+PR that has neither `agent/fixme` nor `agent/lgtm`, but does have a bot comment about the
 iteration cap, is stuck and waiting on a human — it is not "in progress," and nothing
 will move it forward on its own.
 
-**What not to do.** Toggling the originating issue's `agent-code` label off and back on
+**What not to do.** Toggling the originating issue's `agent/code` label off and back on
 does *not* resume work on the stuck PR — `drafter.md` triggers on that label and will
 open a brand-new, separate PR for the same issue, leaving the original stuck PR untouched
 and orphaned. Don't do this; it just produces a duplicate.
 
 **How to actually rescue a stuck PR.** Because the iteration cap is a running commit
-count on the branch that only ever grows, re-applying `ai/fixme` to a capped PR does
+count on the branch that only ever grows, re-applying `agent/fixme` to a capped PR does
 **not** give the loop a clean extra attempt: `fix.md` will immediately see the same (or
 higher) commit count, hit the cap again, and post another comment without ever touching
 the code. The reliable options are:
 
-- Push a fix commit to the branch yourself, then apply `ai/lgtm` directly once you're
+- Push a fix commit to the branch yourself, then apply `agent/lgtm` directly once you're
   confident it's ready — this bypasses `fix.md`/`review.md` entirely and goes straight to
   `merge.yml`.
 - Or just close the PR if it's not worth pursuing further.
 
 (If you really want the automated fix loop itself to run again rather than finishing by
 hand, you'd need to reduce the branch's commit count back below the cap first, e.g. by
-squashing the existing commits, before re-applying `ai/fixme` — at that point you're
+squashing the existing commits, before re-applying `agent/fixme` — at that point you're
 almost as far along as just finishing the fix yourself, so this is rarely worth it.)
 
 **Verifying the pipeline end to end.** `tests/e2e.sh` scripts the manual procedure for
 exercising the full loop against a live repository: it files a fresh issue, then polls
-the real GitHub API and reports each stage — PR opened, review posted, `ai/fixme`/
-`ai/lgtm` applied, fix commit pushed, re-review, merge — as it happens.
+the real GitHub API and reports each stage — PR opened, review posted, `agent/fixme`/
+`agent/lgtm` applied, fix commit pushed, re-review, merge — as it happens.
 
 ```
 ./tests/e2e.sh --repo cgwalters/gh-aw-fullsend-mini --scenario needs-fix
@@ -211,7 +211,7 @@ workflows, and a full `needs-fix` round trip (drafter, review, fix, re-review, m
 been observed to take 20 minutes or more. It's a manual tool for a human — or an agent, on
 explicit request — to run deliberately; it is not wired into any Actions trigger. See
 `./tests/e2e.sh --help` for the full set of flags and the `clean` scenario (no deliberate
-gap, expected to reach `ai/lgtm` on the first review).
+gap, expected to reach `agent/lgtm` on the first review).
 
 ## Adapting to your project
 
@@ -223,8 +223,8 @@ description, validation instructions, and review criteria are all plain English 
 should be tailored to your repo's conventions and tooling.
 
 Leave alone unless you know what you're changing: the `on:`/`if:` triggers, the
-`safe-outputs:` blocks and their token scoping, and the `ai/fixme`/`ai/lgtm`/
-`agent-code` label names. If you do rename a label, update it consistently across
+`safe-outputs:` blocks and their token scoping, and the `agent/fixme`/`agent/lgtm`/
+`agent/code` label names. If you do rename a label, update it consistently across
 `review.md`, `fix.md`, and `merge.yml` — the pipeline depends on all three agreeing on
 the same names.
 

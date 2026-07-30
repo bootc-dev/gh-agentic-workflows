@@ -1,7 +1,7 @@
 ---
 description: |
   Fix-iteration agent. When review.md flags an agent-authored pull request
-  with the 'ai/fixme' label, this agent reads the reviewer's feedback and
+  with the 'agent/fixme' label, this agent reads the reviewer's feedback and
   pushes follow-up commits to the same branch, closing the
   code -> review -> fix loop.
 
@@ -11,7 +11,7 @@ on:
   bots: ["cgwaltersbot[bot]"]
 
 if: |
-  github.event.label.name == 'ai/fixme' &&
+  github.event.label.name == 'agent/fixme' &&
   startsWith(github.event.pull_request.head.ref, 'agent/')
 
 permissions:
@@ -36,7 +36,7 @@ safe-outputs:
     max: 1
   remove-labels:
     max: 1
-    allowed: ["ai/fixme"]
+    allowed: ["agent/fixme"]
   push-to-pull-request-branch:
     max: 1
     # Mirrors drafter.md's override: if the PR itself carries
@@ -56,7 +56,7 @@ timeout-minutes: 15
 
 # PR Fix Agent
 
-The `ai/fixme` label was applied to pull request
+The `agent/fixme` label was applied to pull request
 #${{ github.event.pull_request.number }} by the review agent (`review.md`),
 meaning it found something that needs to change.
 
@@ -66,12 +66,12 @@ gated by `if:` rather than gh-aw's `label_command:` trigger, because
 the `agent/` branch-prefix check) silently drops its own label-name match
 condition, which would make this workflow fire on *any* label added to an
 `agent/`-branch PR. So the label must be consumed manually: this workflow
-removes `ai/fixme` itself via `remove-labels` (step 1 below) so it can't
+removes `agent/fixme` itself via `remove-labels` (step 1 below) so it can't
 cause a duplicate re-trigger.
 
 ## Your task
 
-1. Remove the `ai/fixme` label from this PR via the `remove-labels`
+1. Remove the `agent/fixme` label from this PR via the `remove-labels`
    safe-output, so it's consumed and can't re-trigger this workflow.
 2. **Enforce the iteration cap.** Run
    `gh pr view ${{ github.event.pull_request.number }} --json commits --jq '.commits | length'`
@@ -87,8 +87,8 @@ cause a duplicate re-trigger.
    - Emit an `add-comment` safe-output on this PR whose body says: the
      automated fix loop has reached its iteration limit (3) and automated
      fixing has stopped; a human needs to review the PR and either push a
-     fix commit and apply `ai/lgtm` directly once satisfied, or close the
-     PR. Explicitly note that re-applying `ai/fixme` will **not** give the
+     fix commit and apply `agent/lgtm` directly once satisfied, or close the
+     PR. Explicitly note that re-applying `agent/fixme` will **not** give the
      loop another attempt: this cap is simply the total commit count on
      the branch, which only grows, so relabeling will immediately hit the
      same cap again without attempting a fix (the only way to actually
@@ -121,9 +121,9 @@ cause a duplicate re-trigger.
 - Only ever modify the existing PR branch via `push-to-pull-request-branch`
   — never push directly to `main` and never open a new PR.
 - Respect the iteration cap in step 2 without exception.
-- Always remove `ai/fixme` (step 1), even if the iteration cap causes you
+- Always remove `agent/fixme` (step 1), even if the iteration cap causes you
   to stop before making any code changes.
 - When the iteration cap is reached, never emit `add-labels` for
-  `ai/fixme` or `ai/lgtm` — an unlabeled PR with the cap-reached comment
+  `agent/fixme` or `agent/lgtm` — an unlabeled PR with the cap-reached comment
   is the intended "stuck, needs a human" signal. Only emit the
   `add-comment` safe-output described in step 2.
