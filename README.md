@@ -307,6 +307,17 @@ the code. The reliable options are:
   `merge.yml`.
 - Or just close the PR if it's not worth pursuing further.
 
+Note that the first option isn't just the *preferred* way to get a fresh judgment on a
+manually-pushed commit — it's the *only* way. `review.md` (like `fix.md`) refuses to
+activate unless the actor that triggered its `synchronize`/`labeled` event matches the
+PR's original author, even for a repo admin; this is deliberate (it stops a human from
+smuggling commits onto a bot-authored branch to inherit the bot's `min-integrity:
+approved`/`trusted-users` treatment — see "Trusting the pipeline's own bot" above). So a
+human push to an `agent/*` branch will never cause `review.md` to re-review it, no matter
+who pushes it or what role they have; `merge.yml` has no such check (it's a plain
+mechanical workflow gated only by the `agent/lgtm` label, not an agent job), which is
+exactly why applying that label by hand is the supported rescue path, not a workaround.
+
 (If you really want the automated fix loop itself to run again rather than finishing by
 hand, you'd need to reduce the branch's commit count back below the cap first, e.g. by
 squashing the existing commits, before re-applying `agent/fixme` — at that point you're
