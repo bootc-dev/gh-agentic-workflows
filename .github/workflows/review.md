@@ -1,4 +1,15 @@
 ---
+# Reviewer — stage 2 of the drafter -> review -> fix -> merge pipeline.
+#
+# Trigger:  pull_request opened/synchronize, agent/* branches only
+# Reads:    the PR diff and the files it touches
+# Writes:   one COMMENT review, plus exactly one of agent/fixme | agent/lgtm
+# Next:     agent/fixme -> fix.md; agent/lgtm -> merge.yml
+# Docs:     README.md, "How it works" and "Design notes and gotchas"
+#
+# YAML comments like this one are stripped at compile time and never reach
+# the agent; the markdown body below is the prompt. See README.md,
+# "Where to document a workflow".
 description: |
   Reviewer agent. Automatically reviews pull requests authored by the code
   agent and signals readiness via labels: 'agent/fixme' when changes are

@@ -1,4 +1,15 @@
 ---
+# Drafter — stage 1 of the drafter -> review -> fix -> merge pipeline.
+#
+# Trigger:  issue labeled agent/code
+# Reads:    the issue body and the repo
+# Writes:   a draft PR on an agent/* branch (create-pull-request safe-output)
+# Next:     the new PR fires review.md
+# Docs:     README.md, "How it works" and "Design notes and gotchas"
+#
+# YAML comments like this one are stripped at compile time and never reach
+# the agent; the markdown body below is the prompt. See README.md,
+# "Where to document a workflow".
 description: |
   Autonomous implementation agent. When an issue is labeled 'agent/code',
   this agent reads the issue, explores the repo, implements the change,

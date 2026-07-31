@@ -1,4 +1,15 @@
 ---
+# Fixer — stage 3 of the drafter -> review -> fix -> merge pipeline.
+#
+# Trigger:  PR labeled agent/fixme, agent/* branches only
+# Reads:    the reviewer's feedback on the PR
+# Writes:   a fix commit (push-to-pull-request-branch); removes agent/fixme
+# Next:     the pushed commit fires review.md again; capped at 2 attempts
+# Docs:     README.md, "How it works" and "Troubleshooting and operations"
+#
+# YAML comments like this one are stripped at compile time and never reach
+# the agent; the markdown body below is the prompt. See README.md,
+# "Where to document a workflow".
 description: |
   Fix-iteration agent. When review.md flags an agent-authored pull request
   with the 'agent/fixme' label, this agent reads the reviewer's feedback and

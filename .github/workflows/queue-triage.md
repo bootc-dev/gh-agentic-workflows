@@ -1,4 +1,19 @@
 ---
+# Queue triage — standalone; not part of the drafter -> review -> fix ->
+# merge pipeline, and inert until an adopter names their CI workflow below
+# and files a tracker issue labeled agent/flake-tracker.
+#
+# Trigger:  workflow_run failure of the monitored CI workflow on a
+#           gh-readonly-queue/** branch (or workflow_dispatch with a run_id)
+# Reads:    the failed jobs' logs, pre-fetched deterministically below
+# Writes:   a verdict comment per affected PR; a flake-signature ledger in
+#           an island region of the tracker issue's body
+# Next:     nothing automated - re-queueing is deliberately left to a human
+# Docs:     README.md, "Merge queue failure analyzer"
+#
+# YAML comments like this one are stripped at compile time and never reach
+# the agent; the markdown body below is the prompt. See README.md,
+# "Where to document a workflow".
 description: |
   Merge queue failure analyzer. When the monitored CI workflow completes with
   a failure on a merge-queue branch, this agent downloads the failed job's

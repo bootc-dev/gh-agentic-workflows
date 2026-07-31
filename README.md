@@ -134,6 +134,34 @@ Non-obvious things that were hard-won getting this to actually work:
   capture the command's output into a variable first and `grep` that instead of piping
   straight into `-q`.
 
+### Where to document a workflow
+
+Text in a workflow `.md` can go in three places, and they behave completely differently:
+
+- **YAML comments in the frontmatter** are stripped at compile time and never reach the
+  compiled `.lock.yml`, let alone the agent. They're free, which is why every design note
+  in these files lives there, including the header block each `.md` opens with. (Free to
+  the agent, not to the lock file: the comment text doesn't appear in it, but gh-aw's
+  `frontmatter_hash` covers the raw frontmatter, so editing a comment still needs a
+  recompile or `ci.yml`'s drift check fails.)
+- **`description:`** is metadata, not instructions: gh-aw passes it to the *threat
+  detection* job as `WORKFLOW_DESCRIPTION` and surfaces it in `gh aw` listings. The agent
+  never sees it.
+- **The markdown body is the prompt**, imported verbatim at runtime
+  (`{{#runtime-import .github/workflows/<name>.md}}` in the lock file) rather than baked
+  in at compile time. Everything there is tokens the model reads and acts on. gh-aw
+  advertises this as being able to edit instructions on github.com without recompiling,
+  and the edit does take effect — but the lock header carries a `body_hash` alongside the
+  `frontmatter_hash`, so `ci.yml`'s drift check fails until you recompile anyway.
+
+The trap is `<!-- HTML comments -->` in the body. They look like the obvious way to leave
+a note for a human, but the body *is* the prompt, so the model reads them like any other
+text — and gh-aw's markdown scanner classifies "hidden content (suspicious HTML
+comments)" as a rejection category that, per its docs, "cannot be overridden". They cost
+tokens, can steer the agent, and risk a compile failure, all for something a frontmatter
+comment does for free. Keep maintainer notes in the frontmatter; put in the body only
+what you want the agent to read.
+
 ### Letting the agent edit protected files
 
 `drafter.md`/`fix.md` default to gh-aw's `request_review` policy for protected files
