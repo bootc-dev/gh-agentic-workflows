@@ -29,12 +29,12 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          gh aw compile drafter review fix --approve
+          gh aw compile drafter review fix queue-triage --approve
 
       - name: Check for lock drift
         run: |
           set -euo pipefail
           git diff --exit-code -- .github/workflows/ || {
-            echo "::error::Compiled .lock.yml files are out of sync with their .md sources — run 'gh aw compile drafter review fix --approve' locally and commit the result."
+            echo "::error::Compiled .lock.yml files are out of sync with their .md sources — run 'gh aw compile drafter review fix queue-triage --approve' locally and commit the result."
             exit 1
           }
