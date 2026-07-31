@@ -53,6 +53,11 @@ const LABELS = [
     description: 'Pre-authorizes agent runs to edit protected files without the request_review gate',
     color: '5319E7', // purple
   },
+  {
+    name: 'agent/flake-tracker',
+    description: 'Marks the CI flake tracker issue the merge queue analyzer maintains',
+    color: '1D76DB', // blue
+  },
 ];
 
 /**
