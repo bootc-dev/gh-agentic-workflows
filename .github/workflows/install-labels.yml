@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install labels
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             // Keep this LABELS array and install loop in sync with
