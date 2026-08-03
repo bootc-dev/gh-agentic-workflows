@@ -299,6 +299,14 @@ now at least readable by the agent, but it was never the intended recovery path.
        - defaults
        - rust  # or your ecosystem's identifier, or explicit domains
    ```
+5. If the target branch has a GitHub merge-queue ruleset, enable "Allow auto-merge" in
+   the repo's settings. `merge.yml` enqueues PRs via `gh pr merge` rather than merging
+   them directly on such branches (merging becomes async: the queue runs its own checks
+   and merges later, possibly batched with other PRs), and `gh` refuses to do that at
+   all unless auto-merge is allowed. Note the queue also always uses its own configured
+   merge method and generates its own commit message once it actually merges — the
+   `--squash`/custom-subject handling in `merge.yml` only takes effect on branches
+   without a merge queue.
 
 ## Troubleshooting and operations
 
