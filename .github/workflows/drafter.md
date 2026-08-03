@@ -29,7 +29,7 @@ tools:
     # before it can read it - see "Trusting the pipeline's own bot" in
     # README.md.
     min-integrity: approved
-    trusted-users: ["cgwaltersbot[bot]"]
+    trusted-users: ["${{ vars.GH_AW_APP_BOT_SLUG }}"]
 
 safe-outputs:
   github-app:
