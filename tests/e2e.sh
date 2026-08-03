@@ -54,7 +54,7 @@ Options:
   -h, --help              Show this help and exit.
 
 Example:
-  ./tests/e2e.sh --repo cgwalters/gh-agentic-workflows --scenario needs-fix
+  ./tests/e2e.sh --repo bootc-dev/gh-agentic-workflows --scenario needs-fix
 EOF
 }
 

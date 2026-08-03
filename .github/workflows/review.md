@@ -7,7 +7,7 @@ description: |
 on:
   pull_request:
     types: [opened, synchronize]
-  bots: ["cgwaltersbot[bot]"]
+  bots: ["${{ vars.GH_AW_APP_BOT_SLUG }}"]
 
 if: startsWith(github.event.pull_request.head.ref, 'agent/')
 
@@ -27,7 +27,7 @@ tools:
     # See drafter.md: trusts our own bot's authored content (e.g. issues it
     # files) so it isn't filtered out by integrity checks on this public repo.
     min-integrity: approved
-    trusted-users: ["cgwaltersbot[bot]"]
+    trusted-users: ["${{ vars.GH_AW_APP_BOT_SLUG }}"]
 
 safe-outputs:
   github-app:
