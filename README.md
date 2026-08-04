@@ -11,10 +11,10 @@ demonstrates one possible pipeline.
 
 Rather than forking this whole repo (see "Adapting to your project" below), you can
 install it as a gh-aw package: `gh aw add bootc-dev/gh-agentic-workflows@v0.1.0` pulls in
-`drafter.md`, `review.md`, and `fix.md`, compiling them fresh against your repo, and
-copies `merge.yml` and `install-labels.yml` over verbatim. The installed `.md` files
-reference the pipeline's bot identity through repo variables/secrets rather than
-hardcoding it, so before anything will actually trigger you still need to:
+`drafter.md`, `review.md`, `fix.md`, and `queue-triage.md`, compiling them fresh against
+your repo, and copies `merge.yml` and `install-labels.yml` over verbatim. The installed
+`.md` files reference the pipeline's bot identity through repo variables/secrets rather
+than hardcoding it, so before anything will actually trigger you still need to:
 
 - Register your own GitHub App and configure `GH_AW_APP_CLIENT_ID`, `GH_AW_APP_PRIVATE_KEY`,
   and `GH_AW_APP_BOT_SLUG` (see "Repository setup checklist" below).
@@ -57,6 +57,32 @@ issue labeled            pull_request              label: agent/fixme          l
   Actions workflow: merging is mechanical once the reviewer has already made the
   judgment call, so no LLM is involved. Marks the draft PR ready, squash-merges it, and
   deletes the branch.
+
+## Merge queue failure analyzer
+
+`queue-triage.md` is a fifth workflow, separate from the four-stage pipeline above. It's
+for repos that use GitHub's merge queue and want an agent to triage merge-group CI
+failures instead of having humans read logs every time a flaky test kicks a PR out of the
+queue. It ships in this package but is inert until you name your CI workflow and create a
+tracker issue.
+
+- **Trigger:** `workflow_run` completion of a named CI workflow (default: `"CI"`) on
+  `gh-readonly-queue/**` branches, gated to runs with `conclusion == 'failure'` and
+  `event == 'merge_group'`. Also accepts `workflow_dispatch` with a `run_id` input.
+- **Pre-fetch:** Downloads failed job logs, greps for error indicators, and resolves
+  affected PRs deterministically before the agent starts, so it works from small hint
+  files rather than raw logs.
+- **Classification:** Analyzes each failure as `flake` (environmental/transient — a
+  re-run would plausibly pass), `real` (this PR's change broke it), or `unclear`
+  (deterministic but not this PR's fault — re-queueing won't help). Comments on each
+  verified PR with the verdict and a recommendation.
+- **Flake ledger:** Maintains a deduplicated ledger of known flake signatures on a
+  human-created tracker issue (labeled `agent/flake-tracker`). Posts a narrative comment
+  only the first time a given signature appears.
+- **Constraints:** Never re-queues PRs or creates the tracker issue itself — both are
+  deliberately left to humans.
+
+See `.github/workflows/queue-triage.md` for the full prompt and workflow details.
 
 ## Design notes and gotchas
 
@@ -224,11 +250,13 @@ now at least readable by the agent, but it was never the intended recovery path.
 
 ## Repository setup checklist
 
-1. Create seven labels: `agent/code`, `agent/fixme`, `agent/lgtm`, `agent/draft-working`,
-   `agent/review-working`, `agent/fix-working`, `agent/workflow-edits-allowed` (see
-   "Letting the agent edit protected files" above). The three `agent/*-working` labels
-   just need to exist; their color is cosmetic (see "a per-workflow `agent/*-working`
-   label is added and removed via frontmatter `jobs:`" above).
+1. Create eight labels: `agent/code`, `agent/fixme`, `agent/lgtm`, `agent/draft-working`,
+   `agent/review-working`, `agent/fix-working`, `agent/workflow-edits-allowed`,
+   `agent/flake-tracker` (see "Letting the agent edit protected files" above). The three
+   `agent/*-working` labels just need to exist; their color is cosmetic (see "a per-workflow
+   `agent/*-working` label is added and removed via frontmatter `jobs:`" above).
+   `agent/flake-tracker` is only needed if you're using the merge queue failure analyzer
+   (see "Merge queue failure analyzer" above).
 
    The easiest way is to run the included install script via the **Install Labels** workflow
    in the Actions tab, or manually via:
@@ -248,6 +276,8 @@ now at least readable by the agent, but it was never the intended recovery path.
      --description "The fix agent is actively working on this PR"
    gh label create "agent/workflow-edits-allowed" --color 5319E7 \
      --description "Pre-authorizes agent runs to edit protected files without the request_review gate"
+   gh label create "agent/flake-tracker" --color 1D76DB \
+     --description "Marks the CI flake tracker issue the merge queue analyzer maintains"
    ```
 
    See [`scripts/README.md`](scripts/README.md) for more installation options.
