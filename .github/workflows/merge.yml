@@ -97,6 +97,7 @@ jobs:
           set -euo pipefail
           pr="${{ github.event.pull_request.number }}"
           repo="${{ github.repository }}"
+          base="${{ github.event.pull_request.base.ref }}"
           # Pin the squash commit's message to the PR's title/body rather
           # than gh's default (title + the raw commit log concatenated).
           # Commits on an agent-authored branch are WIP checkpoints from a
@@ -105,12 +106,41 @@ jobs:
           # what should end up in the permanent log, not intermediate
           # commit messages. It also means review.md never needs to demand
           # a fix commit purely to reword an earlier commit message.
+          #
+          # None of this applies if the base branch has a merge-queue
+          # ruleset: `gh pr merge` there doesn't merge directly, it enqueues
+          # (the same underlying mechanism as --auto), and the queue always
+          # uses its own configured merge method and generates its own
+          # commit message once it actually merges -- --squash/--subject/
+          # --body-file are silently ignored in that path (confirmed by
+          # testing against a live merge-queue repo). We still pass them:
+          # harmless when ignored, and correct on non-merge-queue repos.
+          #
+          # `--delete-branch` is a harder problem: gh refuses it outright
+          # ("Cannot use -d or --delete-branch when merge queue enabled")
+          # instead of ignoring it, so it must not be passed at all when a
+          # merge queue is in play. Branch cleanup in that case is left to
+          # the repo's own "Automatically delete head branches" setting.
+          # Detect this via the rules-branches endpoint, which returns the
+          # effective rules for a branch (org + repo rulesets combined).
+          # Fail safe on API errors: assume no merge queue, i.e. keep the
+          # old behavior, since that fails loudly and clearly if wrong
+          # rather than silently leaving branches undeleted everywhere.
+          mq_count=$(gh api "repos/$repo/rules/branches/$base" \
+            --jq '[.[] | select(.type == "merge_queue")] | length' \
+            2>/dev/null) || mq_count=0
           title=$(gh pr view "$pr" --repo "$repo" --json title --jq .title)
           gh pr view "$pr" --repo "$repo" --json body --jq .body \
             > /tmp/merge-pr-body.txt
-          gh pr merge "$pr" --repo "$repo" \
-            --squash --delete-branch \
-            --subject "$title" --body-file /tmp/merge-pr-body.txt
+          merge_args=(--squash --subject "$title" --body-file /tmp/merge-pr-body.txt)
+          if [ "${mq_count:-0}" -gt 0 ]; then
+            echo "Base branch '$base' has a merge-queue ruleset; enqueuing" \
+              "the PR instead of merging directly (branch deletion left to" \
+              "the repo's own settings)."
+          else
+            merge_args+=(--delete-branch)
+          fi
+          gh pr merge "$pr" --repo "$repo" "${merge_args[@]}"
       - name: Remove agent/lgtm label (best-effort, PR may already be merged/gone)
         if: always()
         env:
