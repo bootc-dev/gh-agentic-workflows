@@ -216,7 +216,12 @@ cause a duplicate re-trigger.
 6. Validate your change using whatever the repo actually provides (tests,
    a lint command, or a small ad hoc check) — do not assume tooling that
    may not exist.
-7. Push your fix as a new commit on the same branch via the
+7. If your change edits any `.github/workflows/*.md` file, recompile the
+   lockfiles: run `just setup && just compile` (this recompiles *all*
+   workflows, not just the one you touched — every `.lock.yml` must stay in
+   sync with its `.md` source). Include the resulting `.lock.yml` changes in
+   your commit.
+8. Push your fix as a new commit on the same branch via the
    `push-to-pull-request-branch` safe-output. Do not open a new PR.
 
 ## Constraints

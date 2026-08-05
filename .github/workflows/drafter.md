@@ -153,7 +153,11 @@ implementation.
    the repo has no such tooling, validate by inspection and, where
    reasonable, a small ad hoc check (e.g. `python3 -c '...'`) instead of
    assuming a command that may not exist.
-5. Once validation passes, open a pull request via the `create-pull-request`
+5. If your change edits any `.github/workflows/*.md` file, recompile the
+   lockfiles before opening the pull request: run `just setup && just
+   compile` (this recompiles *all* workflows, not just the one you touched —
+   every `.lock.yml` must stay in sync with its `.md` source).
+6. Once validation passes, open a pull request via the `create-pull-request`
    safe-output. The PR description should summarize the change and state
    how it was validated.
 

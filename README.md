@@ -136,7 +136,8 @@ A few things here are non-obvious and were hard-won getting this to actually wor
   and an upgrade once shipped a compiler whose AI-credits pricing table had fallen out of
   sync with Anthropic's current model line — agents started failing with errors like
   `<model> has no AI credits pricing`. The fix: pin the extension to a known-good version
-  (`gh extension install github/gh-aw --pin v0.81.6`, as `ci.yml` does) and set
+  (the pinned version lives in `.github/aw/gh-aw-version`, used by both `ci.yml` and `just
+  setup` — run `just setup` locally to install it) and set
   `engine.model` explicitly in each `.md` file's frontmatter to an exact dated model ID
   (e.g. `claude-sonnet-4-5-20250929`) instead of a floating alias, then recompile. If
   workflows that were working suddenly start failing with a pricing-lookup error, this is
@@ -313,9 +314,9 @@ now at least readable by the agent, but it was never the intended recovery path.
 
    (The App used for this specific demo instance is `bootc-bot`; the steps above are
    written generically so you can register your own App if adapting this repo.)
-3. Make sure `gh aw compile` runs cleanly against the `.md` files (see below) — run `gh
-   aw compile drafter review fix --approve` after any workflow edit. Pin the gh-aw
-   extension version when you do (see "Design notes and gotchas" above).
+3. Make sure the workflows compile cleanly from the `.md` files (see below) — run `just
+   setup && just compile` after any workflow edit (see "Design notes and gotchas" above
+   for why the extension version must stay pinned).
 4. If validating your project needs network access beyond gh-aw's engine defaults —
    e.g. `cargo test`/`cargo check` reaching a crate registry, or any other compiled
    language's package manager — add a `network:` block to `drafter.md`'s and `fix.md`'s
@@ -414,8 +415,10 @@ the same names.
 After editing any `.md` file, recompile with:
 
 ```
-gh aw compile drafter review fix --approve
+just setup && just compile
 ```
+
+(see the `justfile` at the repo root).
 
 ## Files
 

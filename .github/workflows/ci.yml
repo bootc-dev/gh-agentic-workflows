@@ -22,7 +22,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          gh extension install github/gh-aw --pin v0.81.6
+          gh extension install github/gh-aw --pin "$(cat .github/aw/gh-aw-version)"
 
       - name: Compile workflows
         env:
@@ -35,6 +35,6 @@ jobs:
         run: |
           set -euo pipefail
           git diff --exit-code -- .github/workflows/ || {
-            echo "::error::Compiled .lock.yml files are out of sync with their .md sources — run 'gh aw compile drafter review fix --approve' locally and commit the result."
+            echo "::error::Compiled .lock.yml files are out of sync with their .md sources — run 'just setup && just compile' locally and commit the result."
             exit 1
           }
