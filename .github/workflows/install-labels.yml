@@ -23,7 +23,7 @@ jobs:
             // scripts/install-labels.js (inlined here so this step needs
             // no eval/require and no checkout of the repo).
             const LABELS = [
-              { name: 'agent/code', description: 'Triggers the autonomous drafter agent', color: '0E8A16' },
+              { name: 'agent/code', description: 'Triggers the drafter agent', color: '0E8A16' },
               { name: 'agent/fixme', description: 'Reviewer agent found issues that need fixing', color: 'D93F0B' },
               { name: 'agent/lgtm', description: 'Reviewer agent approved; ready to auto-merge', color: '0E8A16' },
               { name: 'agent/draft-working', description: 'The drafter agent is actively working on this issue', color: 'FBCA04' },
