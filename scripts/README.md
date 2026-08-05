@@ -4,13 +4,13 @@ This directory contains utility scripts for setting up and managing the gh-agent
 
 ## install-labels.js
 
-Installs the required labels on a repository for the autonomous issue → PR → review → fix → merge pipeline.
+Installs the required labels on a repository for the issue → PR → review → fix → merge pipeline.
 
 ### Labels Created
 
 The script creates or updates the following labels:
 
-- **`agent/code`** (green) — Triggers the autonomous drafter agent. When applied to an issue, the drafter agent reads the issue, implements the change, validates it, and opens a pull request.
+- **`agent/code`** (green) — Triggers the drafter agent. When applied to an issue, the drafter agent reads the issue, implements the change, validates it, and opens a pull request.
 
 - **`agent/fixme`** (red) — Applied by the review workflow when a PR needs work. The fix workflow consumes this label, reads the reviewer's feedback, and pushes a fix commit.
 
@@ -55,7 +55,7 @@ You can also use the GitHub CLI to create the labels directly:
 
 ```bash
 gh label create "agent/code" --color 0E8A16 \
-  --description "Triggers the autonomous drafter agent"
+  --description "Triggers the drafter agent"
 
 gh label create "agent/fixme" --color D93F0B \
   --description "Reviewer agent found issues that need fixing"
@@ -80,7 +80,7 @@ Or via `gh api`, e.g. to update an existing label:
 
 ```bash
 gh api repos/:owner/:repo/labels/agent/code -X PATCH \
-  -f color="0E8A16" -f description="Triggers the autonomous drafter agent"
+  -f color="0E8A16" -f description="Triggers the drafter agent"
 ```
 
 ### Customizing Labels
