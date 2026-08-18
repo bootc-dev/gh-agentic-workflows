@@ -10,10 +10,13 @@ demonstrates one possible pipeline.
 ## Reusing this pipeline in your own repo
 
 Rather than forking this whole repo (see "Adapting to your project" below), you can
-install it as a gh-aw package: `gh aw add bootc-dev/gh-agentic-workflows@v0.1.0` pulls in
-`drafter.md`, `review.md`, `fix.md`, and `queue-triage.md`, compiling them fresh against
-your repo, and copies `merge.yml`, `install-labels.yml`, and `upgrade.yml` over verbatim.
-The installed
+install it as a gh-aw package: `gh aw add bootc-dev/gh-agentic-workflows@v0.1.0` reads
+this repo's `aw.yml` manifest and pulls in `drafter.md`, `review.md`, and `fix.md`,
+compiling them fresh against your repo, and copies `merge.yml`, `install-labels.yml`,
+and `upgrade.yml` over verbatim. `queue-triage.md` and `ci-triage.md` are deliberately
+*not* in that manifest's `includes:` list — they're optional add-ons, not part of the
+core pipeline — so add either one explicitly by its full path, e.g.
+`gh aw add bootc-dev/gh-agentic-workflows/.github/workflows/ci-triage.md`. The installed
 `.md` files reference the pipeline's bot identity through repo variables/secrets rather
 than hardcoding it, so before anything will actually trigger you still need to:
 
@@ -84,6 +87,35 @@ tracker issue.
   deliberately left to humans.
 
 See `.github/workflows/queue-triage.md` for the full prompt and workflow details.
+
+## PR CI failure analyzer
+
+`ci-triage.md` is a sixth, similarly standalone workflow: the same idea as
+`queue-triage.md`, but for CI failures on regular pull requests instead of
+merge-group runs. It's useful in two situations: it's the *only* automated failure
+feedback a repo has while its merge queue is temporarily disabled (no `merge_group`
+events fire at all in that mode), and even with the queue active, it gives contributors
+fast feedback on lint/validate-type failures without waiting for the merge queue to
+re-verify everything from scratch.
+
+- **Trigger:** `workflow_run` completion of the same named CI workflow (default: `"CI"`)
+  as `queue-triage.md`, gated to runs with `conclusion == 'failure'` and
+  `event == 'pull_request'` — the disjoint counterpart of `queue-triage.md`'s
+  `event == 'merge_group'` check, so the two workflows never double-process the same run.
+  Also accepts `workflow_dispatch` with a `run_id` input.
+- **Pre-fetch:** Downloads failed job logs and greps for error indicators, same as
+  `queue-triage.md`. Resolves the affected PR(s) via the commit-associated-PRs API
+  (works uniformly for same-repo and fork PRs) rather than parsing the branch name, and
+  verifies each candidate's head SHA still matches the analyzed commit before treating it
+  as safe to comment on — a PR that has since moved on to a newer push is reported as
+  stale and skipped, not commented on.
+- **Classification:** The same `flake`/`real`/`unclear` taxonomy as `queue-triage.md`.
+  Comments on each verified PR with the verdict and a recommendation.
+- **No ledger:** Unlike `queue-triage.md`, this workflow maintains no cross-PR tracker —
+  each comment stands on its own, and older comments from this workflow on the same PR
+  are automatically hidden as new ones are posted.
+
+See `.github/workflows/ci-triage.md` for the full prompt and workflow details.
 
 ## Design notes and gotchas
 
@@ -481,8 +513,11 @@ The pipeline lives entirely in
 [`.github/workflows/drafter.md`](.github/workflows/drafter.md),
 [`review.md`](.github/workflows/review.md), [`fix.md`](.github/workflows/fix.md), and
 [`merge.yml`](.github/workflows/merge.yml) — see "How it works" above for what each does.
-The matching `*.lock.yml` files are gh-aw's compiled output, checked in as generated
-artifacts.
+The two standalone triage add-ons live in
+[`queue-triage.md`](.github/workflows/queue-triage.md) and
+[`ci-triage.md`](.github/workflows/ci-triage.md) — see "Merge queue failure analyzer" and
+"PR CI failure analyzer" above. The matching `*.lock.yml` files are gh-aw's compiled
+output, checked in as generated artifacts.
 [`upgrade.yml`](.github/workflows/upgrade.yml) is a separate, plain maintenance workflow:
 weekly, it self-upgrades the `gh-aw` CLI, refreshes `.github/aw/gh-aw-version` and
 `.github/aw/actions-lock.json` to match, recompiles every `.md` workflow, and opens a PR
