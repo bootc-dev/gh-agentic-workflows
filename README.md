@@ -264,7 +264,7 @@ now at least readable by the agent, but it was never the intended recovery path.
 
    ```bash
    gh label create "agent/code" --color 0E8A16 \
-     --description "Triggers the autonomous drafter agent"
+     --description "Triggers the drafter agent"
    gh label create "agent/fixme" --color D93F0B \
      --description "Reviewer agent found issues that need fixing"
    gh label create "agent/lgtm" --color 0E8A16 \

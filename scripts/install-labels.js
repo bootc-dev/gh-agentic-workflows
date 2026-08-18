@@ -1,7 +1,7 @@
 /**
  * Install gh-agentic-workflows labels
  *
- * Defines the labels required by the gh-agentic-workflows autonomous
+ * Defines the labels required by the gh-agentic-workflows
  * issue → PR → review → fix → merge pipeline, and a helper to create or
  * update them via the GitHub REST API.
  *
@@ -20,7 +20,7 @@
 const LABELS = [
   {
     name: 'agent/code',
-    description: 'Triggers the autonomous drafter agent',
+    description: 'Triggers the drafter agent',
     color: '0E8A16', // green
   },
   {

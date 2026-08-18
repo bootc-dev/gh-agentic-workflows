@@ -1,8 +1,8 @@
 ---
 description: |
-  Autonomous implementation agent. When an issue is labeled 'agent/code',
+  Draft PR implementation agent. When an issue is labeled 'agent/code',
   this agent reads the issue, explores the repo, implements the change,
-  validates it with the repo's own build tooling, and opens a pull
+  validates it with the repo's own build tooling, and opens a draft pull
   request for human review via the create-pull-request safe-output.
 
 on:
@@ -134,9 +134,9 @@ jobs:
 timeout-minutes: 15
 ---
 
-# Autonomous Developer Agent
+# Drafter
 
-Issue #${{ github.event.issue.number }} has been labeled for autonomous
+Issue #${{ github.event.issue.number }} has been labeled for draft PR
 implementation.
 
 ## Your task
