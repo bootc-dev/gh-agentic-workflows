@@ -421,6 +421,60 @@ just setup && just compile
 
 (see the `justfile` at the repo root).
 
+## Roadmap
+
+This repo is proven as a single-repo demo; the next phase is rolling it out as the
+standard pipeline across `bootc-dev`'s other active repos. Roughly in order:
+
+- [x] **Stop Renovate from bumping compiled `.lock.yml` files directly.** Renovate's
+      `github-actions` manager currently treats `*.lock.yml` like a hand-authored
+      workflow and rewrites action SHAs in place (see
+      [#50](https://github.com/bootc-dev/gh-agentic-workflows/pull/50)) — including
+      bumping `github/gh-aw-actions` straight past the version pinned in
+      `.github/aw/gh-aw-version`, which desyncs the lock files from what `gh aw compile`
+      would actually produce and fails `check-drift`. Fixed in two parts: Renovate gets
+      `ignorePaths` for `.github/workflows/*.lock.yml` (and, preemptively, the other
+      compiler-owned pin file, `.github/aw/actions-lock.json`, even though no manager
+      currently targets it) so it stops touching compiler output entirely, and
+      [`upgrade.yml`](.github/workflows/upgrade.yml) — shipped as part of this same
+      package, like `merge.yml` — takes over that job instead: weekly, it self-upgrades
+      the `gh-aw` CLI, updates `.github/aw/gh-aw-version` and
+      `.github/aw/actions-lock.json` to match, recompiles everything, and opens a PR.
+      This runs as a plain, non-agentic scheduled workflow (no LLM involved, nothing to
+      review beyond `check-drift` passing) — deliberately not routed through Renovate's
+      `postUpgradeTasks`, since that would need org-wide admin config for a single
+      repo's need and `gh`/`gh aw` aren't available in Renovate's runner anyway. (`gh aw
+      upgrade` also has a `--org` mode to trigger this fleet-wide from one place; not
+      needed yet since every consumer gets its own `upgrade.yml` on install, but worth
+      knowing about for a one-off global sweep, e.g. reacting to a security advisory.)
+- [ ] **Keep cutting `v0.x.0` releases for now rather than committing to a `v1`
+      stability contract.** Per semver's pre-1.0 convention, a `0.x` minor bump is where
+      breaking changes are expected to land, so each notable change to this pipeline
+      gets its own `v0.x.0` tag rather than piling up as `v0.1.x` patches. Consumers pin
+      `gh aw add bootc-dev/gh-agentic-workflows@v0.x.0` to an exact tag (frozen forever
+      per gh-aw's versioning model, so this is safe even without a stability guarantee)
+      instead of tracking a moving major ref. Revisit cutting `v1` — and documenting,
+      ideally in "Adapting to your project" above, exactly which frontmatter/label
+      surface is load-bearing versus safe to diverge on — once the pipeline has proven
+      itself across a couple of real consumers.
+- [ ] **Decide the bot-identity model org-wide**: one GitHub App installed into every
+      consuming repo, versus one App registration per repo. The former means less
+      operational toil (one set of credentials to rotate) but a more centralized blast
+      radius if compromised.
+- [ ] **Pilot on one low-traffic repo** via `gh aw add` (not copy-paste), with
+      `merge.yml` initially disabled or manual, watching reviewer/fixer judgment quality
+      for a couple of weeks before enabling auto-merge — following gh-aw's own "safe
+      rollout" ladder (report-only → staged → full writes).
+- [ ] **Fold the Renovate fixes into the shared `bootc-dev/infra` config** once proven on
+      a second repo, so every future consumer inherits the `.lock.yml`/`gh-aw-version`
+      handling for free instead of rediscovering it.
+- [ ] **Wider rollout** to the rest of the active `bootc-dev` repos (`bootc`, `bcvk`,
+      `bink`, `bootc-operator`, …), each getting its own pilot window. Metadata-only
+      repos (`.project`, `community`) are out of scope — the pipeline assumes a code+CI
+      repo shape.
+- [ ] **Revisit `queue-triage.md`** for repos with a real merge queue and real flake
+      history — `bootc` is the most likely candidate.
+
 ## Files
 
 The pipeline lives entirely in
