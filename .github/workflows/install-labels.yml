@@ -1,11 +1,14 @@
 name: Install Labels
 
-# This is a plain (non-gh-aw) workflow: sets up required repository labels for gh-agentic-workflows.
-#
-# You can run this workflow manually via the Actions tab, or adapt it
-# to run automatically (e.g., on repository creation).
+# This is a plain (non-gh-aw) workflow: sets up required repository labels for
+# gh-agentic-workflows. The create-or-update loop below is idempotent, so the
+# weekly schedule just self-heals labels that get renamed/deleted/recolored by
+# hand -- run it manually via the Actions tab too, e.g. right after initial
+# setup, instead of waiting for the first scheduled run.
 
 on:
+  schedule:
+    - cron: "40 7 * * 1"  # Weekly, Monday 07:40 UTC (upgrade.yml runs at :25).
   workflow_dispatch:
 
 permissions:

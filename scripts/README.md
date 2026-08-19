@@ -24,7 +24,10 @@ The script creates or updates the following labels:
 
 #### Via GitHub Actions
 
-The easiest way to install labels is using the included workflow:
+The easiest way to install labels is using the included workflow. It also runs weekly on
+its own (the create-or-update loop is idempotent, so this just self-heals any label
+that gets renamed, deleted, or recolored by hand) — running it manually is only needed
+to create the labels immediately instead of waiting for the first scheduled run:
 
 1. Go to your repository's **Actions** tab
 2. Select the **Install Labels** workflow
