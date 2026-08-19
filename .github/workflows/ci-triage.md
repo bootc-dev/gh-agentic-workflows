@@ -371,34 +371,16 @@ verdict comment on the PR(s) this run's commit is associated with.
    classification is possible from the evidence?** Call `missing-data`
    describing what's missing, instead of guessing.
 
-3. **Classify each distinct failure**, from this run's own evidence (the
-   logs, the PR's diff), as one of the same three verdicts queue-triage.md
-   uses, for vocabulary consistency across this repo's two triage
-   workflows:
-   - `flake` — environmental, transient, or nondeterministic: simply
-     re-running the job would plausibly pass. Recommend re-running it. A
-     transient package-registry 5xx, DNS failure, runner OOM/timeout, or
-     other environment hiccup unrelated to the PR's own content is a
-     `flake`.
-   - `real` — a deterministic failure caused by *this PR's own change*.
-     Recommend pushing a fix. A lint/clippy/formatting failure, a compile
-     error, or a test assertion that plainly follows from the PR's diff is
-     `real`.
-   - `unclear` — a deterministic failure that reproduces but does not
-     appear to stem from this PR's changes (e.g. already broken on the
-     base branch, a dependency that started failing for everyone). Say
-     plainly that the failure looks real but doesn't appear to be caused
-     by this PR, and that a human should look — re-running won't help.
+3. Use the same taxonomy queue-triage.md uses, for vocabulary consistency
+   across this repo's two triage workflows:
 
-   As in queue-triage.md, reproducibility ("would a re-run plausibly
-   pass?") and attribution ("did this PR cause it?") are separate axes —
-   don't conflate "not this PR's fault" with `flake`. Before concluding
-   `real` vs. `flake`/`unclear`, use the GitHub tools to look at the PR's
-   changed files/diff (`gh pr diff` is not available to you) — a PR can
-   legitimately cause what looks like an environmental failure (e.g. it
-   adds a huge fixture that triggers a disk-full, or an infinite loop that
-   triggers a timeout). When the evidence is thin, say `unclear` rather
-   than guessing.
+   {{#runtime-import shared/triage-classification.md}}
+
+   Recommend re-running the job for `flake`; recommend pushing a fix for
+   `real`. A transient package-registry 5xx, DNS failure, or runner
+   OOM/timeout is typical `flake` evidence; a lint/clippy/formatting
+   failure, a compile error, or a test assertion that plainly follows from
+   the PR's diff is `real`.
 
 4. **Outputs.** For each verified PR (from
    `/tmp/gh-aw/agent/ci-triage/prs.json`), post one `add-comment`

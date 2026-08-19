@@ -386,26 +386,16 @@ re-investigated from scratch every time it recurs.
      this failure without leaning on, so leave it unread until step 5.
    - Do not create the tracker issue yourself under any circumstances.
 
-4. **Classify each distinct failure**, from this run's own evidence alone
-   (the logs, the PR diff), as one of:
-   - `flake` — environmental, transient, or nondeterministic: simply
-     re-running this would plausibly pass. Recommend re-queueing. Only
-     `flake` verdicts ever reach the tracker (step 6).
-   - `real` — a deterministic failure caused by *this PR's own change*.
-     Recommend pushing a fix.
-   - `unclear` — everything else. This explicitly includes the case of a
-     deterministic, reproducible failure that is **not** attributable to
-     this PR — a fuzzer-found crash, a test already broken on the base
-     branch, a dependency that started failing for everyone. Say plainly
-     in the PR comment that the failure looks real but doesn't appear to
-     be caused by this PR, that re-queueing will likely just hit it again,
-     and that a human should look. Never file these in the tracker.
+4. {{#runtime-import shared/triage-classification.md}}
 
-   Reproducibility ("would a re-run plausibly pass?") and attribution
-   ("did this PR cause it?") are separate axes — don't conflate "not this
-   PR's fault" with `flake`. Only nondeterminism earns `flake`; a
-   deterministic failure that isn't this PR's fault is `unclear`, because
-   re-queueing won't help and someone still needs to go fix it.
+   Recommend re-queueing for `flake`; recommend pushing a fix for `real`.
+   Only `flake` verdicts ever reach the tracker (step 6) — never file a
+   `real` or `unclear` failure there. `unclear` also covers a fuzzer-found
+   crash, a test already broken on the base branch, or a dependency that
+   started failing for everyone: say plainly in the PR comment that the
+   failure looks real but doesn't appear to be caused by this PR, that
+   re-queueing will likely just hit it again, and that a human should
+   look.
 
    Starter taxonomy of *evidence for reproducibility* (not verdict rules —
    see below): transient registry/mirror 5xx, DNS/TLS resolution failure,
@@ -416,20 +406,17 @@ re-investigated from scratch every time it recurs.
 
    These are evidence, not a verdict by themselves: a PR can legitimately
    *cause* a disk-full, OOM, or timeout failure (e.g. it adds a large
-   fixture, an infinite loop, or a genuine resource leak). Before calling
-   something a flake, cross-check against what the PR actually changed —
-   use the GitHub tools to look at the PR's changed files (`gh pr diff` is
-   not available to you). Deterministic compile errors, lint failures, and
-   assertion failures that plainly implicate the PR's own code are `real`.
-   A deterministic crash or assertion failure that does *not* implicate
-   the PR's changes (e.g. a fuzz-target crash, a failure also reproducible
-   on the base branch) is `unclear`, not `flake` — it will fail the same
-   way on a re-run. Don't be talked into `flake` by the fuzzer's *search*
-   being randomized ("another run might not find this crash") — that's a
-   fact about how the crash was discovered, not about whether it still
-   exists. A crash the fuzzer already found and saved an artifact for is a
-   fixed, reproducible bug regardless of how the search got there. When the
-   evidence is thin, say `unclear` rather than guessing.
+   fixture, an infinite loop, or a genuine resource leak). Deterministic
+   compile errors, lint failures, and assertion failures that plainly
+   implicate the PR's own code are `real`. A deterministic crash or
+   assertion failure that does *not* implicate the PR's changes
+   (e.g. a fuzz-target crash, a failure also reproducible on the base
+   branch) is `unclear`, not `flake` — it will fail the same way on a
+   re-run. Don't be talked into `flake` by the fuzzer's *search* being
+   randomized ("another run might not find this crash") — that's a fact
+   about how the crash was discovered, not about whether it still exists.
+   A crash the fuzzer already found and saved an artifact for is a fixed,
+   reproducible bug regardless of how the search got there.
 
    Reach this verdict before you look at the tracker ledger at all (that's
    step 5, next). A signature already in the ledger is not evidence that
