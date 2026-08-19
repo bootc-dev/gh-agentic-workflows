@@ -10,3 +10,4 @@ includes:
   - .github/workflows/fix.md
   - .github/workflows/merge.yml
   - .github/workflows/install-labels.yml
+  - .github/workflows/upgrade.yml

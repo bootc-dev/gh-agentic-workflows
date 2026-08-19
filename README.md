@@ -12,7 +12,8 @@ demonstrates one possible pipeline.
 Rather than forking this whole repo (see "Adapting to your project" below), you can
 install it as a gh-aw package: `gh aw add bootc-dev/gh-agentic-workflows@v0.1.0` pulls in
 `drafter.md`, `review.md`, `fix.md`, and `queue-triage.md`, compiling them fresh against
-your repo, and copies `merge.yml` and `install-labels.yml` over verbatim. The installed
+your repo, and copies `merge.yml`, `install-labels.yml`, and `upgrade.yml` over verbatim.
+The installed
 `.md` files reference the pipeline's bot identity through repo variables/secrets rather
 than hardcoding it, so before anything will actually trigger you still need to:
 
@@ -289,9 +290,9 @@ now at least readable by the agent, but it was never the intended recovery path.
    - Grant repository permissions: Contents (Read & Write), Issues (Read & Write), Pull
      requests (Read & Write), Workflows (Read & Write). Metadata (Read) is auto-granted.
      Workflows is easy to miss since nothing in this repo's own `permissions:` blocks
-     needs it — it's only required because `drafter.md`/`fix.md` push commits that touch
-     `.github/workflows/*` (see "The App token also needs an explicit `workflows`
-     permission" above).
+     needs it — it's only required because `drafter.md`/`fix.md`/`upgrade.yml` push
+     commits that touch `.github/workflows/*` (see "The App token also needs an
+     explicit `workflows` permission" above).
    - Set the webhook to inactive — it isn't needed, since this App is only used to mint
      API tokens for Actions, not to receive events.
    - Set installability to "Only on this account".
@@ -428,6 +429,10 @@ The pipeline lives entirely in
 [`merge.yml`](.github/workflows/merge.yml) — see "How it works" above for what each does.
 The matching `*.lock.yml` files are gh-aw's compiled output, checked in as generated
 artifacts.
+[`upgrade.yml`](.github/workflows/upgrade.yml) is a separate, plain maintenance workflow:
+weekly, it self-upgrades the `gh-aw` CLI, refreshes `.github/aw/gh-aw-version` and
+`.github/aw/actions-lock.json` to match, recompiles every `.md` workflow, and opens a PR
+with the result — see the Roadmap entry below for why this exists.
 
 ## Prior art
 
