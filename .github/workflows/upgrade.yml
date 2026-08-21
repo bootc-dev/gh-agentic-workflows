@@ -103,7 +103,7 @@ jobs:
           git commit -m "$title"
           git push --force-with-lease origin "$branch"
 
-          existing=$(gh pr list --head "$branch" --state open --json number --jq '.[0].number')
+          existing=$(gh pr list --head "$branch" --state open --json number --jq '.[0].number // empty')
           if [ -n "$existing" ]; then
             gh pr edit "$existing" --title "$title" --body "$body"
             echo "Updated existing PR #${existing}"
