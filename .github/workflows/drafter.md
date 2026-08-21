@@ -157,9 +157,15 @@ implementation.
    lockfiles before opening the pull request: run `just setup && just
    compile` (this recompiles *all* workflows, not just the one you touched —
    every `.lock.yml` must stay in sync with its `.md` source).
-6. Once validation passes, open a pull request via the `create-pull-request`
+6. Check if the originating issue #${{ github.event.issue.number }} has the
+   `agent/workflow-edits-allowed` label by reading its labels. If it does,
+   you must propagate this label to the pull request so that subsequent
+   fix iterations (via `fix.md`) can also push changes to protected files.
+7. Once validation passes, open a pull request via the `create-pull-request`
    safe-output. The PR description should summarize the change and state
-   how it was validated.
+   how it was validated. If the originating issue has the 
+   `agent/workflow-edits-allowed` label (checked in step 6), pass it in the
+   `labels` parameter when creating the PR.
 
 ## Constraints
 
