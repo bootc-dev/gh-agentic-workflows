@@ -34,7 +34,7 @@ const LABELS = [
     color: '0E8A16', // green
   },
   {
-    name: 'agent/draft-working',
+    name: 'agent/drafter-working',
     description: 'The drafter agent is actively working on this issue',
     color: 'FBCA04', // yellow
   },
