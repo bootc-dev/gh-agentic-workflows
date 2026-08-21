@@ -76,7 +76,7 @@ jobs:
         with:
           client-id: ${{ vars.GH_AW_APP_CLIENT_ID }}
           private-key: ${{ secrets.GH_AW_APP_PRIVATE_KEY }}
-      - name: Add agent/draft-working label
+      - name: Add agent/drafter-working label
         # ISSUE_NUMBER/REPO must be passed via env: rather than inlined
         # directly into the run: script below (as `${{ github.* }}`): gh-aw's
         # compiler sanitizes any inline `${{ github.* }}` expressions it
@@ -93,7 +93,7 @@ jobs:
           REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-          gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --add-label agent/draft-working || true
+          gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --add-label agent/drafter-working || true
   remove_working_label:
     needs: [pre_activation, activation, agent, detection, safe_outputs]
     # Only tear down the label this same run put up: gating on this run's own
@@ -113,15 +113,15 @@ jobs:
         with:
           client-id: ${{ vars.GH_AW_APP_CLIENT_ID }}
           private-key: ${{ secrets.GH_AW_APP_PRIVATE_KEY }}
-      - name: Remove agent/draft-working label (best-effort)
-        # See the "Add agent/draft-working label" step above for why
+      - name: Remove agent/drafter-working label (best-effort)
+        # See the "Add agent/drafter-working label" step above for why
         # ISSUE_NUMBER/REPO are passed via env: instead of inlined in run:.
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           REPO: ${{ github.repository }}
         run: |
-          gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --remove-label agent/draft-working || true
+          gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --remove-label agent/drafter-working || true
 
 timeout-minutes: 15
 ---
