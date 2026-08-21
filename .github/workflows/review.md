@@ -106,7 +106,7 @@ timeout-minutes: 15
 
 # PR Review Agent
 
-The code agent has opened or updated pull request
+The code agent has opened or updated a pull request
 #${{ github.event.pull_request.number }}.
 
 ## Your task
