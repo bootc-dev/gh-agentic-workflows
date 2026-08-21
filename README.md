@@ -496,7 +496,9 @@ standard pipeline across `bootc-dev`'s other active repos. Roughly in order:
 - [ ] **Pilot on one low-traffic repo** via `gh aw add` (not copy-paste), with
       `merge.yml` initially disabled or manual, watching reviewer/fixer judgment quality
       for a couple of weeks before enabling auto-merge — following gh-aw's own "safe
-      rollout" ladder (report-only → staged → full writes).
+      rollout" ladder (report-only → staged → full writes). See the
+      [`onboard-repo`](.agents/skills/onboard-repo/SKILL.md) skill for the concrete
+      step-by-step.
 - [ ] **Fold the Renovate fixes into the shared `bootc-dev/infra` config** once proven on
       a second repo, so every future consumer inherits the `.lock.yml`/`gh-aw-version`
       handling for free instead of rediscovering it.
@@ -522,6 +524,9 @@ output, checked in as generated artifacts.
 weekly, it self-upgrades the `gh-aw` CLI, refreshes `.github/aw/gh-aw-version` and
 `.github/aw/actions-lock.json` to match, recompiles every `.md` workflow, and opens a PR
 with the result — see the Roadmap entry below for why this exists.
+[`.agents/skills/onboard-repo/`](.agents/skills/onboard-repo/SKILL.md) is an
+opencode-compatible agent skill: the operational runbook for piloting this pipeline on a
+new consumer repo, referenced from the Roadmap items below.
 
 ## Prior art
 
