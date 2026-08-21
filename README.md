@@ -177,7 +177,7 @@ A few things here are non-obvious and were hard-won getting this to actually wor
   almost certainly why.
 - **A per-workflow `agent/*-working` label is added and removed via frontmatter
   `jobs:`, not safe-outputs.** Each workflow carries its own working label on the
-  issue/PR for the duration of a run — `agent/draft-working` (drafter.md),
+  issue/PR for the duration of a run — `agent/drafter-working` (drafter.md),
   `agent/review-working` (review.md), `agent/fix-working` (fix.md) — using two custom
   jobs declared directly in each `.md` file's `jobs:` block: `add_working_label`
   (depends on `pre_activation`, which gh-aw's compiler automatically threads into
@@ -284,7 +284,7 @@ now at least readable by the agent, but it was never the intended recovery path.
 
 ## Repository setup checklist
 
-1. Create eight labels: `agent/code`, `agent/fixme`, `agent/lgtm`, `agent/draft-working`,
+1. Create eight labels: `agent/code`, `agent/fixme`, `agent/lgtm`, `agent/drafter-working`,
    `agent/review-working`, `agent/fix-working`, `agent/workflow-edits-allowed`,
    `agent/flake-tracker` (see "Letting the agent edit protected files" above). The three
    `agent/*-working` labels just need to exist; their color is cosmetic (see "a per-workflow
@@ -302,7 +302,7 @@ now at least readable by the agent, but it was never the intended recovery path.
      --description "Reviewer agent found issues that need fixing"
    gh label create "agent/lgtm" --color 0E8A16 \
      --description "Reviewer agent approved; ready to auto-merge"
-   gh label create "agent/draft-working" --color FBCA04 \
+   gh label create "agent/drafter-working" --color FBCA04 \
      --description "The drafter agent is actively working on this issue"
    gh label create "agent/review-working" --color FBCA04 \
      --description "The review agent is actively working on this PR"
