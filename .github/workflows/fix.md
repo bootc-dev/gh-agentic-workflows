@@ -1,6 +1,6 @@
 ---
 description: |
-  Fix-iteration agent. When review.md flags an agent-authored pull request
+  Fix-iteration agent. When review.md flags a pull request
   with the 'agent/fixme' label, this agent reads the reviewer's feedback and
   pushes follow-up commits to the same branch, closing the
   code -> review -> fix loop.
@@ -11,8 +11,7 @@ on:
   bots: ["${{ vars.GH_AW_APP_BOT_SLUG }}"]
 
 if: |
-  github.event.label.name == 'agent/fixme' &&
-  startsWith(github.event.pull_request.head.ref, 'agent/')
+  github.event.label.name == 'agent/fixme'
 
 # gh-aw's default `pull_request`-triggered concurrency group is keyed only by
 # workflow name + PR number, not by which label fired the run. That's fine
@@ -164,13 +163,10 @@ The `agent/fixme` label was applied to pull request
 meaning it found something that needs to change.
 
 Note: this workflow uses a plain `pull_request: types: [labeled]` trigger
-gated by `if:` rather than gh-aw's `label_command:` trigger, because
-`label_command:` combined with a custom top-level `if:` (needed here for
-the `agent/` branch-prefix check) silently drops its own label-name match
-condition, which would make this workflow fire on *any* label added to an
-`agent/`-branch PR. So the label must be consumed manually: this workflow
-removes `agent/fixme` itself via `remove-labels` (step 1 below) so it can't
-cause a duplicate re-trigger.
+rather than gh-aw's `label_command:` trigger to maintain manual label
+consumption and prevent duplicate re-triggers. The label must be consumed
+manually: this workflow removes `agent/fixme` itself via `remove-labels`
+(step 1 below) so it can't cause a duplicate re-trigger.
 
 ## Your task
 
