@@ -42,6 +42,8 @@ on:
     # (gh-aw's compiler warns "workflow_run trigger should include branch
     # restrictions" for this — expected and accepted; the if: guard below
     # is the real filter, not a branches: pattern.)
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       run_id:
@@ -95,10 +97,9 @@ permissions:
   issues: read
   pull-requests: read
 
+model: claude-sonnet-4-5-20250929
 engine:
   id: claude
-  model: claude-sonnet-4-5-20250929
-
 network: defaults
 
 tools:
