@@ -15,10 +15,9 @@ permissions:
   contents: read
   issues: read
 
+model: claude-sonnet-4-5-20250929
 engine:
   id: claude
-  model: claude-sonnet-4-5-20250929
-
 tools:
   bash: ["*"]
   github:
@@ -80,7 +79,7 @@ jobs:
     steps:
       - name: Generate App token
         id: app-token
-        uses: actions/create-github-app-token@v3
+        uses: actions/create-github-app-token@v3.2.0
         with:
           client-id: ${{ vars.GH_AW_APP_CLIENT_ID }}
           private-key: ${{ secrets.GH_AW_APP_PRIVATE_KEY }}
@@ -117,7 +116,7 @@ jobs:
     steps:
       - name: Generate App token
         id: app-token
-        uses: actions/create-github-app-token@v3
+        uses: actions/create-github-app-token@v3.2.0
         with:
           client-id: ${{ vars.GH_AW_APP_CLIENT_ID }}
           private-key: ${{ secrets.GH_AW_APP_PRIVATE_KEY }}
