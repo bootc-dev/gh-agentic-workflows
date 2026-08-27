@@ -22,13 +22,6 @@ tools:
   bash: ["*"]
   github:
     toolsets: [issues]
-    # Without this, content authored by our own bot (e.g. the fallback issue
-    # it files when a push is rejected) defaults to `unapproved`/`none`
-    # integrity on this public repo and gets filtered from the agent's view
-    # before it can read it - see "Trusting the pipeline's own bot" in
-    # README.md.
-    min-integrity: approved
-    trusted-users: ["${{ vars.GH_AW_APP_BOT_SLUG }}"]
 
 safe-outputs:
   github-app:
