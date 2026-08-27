@@ -2,7 +2,8 @@
 description: |
   Automated release agent. Runs weekly to create a release PR with
   LLM-generated release notes from git history since the last release.
-  The PR requires human review and approval before the release is published.
+  The PR requires human review and approval before merge. When merged,
+  the publish-release.yml workflow automatically creates the GitHub release.
 
 on:
   schedule:
@@ -105,6 +106,22 @@ This workflow runs weekly to create a release PR.
 ## Constraints
 
 - Never push directly to the default branch
-- Only create release PRs, not actual releases or tags
+- This workflow only creates release PRs; the actual GitHub release is
+  created by the publish-release.yml workflow when the PR is merged
 - Always include "Generated-by: AI" in the PR body
 - Require human review for all releases
+
+## Release Process
+
+This is a two-phase automated release process:
+
+1. **Phase 1 (This Workflow)**: Creates a release PR with:
+   - Branch: `release/<version>`
+   - Label: `release`
+   - Body: LLM-generated release notes from git history
+
+2. **Phase 2 (publish-release.yml)**: When the release PR is merged:
+   - Automatically creates the GitHub release
+   - Uses the version from the branch name (e.g., `release/v1.2.4` → `v1.2.4`)
+   - Uses the PR body as release notes
+   - Creates a git tag for the release
