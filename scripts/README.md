@@ -16,7 +16,7 @@ The script creates or updates the following labels:
 
 - **`agent/lgtm`** (green) — Applied by the review workflow when a PR is approved and ready to merge. The merge workflow automatically merges PRs with this label.
 
-- **`agent/draft-working`**, **`agent/review-working`**, **`agent/fix-working`** (yellow) — Indicates that the corresponding agent (drafter, review, or fix) is actively working on the issue or PR. Per-workflow labels avoid one workflow's cleanup clearing another's still-in-progress signal on the same PR.
+- **`agent/drafter-working`**, **`agent/review-working`**, **`agent/fix-working`** (yellow) — Indicates that the corresponding agent (drafter, review, or fix) is actively working on the issue or PR. Per-workflow labels avoid one workflow's cleanup clearing another's still-in-progress signal on the same PR.
 
 - **`agent/workflow-edits-allowed`** (purple) — Pre-authorizes an agent run to edit protected files (workflows, README, etc.) without triggering the request_review gate. Apply this to an issue before labeling it `agent/code`, or to a PR before applying `agent/fixme`.
 
@@ -66,7 +66,7 @@ gh label create "agent/fixme" --color D93F0B \
 gh label create "agent/lgtm" --color 0E8A16 \
   --description "Reviewer agent approved; ready to auto-merge"
 
-gh label create "agent/draft-working" --color FBCA04 \
+gh label create "agent/drafter-working" --color FBCA04 \
   --description "The drafter agent is actively working on this issue"
 
 gh label create "agent/review-working" --color FBCA04 \
