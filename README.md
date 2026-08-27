@@ -266,15 +266,22 @@ regardless of author), but plain *issues* don't — including the fallback issue
 App bot files when a safe-output push is rejected (e.g.
 [#26](https://github.com/bootc-dev/gh-agentic-workflows/issues/26)).
 
-That means relabeling one of those fallback issues to retry a task doesn't work: the
-agent can see the label but gets a filtered, empty view of the issue body describing
-what to actually do, and correctly no-ops. All three workflows list the bot in
-`tools.github.trusted-users` so its own output is treated as trusted input:
+`drafter.md` uses `min-integrity: none` because the decision to run the agent is already
+fully gated: GitHub restricts label mutations to triage+ collaborators, and gh-aw's own
+`pre_activation` role check confirms the labeling actor has `admin`/`maintainer`/`write`
+access before the agent job starts. Filtering the issue *body* by its author's
+collaborator status on top of that blocks legitimate use (a non-collaborator files an
+issue, a collaborator triages it with `agent/code`) without adding real security value,
+since the trusted human already made the decision to hand the content to the agent.
+
+`review.md` and `fix.md` keep `min-integrity: approved` because they trigger on pull
+request events where the actor check alone is a weaker gate (the events can be authored
+by the bot itself). All three workflows list the bot in `tools.github.trusted-users` so
+its own output (e.g. fallback issues) is treated as trusted input:
 
 ```yaml
 tools:
   github:
-    min-integrity: approved
     trusted-users: ["${{ vars.GH_AW_APP_BOT_SLUG }}"]
 ```
 

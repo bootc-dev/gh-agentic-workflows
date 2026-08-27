@@ -22,12 +22,14 @@ tools:
   bash: ["*"]
   github:
     toolsets: [issues]
-    # Without this, content authored by our own bot (e.g. the fallback issue
-    # it files when a push is rejected) defaults to `unapproved`/`none`
-    # integrity on this public repo and gets filtered from the agent's view
-    # before it can read it - see "Trusting the pipeline's own bot" in
-    # README.md.
-    min-integrity: approved
+    # The drafter only activates after pre_activation's role check confirms
+    # the labeling actor has admin/maintainer/write access, and GitHub itself
+    # restricts label mutations to triage+ collaborators, so the decision to
+    # run the agent is already fully gated on a trusted human. Filtering the
+    # issue body by its author's collaborator status on top of that blocks
+    # legitimate use (non-collaborator files issue, collaborator triages it
+    # with agent/code) without adding real security value.
+    min-integrity: none
     trusted-users: ["${{ vars.GH_AW_APP_BOT_SLUG }}"]
 
 safe-outputs:
