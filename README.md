@@ -1,11 +1,14 @@
 # gh-agentic-workflows
 
-A minimal, standalone demonstration of a fully autonomous issue → draft PR → review →
-fix → merge pipeline built on [gh-aw](https://github.com/github/gh-aw) (GitHub Agentic
-Workflows).
+[GitHub Agentic Workflows](https://github.com/github/gh-aw) is generic tooling
+that compiles markdown defining agent tasks into GitHub Actions. It is very flexible,
+not defining any specific workflow (though there are reference examples upstream).
 
-GH-AW, like the underlying raw Github Actions is a very flexible system, this
-demonstrates one possible pipeline.
+This repository serves as a place for workflows deployed in the bootc-dev GitHub
+organization.
+
+There is a collection of things like CI failure analysis, as well as a full
+"issue to PR" style flow.
 
 ## Reusing this pipeline in your own repo
 
@@ -27,95 +30,38 @@ than hardcoding it, so before anything will actually trigger you still need to:
 
 See "Repository setup checklist" below for the full details on each of these steps.
 
-## How it works
+## Overview
 
-Four stages, each a separate workflow:
+This repository provides reusable workflows. Its issue-to-PR pipeline drafts changes from
+an issue, iterates through review and fixes, and mechanically merges approved pull
+requests:
 
+```text
+issue --agent/code--> drafter.md --> draft PR (agent/*, same repository)
+                                        |
+                     opened/synchronized; gh-aw activated and authorized
+                                        v
+                                   review.md
+                                  /         \
+                    agent/fixme v           v agent/lgtm
+                              fix.md      merge.yml --> merge
+                                |
+                       successful fix push
+                                |
+                                +-----------> review.md
 ```
-issue labeled            pull_request              label: agent/fixme          label: agent/lgtm
-  'agent/code'          opened/synchronize        (pull_request labeled)   (pull_request labeled)
-       │                       │                          │                        │
-       ▼                       ▼                          ▼                        ▼
-  drafter.md   ──opens PR──▶ review.md   ──labels──▶   fix.md   ──pushes──▶  (back to review.md)
- (gh-aw agent)            (gh-aw agent)              (gh-aw agent)
-                                │
-                                └──labels 'agent/lgtm'──▶  merge.yml
-                                                      (plain Actions workflow)
-```
 
-- **`drafter.md`** — triggers when an issue is labeled `agent/code`. Reads the issue,
-  implements the change, validates it with whatever the repo provides, and opens a
-  **draft** pull request on an `agent/*` branch via gh-aw's `create-pull-request`
-  safe-output.
-- **`review.md`** — triggers on `pull_request: [opened, synchronize]` for `agent/*`
-  branches. Reviews the diff, posts a `COMMENT` review with concrete feedback, and
-  applies exactly one of `agent/fixme` (needs work) or `agent/lgtm` (ready to merge), removing
-  the other if present.
-- **`fix.md`** — triggers on the `agent/fixme` label. Consumes the label (removes it so it
-  can't retrigger itself), reads the reviewer's feedback from the PR's reviews, pushes a
-  fix commit to the same branch via `push-to-pull-request-branch`, and stops. Pushing a
-  new commit fires `review.md` again, closing the loop. An iteration cap stops the loop
-  after 2 automated fix attempts and posts a PR comment asking a human to take over
-  instead of silently doing nothing — see "Troubleshooting and operations" below.
-- **`merge.yml`** — triggers on the `agent/lgtm` label. A deliberately plain, non-gh-aw
-  Actions workflow: merging is mechanical once the reviewer has already made the
-  judgment call, so no LLM is involved. Marks the draft PR ready, squash-merges it, and
-  deletes the branch.
-
-## Merge queue failure analyzer
-
-`queue-triage.md` is a fifth workflow, separate from the four-stage pipeline above. It's
-for repos that use GitHub's merge queue and want an agent to triage merge-group CI
-failures instead of having humans read logs every time a flaky test kicks a PR out of the
-queue. It ships in this package but is inert until you name your CI workflow and create a
-tracker issue.
-
-- **Trigger:** `workflow_run` completion of a named CI workflow (default: `"CI"`) on
-  `gh-readonly-queue/**` branches, gated to runs with `conclusion == 'failure'` and
-  `event == 'merge_group'`. Also accepts `workflow_dispatch` with a `run_id` input.
-- **Pre-fetch:** Downloads failed job logs, greps for error indicators, and resolves
-  affected PRs deterministically before the agent starts, so it works from small hint
-  files rather than raw logs.
-- **Classification:** Analyzes each failure as `flake` (environmental/transient — a
-  re-run would plausibly pass), `real` (this PR's change broke it), or `unclear`
-  (deterministic but not this PR's fault — re-queueing won't help). Comments on each
-  verified PR with the verdict and a recommendation.
-- **Flake ledger:** Maintains a deduplicated ledger of known flake signatures on a
-  human-created tracker issue (labeled `agent/flake-tracker`). Posts a narrative comment
-  only the first time a given signature appears.
-- **Constraints:** Never re-queues PRs or creates the tracker issue itself — both are
-  deliberately left to humans.
-
-See `.github/workflows/queue-triage.md` for the full prompt and workflow details.
-
-## PR CI failure analyzer
-
-`ci-triage.md` is a sixth, similarly standalone workflow: the same idea as
-`queue-triage.md`, but for CI failures on regular pull requests instead of
-merge-group runs. It's useful in two situations: it's the *only* automated failure
-feedback a repo has while its merge queue is temporarily disabled (no `merge_group`
-events fire at all in that mode), and even with the queue active, it gives contributors
-fast feedback on lint/validate-type failures without waiting for the merge queue to
-re-verify everything from scratch.
-
-- **Trigger:** `workflow_run` completion of the same named CI workflow (default: `"CI"`)
-  as `queue-triage.md`, gated to runs with `conclusion == 'failure'` and
-  `event == 'pull_request'` — the disjoint counterpart of `queue-triage.md`'s
-  `event == 'merge_group'` check, so the two workflows never double-process the same run.
-  Also accepts `workflow_dispatch` with a `run_id` input.
-- **Pre-fetch:** Downloads failed job logs and greps for error indicators, same as
-  `queue-triage.md`. Resolves the affected PR(s) via the commit-associated-PRs API
-  (works uniformly for same-repo and fork PRs) rather than parsing the branch name, and
-  verifies each candidate's head SHA still matches the analyzed commit before treating it
-  as safe to comment on — a PR that has since moved on to a newer push is reported as
-  stale and skipped, not commented on.
-- **Classification:** The same `flake`/`real`/`unclear` taxonomy as `queue-triage.md`.
-  Comments on each verified PR with the verdict and a recommendation.
-- **No ledger:** Unlike `queue-triage.md`, this workflow maintains no cross-PR tracker —
-  each comment stands on its own, and older comments from this workflow on the same PR
-  are automatically hidden as new ones are posted.
-
-See `.github/workflows/ci-triage.md` for the full prompt and workflow details.
+`review.md` does not review every PR: it handles only opened or synchronized,
+same-repository PRs whose head branch starts with `agent/`, after gh-aw's activation and
+authorization gates pass. `agent/fixme` sends the PR to `fix.md`; a successful fix push
+causes a synchronize event and another review. `agent/lgtm` sends it to `merge.yml` for
+mechanical merging. Its CI failure analysis covers normal pull-request and merge-queue
+runs. The canonical authored workflow definitions are
+[`drafter.md`](.github/workflows/drafter.md),
+[`review.md`](.github/workflows/review.md), [`fix.md`](.github/workflows/fix.md),
+[`merge.yml`](.github/workflows/merge.yml), [`ci-triage.md`](.github/workflows/ci-triage.md),
+and [`queue-triage.md`](.github/workflows/queue-triage.md). The `.md` files are the
+canonical gh-aw sources; their matching `.lock.yml` files are generated artifacts.
 
 ## Design notes and gotchas
 
@@ -289,8 +235,8 @@ now at least readable by the agent, but it was never the intended recovery path.
    `agent/flake-tracker` (see "Letting the agent edit protected files" above). The three
    `agent/*-working` labels just need to exist; their color is cosmetic (see "a per-workflow
    `agent/*-working` label is added and removed via frontmatter `jobs:`" above).
-   `agent/flake-tracker` is only needed if you're using the merge queue failure analyzer
-   (see "Merge queue failure analyzer" above).
+   `agent/flake-tracker` is only needed for merge-queue CI failure analysis (see
+   "Overview" above).
 
    The easiest way is to run the included install script via the **Install Labels** workflow
    in the Actions tab, or manually via:
@@ -316,8 +262,7 @@ now at least readable by the agent, but it was never the intended recovery path.
 
    See [`scripts/README.md`](scripts/README.md) for more installation options.
 2. Register a GitHub App to act as the pipeline's bot identity (this must be a real App,
-   not the default `GITHUB_TOKEN` — see "GITHUB_TOKEN doesn't retrigger workflows"
-   above):
+   not the default `GITHUB_TOKEN`, which cannot trigger subsequent workflows):
    - Go to Settings → Developer settings → GitHub Apps → New GitHub App.
    - Grant repository permissions: Contents (Read & Write), Issues (Read & Write), Pull
      requests (Read & Write), Workflows (Read & Write). Metadata (Read) is auto-granted.
@@ -432,8 +377,8 @@ gap, expected to reach `agent/lgtm` on the first review).
 
 ## Adapting to your project
 
-Copy `.github/workflows/{drafter,review,fix}.md` (+ their compiled `.lock.yml`
-counterparts) and `merge.yml`.
+Copy `.github/workflows/{drafter,review,fix}.md` and `merge.yml`. Recompile the Markdown
+sources to generate their `.lock.yml` counterparts.
 
 Safe to edit: the prompt bodies under each `---` frontmatter block — the task
 description, validation instructions, and review criteria are all plain English and
@@ -511,15 +456,8 @@ standard pipeline across `bootc-dev`'s other active repos. Roughly in order:
 
 ## Files
 
-The pipeline lives entirely in
-[`.github/workflows/drafter.md`](.github/workflows/drafter.md),
-[`review.md`](.github/workflows/review.md), [`fix.md`](.github/workflows/fix.md), and
-[`merge.yml`](.github/workflows/merge.yml) — see "How it works" above for what each does.
-The two standalone triage add-ons live in
-[`queue-triage.md`](.github/workflows/queue-triage.md) and
-[`ci-triage.md`](.github/workflows/ci-triage.md) — see "Merge queue failure analyzer" and
-"PR CI failure analyzer" above. The matching `*.lock.yml` files are gh-aw's compiled
-output, checked in as generated artifacts.
+Workflow sources live under `.github/workflows/`; see "Overview" above for the canonical
+definitions. Matching `*.lock.yml` files are generated artifacts checked into the repo.
 [`upgrade.yml`](.github/workflows/upgrade.yml) is a separate, plain maintenance workflow:
 weekly, it self-upgrades the `gh-aw` CLI, refreshes `.github/aw/gh-aw-version` and
 `.github/aw/actions-lock.json` to match, recompiles every `.md` workflow, and opens a PR
