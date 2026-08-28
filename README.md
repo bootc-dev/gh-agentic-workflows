@@ -30,6 +30,37 @@ than hardcoding it, so before anything will actually trigger you still need to:
 
 See "Repository setup checklist" below for the full details on each of these steps.
 
+### Updating an installed pipeline
+
+Cutting a `gh-agentic-workflows` release should normally result in a separate PR for
+each consumer that adopts the release, including `bootc-dev/bcvk`. This is a **package
+update**, not the consumer's weekly `upgrade.yml` PR: `upgrade.yml` maintains that
+repository's action lock and generated lock files using the `gh-aw` compiler selected by
+the package release, and may also apply
+dispatcher updates and codemods to its authored Markdown workflows. Review the full
+compiler-upgrade diff and retain consumer frontmatter customizations. A package update,
+by contrast, takes changed authored workflows and shipped plain YAML files from this
+repository.
+
+Do not re-run `gh aw add ... --force` over a consumer: it overwrites local frontmatter
+customizations such as bcvk's Rust network allowance and pilot auto-merge guard. Apply
+the diff between exact package release tags manually to the consumer, retaining its
+customizations, then apply the release's changes to copied `merge.yml`,
+`install-labels.yml`, and `upgrade.yml`. Recompile and review the complete diff before
+opening the PR.
+
+`gh aw add` currently records a resolved commit SHA in each Markdown workflow's
+`source:` field, even when installed from a tag. Consequently, a later `gh aw update`
+tracks the source repository's default branch rather than release tags. Before updating,
+replace each source ref with the currently installed release tag; after a successful
+update, replace its newly resolved SHA with the target release tag again. This keeps the
+next update release-driven. Treat this as a gh-aw limitation: source-aware updates do
+not cover the plain YAML files in this package. More importantly, `gh aw update` expands
+the package manifest and can replace locally customized sibling Markdown workflows even
+when invoked for one workflow; a bcvk trial dropped both Rust `network:` blocks. Do not
+use it (including `--no-merge`) for a customized consumer until that behavior is fixed
+upstream.
+
 ## Overview
 
 This repository provides reusable workflows. Its issue-to-PR pipeline drafts changes from
@@ -440,12 +471,13 @@ standard pipeline across `bootc-dev`'s other active repos. Roughly in order:
       `ignorePaths` for `.github/workflows/*.lock.yml` (and, preemptively, the other
       compiler-owned pin file, `.github/aw/actions-lock.json`, even though no manager
       currently targets it) so it stops touching compiler output entirely, and
-      [`upgrade.yml`](.github/workflows/upgrade.yml) — shipped as part of this same
-      package, like `merge.yml` — takes over that job instead: weekly, it self-upgrades
-      the `gh-aw` CLI, updates `.github/aw/gh-aw-version` and
-      `.github/aw/actions-lock.json` to match, recompiles everything, and opens a PR.
-      This runs as a plain, non-agentic scheduled workflow (no LLM involved, nothing to
-      review beyond `check-drift` passing) — deliberately not routed through Renovate's
+       [`upgrade.yml`](.github/workflows/upgrade.yml) — shipped as part of this same
+       package, like `merge.yml` — takes over that job instead: weekly, it installs the
+       package-selected `gh-aw` CLI version, writes `.github/aw/gh-aw-version` in the
+       consumer, refreshes `.github/aw/actions-lock.json`, runs gh-aw's dispatcher/codemod updates,
+       recompiles everything, and opens a PR. This runs as a plain, non-agentic scheduled
+       workflow (no LLM involved), but the complete diff still needs review because
+       codemods can alter authored Markdown workflow frontmatter — deliberately not routed through Renovate's
       `postUpgradeTasks`, since that would need org-wide admin config for a single
       repo's need and `gh`/`gh aw` aren't available in Renovate's runner anyway. (`gh aw
       upgrade` also has a `--org` mode to trigger this fleet-wide from one place; not
@@ -489,9 +521,11 @@ definitions. Matching `*.lock.yml` files are generated artifacts checked into th
 from `aw.yml`; it scans accessible organization repositories but centralizes issues in
 this repository — see "Retrospective analyzer" above.
 [`upgrade.yml`](.github/workflows/upgrade.yml) is a separate, plain maintenance workflow:
-weekly, it self-upgrades the `gh-aw` CLI, refreshes `.github/aw/gh-aw-version` and
-`.github/aw/actions-lock.json` to match, recompiles every `.md` workflow, and opens a PR
-with the result — see the Roadmap entry below for why this exists.
+weekly, it installs this package release's pinned `gh-aw` CLI, writes the consumer's
+`.github/aw/gh-aw-version`, refreshes `.github/aw/actions-lock.json`, applies gh-aw dispatcher/codemod updates, recompiles every
+`.md` workflow, and opens a PR. Review the complete PR, including authored Markdown
+workflows and any consumer-specific frontmatter customizations — see the Roadmap entry
+below for why this exists.
 [`.agents/skills/onboard-repo/`](.agents/skills/onboard-repo/SKILL.md) is an
 opencode-compatible agent skill: the operational runbook for piloting this pipeline on a
 new consumer repo, referenced from the Roadmap items below.

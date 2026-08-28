@@ -1,9 +1,10 @@
-name: Upgrade gh-aw
+name: Maintain gh-aw workflows
 
-# This is a plain (non-gh-aw) workflow: keeps the gh-aw CLI version pin
-# (.github/aw/gh-aw-version), the compiler's action-version pins
-# (.github/aw/actions-lock.json), and the compiled `*.lock.yml` files all
-# in sync on a schedule. No fork-guard or bot-role check is needed here —
+# This is a plain (non-gh-aw) workflow: it maintains compiler-owned artifacts
+# using the gh-aw version selected by this package release. `gh aw upgrade`
+# also applies dispatcher updates and codemods to authored Markdown workflows,
+# so its PR needs a full diff review, especially in consumers with frontmatter customizations. No
+# fork-guard or bot-role check is needed here —
 # schedule/workflow_dispatch events only ever run in this repo's own
 # context, with no untrusted event payload to gate against.
 #
@@ -24,6 +25,11 @@ permissions:
   contents: write
   pull-requests: write
 
+# aw.yml cannot include arbitrary resources with gh-aw v0.86.2. Keep this
+# embedded pin synchronized with .github/aw/gh-aw-version (tested locally).
+env:
+  GH_AW_VERSION: v0.86.2
+
 jobs:
   upgrade:
     runs-on: ubuntu-latest
@@ -41,21 +47,27 @@ jobs:
         with:
           token: ${{ steps.app-token.outputs.token }}
 
-      - name: Install latest gh-aw and update the version pin
-        id: install
+      - name: Install the package-selected gh-aw version
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        shell: node {0}
         run: |
-          set -euo pipefail
-          # Deliberately unpinned here: discovering the latest version is
-          # this workflow's job. ci.yml and `just setup` always pin to
-          # whatever ends up in .github/aw/gh-aw-version, which this step
-          # now updates, so both stay in sync with what gets compiled below.
-          gh extension install --force github/gh-aw
-          version=$(gh aw version | awk '{print $NF}')
-          echo "Installed gh-aw ${version}"
-          printf '%s\n' "$version" >.github/aw/gh-aw-version
-          echo "version=${version}" >>"$GITHUB_OUTPUT"
+          const { execFileSync, spawnSync } = require("node:child_process");
+          const { mkdirSync, writeFileSync } = require("node:fs");
+
+          const expected = process.env.GH_AW_VERSION;
+          execFileSync("gh", ["extension", "install", "github/gh-aw", "--pin", expected, "--force"], {
+            stdio: "inherit",
+          });
+          const result = spawnSync("gh", ["aw", "version"], { encoding: "utf8" });
+          if (result.error) throw result.error;
+          if (result.status !== 0) throw new Error(`gh aw version exited with status ${result.status}`);
+          const output = `${result.stdout}${result.stderr}`.replace(/\r?\n$/, "");
+          if (output !== `gh aw version ${expected}`) {
+            throw new Error(`installed gh-aw output ${JSON.stringify(output)}, expected gh aw version ${expected}`);
+          }
+          mkdirSync(".github/aw", { recursive: true });
+          writeFileSync(".github/aw/gh-aw-version", `${expected}\n`);
 
       - name: Update action-version pins and recompile all workflows
         env:
@@ -64,7 +76,7 @@ jobs:
           set -euo pipefail
           # --no-compile: compile as its own step below, so a failure there
           # is clearly attributable to compilation, not the upgrade itself.
-          gh aw upgrade --no-compile --approve
+          gh aw upgrade --skip-extension-upgrade --no-compile --approve
           # No workflow-id arguments, unlike ci.yml/justfile: compiles every
           # .md file under .github/workflows, so a new pipeline stage never
           # needs this workflow updated to know about it.
@@ -73,27 +85,27 @@ jobs:
       - name: Open or update a pull request with the results
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
-          VERSION: ${{ steps.install.outputs.version }}
         run: |
           set -euo pipefail
           git add -A
           if git diff --cached --quiet; then
-            echo "Already up to date, nothing to upgrade."
+            echo "Already up to date, no workflow maintenance needed."
             exit 0
           fi
 
-          branch="automation/upgrade-gh-aw"
-          title="build: Upgrade gh-aw to ${VERSION}"
+          branch="automation/maintain-gh-aw-workflows"
+          title="build: Maintain gh-aw workflow artifacts"
           body="$(cat <<EOF
           Automated upgrade, opened by \`.github/workflows/upgrade.yml\`:
 
-          - Bumped \`.github/aw/gh-aw-version\` to \`${VERSION}\`.
+          - Ensured \`.github/aw/gh-aw-version\` records this package's selected \`${GH_AW_VERSION}\` compiler.
           - Refreshed action-version pins in \`.github/aw/actions-lock.json\`.
           - Recompiled all \`*.lock.yml\` files against the new version.
 
-          Safe to merge once \`check-drift\` passes; no manual review is
-          needed beyond that unless the CLI upgrade changed compiler
-          behavior in a way worth double-checking.
+          Review the full diff before merging: \`gh aw upgrade\` can apply
+          dispatcher updates and codemods to authored \`*.md\` workflows, not
+          just regenerate compiler-owned files. Retain any consumer-specific
+          frontmatter customizations deliberately.
           EOF
           )"
 

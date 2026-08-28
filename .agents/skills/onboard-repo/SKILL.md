@@ -56,13 +56,13 @@ You can start the install work immediately against the target commit's SHA
 without waiting (`gh aw add` accepts tag, branch, or SHA) — just remember to
 swap the pin string to the real tag name before the PR is reviewed/merged.
 
-## 2. Confirm the gh-aw CLI version matches
+## 2. Install the package-selected gh-aw CLI version
 
 ```bash
 cat .github/aw/gh-aw-version   # in gh-agentic-workflows
-gh aw version                  # in your environment
+gh extension install github/gh-aw --pin "$(cat .github/aw/gh-aw-version)" --force
 ```
-If they differ, `gh extension remove gh-aw && gh extension install github/gh-aw --pin <version>` before compiling anything, or lock files will drift.
+Verify `gh aw version` reports exactly that version before compiling anything, or lock files will drift. The included `upgrade.yml` repeats this exact install and writes the consumer's `.github/aw/gh-aw-version`; the version changes only when this package releases a new selected pin.
 
 ## 3. Install the package into the target repo
 
@@ -75,7 +75,10 @@ This adds `drafter.md`/`review.md`/`fix.md` (recompiled fresh against the
 target repo) plus `merge.yml`/`install-labels.yml`/`upgrade.yml` (copied
 verbatim, per `aw.yml`'s `includes:`). Commit this raw output as its own
 commit before making any adaptations — it makes the diff of your
-adaptations reviewable on its own.
+adaptations reviewable on its own. Since gh-aw v0.86.2 cannot include arbitrary
+resources from `aw.yml`, also create `.github/aw/gh-aw-version` with the
+package-selected version before committing, so local checks are pinned before the
+scheduled workflow first runs.
 
 ## 4. Adapt for the target repo's ecosystem
 
