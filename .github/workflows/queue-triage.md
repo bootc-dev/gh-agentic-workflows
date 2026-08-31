@@ -90,7 +90,7 @@ permissions:
   issues: read
   pull-requests: read
 
-model: claude-sonnet-4-5-20250929
+model: sonnet
 engine:
   id: claude
 network: defaults

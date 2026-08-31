@@ -111,16 +111,15 @@ A few things here are non-obvious and were hard-won getting this to actually wor
   reports success (it did its job, correctly gating the run off) while everything
   downstream silently never runs — the overall run conclusion looks fine, so you have to
   check job-level status, not run-level status, to notice it.
-- **Pin the gh-aw compiler and the agent's model.** gh-aw's CLI auto-upgrades by default,
-  and an upgrade once shipped a compiler whose AI-credits pricing table had fallen out of
-  sync with Anthropic's current model line — agents started failing with errors like
-  `<model> has no AI credits pricing`. The fix: pin the extension to a known-good version
-  (the pinned version lives in `.github/aw/gh-aw-version`, used by both `ci.yml` and `just
-  setup` — run `just setup` locally to install it) and set
-  `engine.model` explicitly in each `.md` file's frontmatter to an exact dated model ID
-  (e.g. `claude-sonnet-4-5-20250929`) instead of a floating alias, then recompile. If
-  workflows that were working suddenly start failing with a pricing-lookup error, this is
-  almost certainly why.
+- **Pin the gh-aw compiler and select models through aliases.** gh-aw's CLI auto-upgrades
+  by default, and an upgrade once shipped a compiler whose AI-credits pricing table had
+  fallen out of sync with Anthropic's current model line — agents started failing with
+  errors like `<model> has no AI credits pricing`. Pin the extension to a known-good
+  version (the pin lives in `.github/aw/gh-aw-version`, used by both `ci.yml` and `just
+  setup` — run `just setup` locally to install it). Set `model: sonnet` in authored
+  workflow frontmatter rather than a dated provider model ID, so gh-aw centrally maps the
+  supported alias; then recompile. If workflows that were working suddenly start failing
+  with a pricing-lookup error, update the pinned compiler and regenerate the lockfiles.
 - **A per-workflow `agent/*-working` label is added and removed via frontmatter
   `jobs:`, not safe-outputs.** Each workflow carries its own working label on the
   issue/PR for the duration of a run — `agent/drafter-working` (drafter.md),
