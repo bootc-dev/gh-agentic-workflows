@@ -1,0 +1,40 @@
+name: Publish Release
+on:
+  pull_request:
+    types: [closed]
+
+# This workflow runs when a release PR is merged and automatically creates
+# the corresponding GitHub release with the release notes from the PR body.
+jobs:
+  publish:
+    if: |
+      github.event.pull_request.merged == true &&
+      contains(github.event.pull_request.labels.*.name, 'release') &&
+      startsWith(github.event.pull_request.head.ref, 'release/')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Extract version from branch name
+        id: version
+        run: |
+          branch="${{ github.event.pull_request.head.ref }}"
+          version="${branch#release/}"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Publishing release: $version"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${{ steps.version.outputs.version }}"
+          pr_number="${{ github.event.pull_request.number }}"
+          pr_body=$(gh pr view "$pr_number" --repo "${{ github.repository }}" --json body --jq .body)
+
+          # Create the release
+          gh release create "$version" \
+            --repo "${{ github.repository }}" \
+            --title "Release $version" \
+            --notes "$pr_body" \
+            --verify-tag
