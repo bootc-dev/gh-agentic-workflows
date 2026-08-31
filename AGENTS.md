@@ -56,6 +56,10 @@ the commit message text.
 
 ## Code guidelines
 
+For repository automation and helper scripts, prefer zero-dependency JavaScript
+using Node.js built-in modules over Bash. Keep shell code limited to cases where
+it is substantially simpler or required by the surrounding tool.
+
 The [REVIEW.md](REVIEW.md) file describes expectations around
 testing, code quality, commit messages, commit organization, etc.
 Language-specific guidelines are in

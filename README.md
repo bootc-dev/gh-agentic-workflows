@@ -30,6 +30,37 @@ than hardcoding it, so before anything will actually trigger you still need to:
 
 See "Repository setup checklist" below for the full details on each of these steps.
 
+### Updating an installed pipeline
+
+Cutting a `gh-agentic-workflows` release should normally result in a separate PR for
+each consumer that adopts the release, including `bootc-dev/bcvk`. This is a **package
+update**, not the consumer's weekly `upgrade.yml` PR: `upgrade.yml` maintains that
+repository's action lock and generated lock files using the `gh-aw` compiler selected by
+the package release, and may also apply
+dispatcher updates and codemods to its authored Markdown workflows. Review the full
+compiler-upgrade diff and retain consumer frontmatter customizations. A package update,
+by contrast, takes changed authored workflows and shipped plain YAML files from this
+repository.
+
+Do not re-run `gh aw add ... --force` over a consumer: it overwrites local frontmatter
+customizations such as bcvk's Rust network allowance and pilot auto-merge guard. Apply
+the diff between exact package release tags manually to the consumer, retaining its
+customizations, then apply the release's changes to copied `merge.yml`,
+`install-labels.yml`, and `upgrade.yml`. Recompile and review the complete diff before
+opening the PR.
+
+`gh aw add` currently records a resolved commit SHA in each Markdown workflow's
+`source:` field, even when installed from a tag. Consequently, a later `gh aw update`
+tracks the source repository's default branch rather than release tags. Before updating,
+replace each source ref with the currently installed release tag; after a successful
+update, replace its newly resolved SHA with the target release tag again. This keeps the
+next update release-driven. Treat this as a gh-aw limitation: source-aware updates do
+not cover the plain YAML files in this package. More importantly, `gh aw update` expands
+the package manifest and can replace locally customized sibling Markdown workflows even
+when invoked for one workflow; a bcvk trial dropped both Rust `network:` blocks. Do not
+use it (including `--no-merge`) for a customized consumer until that behavior is fixed
+upstream.
+
 ## Overview
 
 This repository provides reusable workflows. Its issue-to-PR pipeline drafts changes from
@@ -62,6 +93,31 @@ runs. The canonical authored workflow definitions are
 [`merge.yml`](.github/workflows/merge.yml), [`ci-triage.md`](.github/workflows/ci-triage.md),
 and [`queue-triage.md`](.github/workflows/queue-triage.md). The `.md` files are the
 canonical gh-aw sources; their matching `.lock.yml` files are generated artifacts.
+
+## Retrospective analyzer
+
+`retro.md` is a host-only scheduled workflow for this repository. It is deliberately
+excluded from `aw.yml`, so `gh aw add` consumers do not install or run it. Every six
+hours it runs from `bootc-dev/gh-agentic-workflows`, discovers active, non-archived,
+non-fork repositories in its organization, and analyzes their recent workflow runs.
+The host repository is excluded from the default target set because the intended scope
+is the other organization repositories; a manual `target_repos` dispatch override may
+include it. Duplicate searches and any new `agent/retro` improvement issues are always
+performed in the host repository, not target repositories.
+
+Retro persists one small JSON checkpoint per target repository on its dedicated
+`memory/retro-checkpoints` branch. A first scan starts seven days back; later scans use
+the checkpoint with a one-hour overlap and deduplicate run IDs. A checkpoint advances
+only after useful processing succeeds, so an API failure remains retryable rather than
+skipping data. A dispatch `lookback_days` value is validated from 1 through 90 and can
+request a wider window.
+
+The workflow's `GITHUB_TOKEN` can only discover and analyze repositories it can read.
+It reports this limitation in its pre-fetch data and does not claim coverage of private
+or internal repositories that are inaccessible to that token. A manual dispatch accepts
+comma-separated, whitespace-trimmed `owner/repo` targets from the host organization and
+validates that each is active and not a fork; `lookback_days` must be an integer from 1
+through 90.
 
 ## Design notes and gotchas
 
@@ -111,16 +167,15 @@ A few things here are non-obvious and were hard-won getting this to actually wor
   reports success (it did its job, correctly gating the run off) while everything
   downstream silently never runs — the overall run conclusion looks fine, so you have to
   check job-level status, not run-level status, to notice it.
-- **Pin the gh-aw compiler and the agent's model.** gh-aw's CLI auto-upgrades by default,
-  and an upgrade once shipped a compiler whose AI-credits pricing table had fallen out of
-  sync with Anthropic's current model line — agents started failing with errors like
-  `<model> has no AI credits pricing`. The fix: pin the extension to a known-good version
-  (the pinned version lives in `.github/aw/gh-aw-version`, used by both `ci.yml` and `just
-  setup` — run `just setup` locally to install it) and set
-  `engine.model` explicitly in each `.md` file's frontmatter to an exact dated model ID
-  (e.g. `claude-sonnet-4-5-20250929`) instead of a floating alias, then recompile. If
-  workflows that were working suddenly start failing with a pricing-lookup error, this is
-  almost certainly why.
+- **Pin the gh-aw compiler and select models through aliases.** gh-aw's CLI auto-upgrades
+  by default, and an upgrade once shipped a compiler whose AI-credits pricing table had
+  fallen out of sync with Anthropic's current model line — agents started failing with
+  errors like `<model> has no AI credits pricing`. Pin the extension to a known-good
+  version (the pin lives in `.github/aw/gh-aw-version`, used by both `ci.yml` and `just
+  setup` — run `just setup` locally to install it). Set `model: sonnet` in authored
+  workflow frontmatter rather than a dated provider model ID, so gh-aw centrally maps the
+  supported alias; then recompile. If workflows that were working suddenly start failing
+  with a pricing-lookup error, update the pinned compiler and regenerate the lockfiles.
 - **A per-workflow `agent/*-working` label is added and removed via frontmatter
   `jobs:`, not safe-outputs.** Each workflow carries its own working label on the
   issue/PR for the duration of a run — `agent/drafter-working` (drafter.md),
@@ -230,9 +285,10 @@ now at least readable by the agent, but it was never the intended recovery path.
 
 ## Repository setup checklist
 
-1. Create eight labels: `agent/code`, `agent/fixme`, `agent/lgtm`, `agent/drafter-working`,
+1. Create the required labels: `agent/code`, `agent/fixme`, `agent/lgtm`, `agent/drafter-working`,
    `agent/review-working`, `agent/fix-working`, `agent/workflow-edits-allowed`,
-   `agent/flake-tracker` (see "Letting the agent edit protected files" above). The three
+   `agent/flake-tracker`, `agent/retro` (see "Letting the agent edit protected files"
+   above). The three
    `agent/*-working` labels just need to exist; their color is cosmetic (see "a per-workflow
    `agent/*-working` label is added and removed via frontmatter `jobs:`" above).
    `agent/flake-tracker` is only needed for merge-queue CI failure analysis (see
@@ -258,6 +314,8 @@ now at least readable by the agent, but it was never the intended recovery path.
      --description "Pre-authorizes agent runs to edit protected files without the request_review gate"
    gh label create "agent/flake-tracker" --color 1D76DB \
      --description "Marks the CI flake tracker issue the merge queue analyzer maintains"
+   gh label create "agent/retro" --color 1D76DB \
+     --description "Marks improvement issues filed by the retrospective analyzer"
    ```
 
    See [`scripts/README.md`](scripts/README.md) for more installation options.
@@ -413,12 +471,13 @@ standard pipeline across `bootc-dev`'s other active repos. Roughly in order:
       `ignorePaths` for `.github/workflows/*.lock.yml` (and, preemptively, the other
       compiler-owned pin file, `.github/aw/actions-lock.json`, even though no manager
       currently targets it) so it stops touching compiler output entirely, and
-      [`upgrade.yml`](.github/workflows/upgrade.yml) — shipped as part of this same
-      package, like `merge.yml` — takes over that job instead: weekly, it self-upgrades
-      the `gh-aw` CLI, updates `.github/aw/gh-aw-version` and
-      `.github/aw/actions-lock.json` to match, recompiles everything, and opens a PR.
-      This runs as a plain, non-agentic scheduled workflow (no LLM involved, nothing to
-      review beyond `check-drift` passing) — deliberately not routed through Renovate's
+       [`upgrade.yml`](.github/workflows/upgrade.yml) — shipped as part of this same
+       package, like `merge.yml` — takes over that job instead: weekly, it installs the
+       package-selected `gh-aw` CLI version, writes `.github/aw/gh-aw-version` in the
+       consumer, refreshes `.github/aw/actions-lock.json`, runs gh-aw's dispatcher/codemod updates,
+       recompiles everything, and opens a PR. This runs as a plain, non-agentic scheduled
+       workflow (no LLM involved), but the complete diff still needs review because
+       codemods can alter authored Markdown workflow frontmatter — deliberately not routed through Renovate's
       `postUpgradeTasks`, since that would need org-wide admin config for a single
       repo's need and `gh`/`gh aw` aren't available in Renovate's runner anyway. (`gh aw
       upgrade` also has a `--org` mode to trigger this fleet-wide from one place; not
@@ -458,10 +517,15 @@ standard pipeline across `bootc-dev`'s other active repos. Roughly in order:
 
 Workflow sources live under `.github/workflows/`; see "Overview" above for the canonical
 definitions. Matching `*.lock.yml` files are generated artifacts checked into the repo.
+[`retro.md`](.github/workflows/retro.md) is a host-only retrospective analyzer, excluded
+from `aw.yml`; it scans accessible organization repositories but centralizes issues in
+this repository — see "Retrospective analyzer" above.
 [`upgrade.yml`](.github/workflows/upgrade.yml) is a separate, plain maintenance workflow:
-weekly, it self-upgrades the `gh-aw` CLI, refreshes `.github/aw/gh-aw-version` and
-`.github/aw/actions-lock.json` to match, recompiles every `.md` workflow, and opens a PR
-with the result — see the Roadmap entry below for why this exists.
+weekly, it installs this package release's pinned `gh-aw` CLI, writes the consumer's
+`.github/aw/gh-aw-version`, refreshes `.github/aw/actions-lock.json`, applies gh-aw dispatcher/codemod updates, recompiles every
+`.md` workflow, and opens a PR. Review the complete PR, including authored Markdown
+workflows and any consumer-specific frontmatter customizations — see the Roadmap entry
+below for why this exists.
 [`.agents/skills/onboard-repo/`](.agents/skills/onboard-repo/SKILL.md) is an
 opencode-compatible agent skill: the operational runbook for piloting this pipeline on a
 new consumer repo, referenced from the Roadmap items below.
