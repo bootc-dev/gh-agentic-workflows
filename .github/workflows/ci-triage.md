@@ -156,8 +156,6 @@ safe-outputs:
     # a contributor pushing fix after fix shouldn't accumulate a stale
     # verdict comment per push.
     hide-older-comments: true
-  request-workflow-rerun:
-    max: 3
   noop:
   missing-data:
   missing-tool:
@@ -400,10 +398,10 @@ verdict comment on the PR(s) this run's commit is associated with.
 
    Additionally, when the verdict is `flake` and the failure is clearly
    transient (registry/mirror errors, DNS/TLS failures, runner resource
-   exhaustion - NOT test flakiness), use `request-workflow-rerun`
-   (`run_id` = the workflow run ID from
-   `/tmp/gh-aw/agent/ci-triage/run.json`, `reason` = explanation) to
-   request automatic job retriggering. This creates a record that
+   exhaustion - NOT test flakiness), use `missing-tool` with
+   `tool="workflow_rerun"`, `reason` = explanation, and
+   `alternatives` = reference to the workflow run ID from
+   `/tmp/gh-aw/agent/ci-triage/run.json` to create a record that
    retriggering was recommended.
    Never request retrigger for `real` or `unclear` verdicts.
 
