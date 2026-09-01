@@ -20,11 +20,12 @@ and `upgrade.yml` over verbatim. `queue-triage.md` and `ci-triage.md` are delibe
 *not* in that manifest's `includes:` list — they're optional add-ons, not part of the
 core pipeline — so add either one explicitly by its full path, e.g.
 `gh aw add bootc-dev/gh-agentic-workflows/.github/workflows/ci-triage.md`. The installed
-`.md` files reference the pipeline's bot identity through repo variables/secrets rather
+`.md` files reference the pipeline's bot identity through organization-provided
+variables/secrets rather
 than hardcoding it, so before anything will actually trigger you still need to:
 
-- Register your own GitHub App and configure `GH_AW_APP_CLIENT_ID`, `GH_AW_APP_PRIVATE_KEY`,
-  and `GH_AW_APP_BOT_SLUG` (see "Repository setup checklist" below).
+- For a bootc-dev consumer, verify the shared organization credentials and GitHub App
+  installation are available to the repository (see "Repository setup checklist" below).
 - Run the `install-labels.yml` workflow (or `scripts/install-labels.js`) to create the
   required labels.
 
@@ -106,7 +107,8 @@ A few things here are non-obvious and were hard-won getting this to actually wor
   role check for that specific identity — `bots:`/`trusted-users:` values are passed
   through into the compiled workflow verbatim, so a GitHub Actions expression there
   resolves at runtime just like it would in any other field, letting the bot identity
-  live entirely in a repo variable instead of being hardcoded in the `.md` sources. The
+  live entirely in an organization variable instead of being hardcoded in the `.md`
+  sources. The
   failure mode when this is misconfigured is deceptive: the `pre_activation` job
   reports success (it did its job, correctly gating the run off) while everything
   downstream silently never runs — the overall run conclusion looks fine, so you have to
@@ -261,8 +263,19 @@ now at least readable by the agent, but it was never the intended recovery path.
    ```
 
    See [`scripts/README.md`](scripts/README.md) for more installation options.
-2. Register a GitHub App to act as the pipeline's bot identity (this must be a real App,
-   not the default `GITHUB_TOKEN`, which cannot trigger subsequent workflows):
+2. For a bootc-dev consumer, use the required organization-level credentials and GitHub
+   App; do not create repository-level duplicates. Verify that the target repository can
+   read these organization settings:
+   - Variables: `GH_AW_APP_CLIENT_ID` and `GH_AW_APP_BOT_SLUG`.
+   - Secrets: `GH_AW_APP_PRIVATE_KEY` and `ANTHROPIC_API_KEY`.
+   - Their observed organization visibility is currently **All repositories**. If an
+     organization switches a setting to selected-repository visibility, an organization
+     owner must grant the target repository access.
+   - Verify that the shared App is installed on the target repository.
+
+   The App must be a real App, not the default `GITHUB_TOKEN`, which cannot trigger
+   subsequent workflows. If adapting this package for another organization, provision an
+   organization-level App and credentials with the following configuration:
    - Go to Settings → Developer settings → GitHub Apps → New GitHub App.
    - Grant repository permissions: Contents (Read & Write), Issues (Read & Write), Pull
      requests (Read & Write), Workflows (Read & Write). Metadata (Read) is auto-granted.
@@ -276,12 +289,11 @@ now at least readable by the agent, but it was never the intended recovery path.
    - After creating it, capture the **Client ID** (not the numeric App ID) from the
      App's General settings page.
    - Generate and download a private key from the same page.
-   - Install the App on this specific repository.
-   - Store the credentials on the repo: `gh variable set GH_AW_APP_CLIENT_ID --body
-     "<client-id>"` (a non-secret repo variable) and `gh secret set
-     GH_AW_APP_PRIVATE_KEY < path/to/key.pem` (a secret).
-   - Also set `gh variable set GH_AW_APP_BOT_SLUG --body "<your-app-slug>[bot]"` to the
-     App's actual bot actor name. All three `.md` files read this variable (via
+   - Store the Client ID and bot slug as organization variables, and the private key and
+     inference API key as organization secrets. Install the App on each consumer
+     repository and grant it access to any selected-visibility organization settings.
+   - Set `GH_AW_APP_BOT_SLUG` to the App's actual bot actor name,
+     `<your-app-slug>[bot]`. All three `.md` files read this variable (via
      `bots:`/`trusted-users:` fields set to `${{ vars.GH_AW_APP_BOT_SLUG }}`) instead of
      hardcoding an identity, so swapping bots later is just a variable update — no
      workflow edits or recompiling required. Without it, `review.md`/`fix.md`'s
@@ -290,8 +302,8 @@ now at least readable by the agent, but it was never the intended recovery path.
      able to read content the bot itself files, like fallback issues (see "Trusting the
      pipeline's own bot" above).
 
-   (The App used for this specific demo instance is `bootc-bot`; the steps above are
-   written generically so you can register your own App if adapting this repo.)
+   (The App used for this specific demo instance is `bootc-bot`; bootc-dev consumers
+   reuse it rather than registering an App per repository.)
 3. Make sure the workflows compile cleanly from the `.md` files (see below) — run `just
    setup && just compile` after any workflow edit (see "Design notes and gotchas" above
    for why the extension version must stay pinned).
@@ -434,10 +446,9 @@ standard pipeline across `bootc-dev`'s other active repos. Roughly in order:
       ideally in "Adapting to your project" above, exactly which frontmatter/label
       surface is load-bearing versus safe to diverge on — once the pipeline has proven
       itself across a couple of real consumers.
-- [ ] **Decide the bot-identity model org-wide**: one GitHub App installed into every
-      consuming repo, versus one App registration per repo. The former means less
-      operational toil (one set of credentials to rotate) but a more centralized blast
-      radius if compromised.
+- [x] **Use one shared GitHub App org-wide.** It is installed into every consuming repo,
+       which avoids per-repository credential copies while centralizing the App's
+       credential-rotation and compromise blast radius.
 - [ ] **Pilot on one low-traffic repo** via `gh aw add` (not copy-paste), with
       `merge.yml` initially disabled or manual, watching reviewer/fixer judgment quality
       for a couple of weeks before enabling auto-merge — following gh-aw's own "safe
