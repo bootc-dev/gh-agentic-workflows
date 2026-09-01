@@ -71,42 +71,21 @@ jobs:
           gh aw compile --approve
 
       - name: Open or update a pull request with the results
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-          VERSION: ${{ steps.install.outputs.version }}
-        run: |
-          set -euo pipefail
-          git add -A
-          if git diff --cached --quiet; then
-            echo "Already up to date, nothing to upgrade."
-            exit 0
-          fi
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          commit-message: "build: Upgrade gh-aw to ${{ steps.install.outputs.version }}"
+          title: "build: Upgrade gh-aw to ${{ steps.install.outputs.version }}"
+          body: |
+            Automated upgrade, opened by `.github/workflows/upgrade.yml`:
 
-          branch="automation/upgrade-gh-aw"
-          title="build: Upgrade gh-aw to ${VERSION}"
-          body="$(cat <<EOF
-          Automated upgrade, opened by \`.github/workflows/upgrade.yml\`:
+            - Bumped `.github/aw/gh-aw-version` to `${{ steps.install.outputs.version }}`.
+            - Refreshed action-version pins in `.github/aw/actions-lock.json`.
+            - Recompiled all `*.lock.yml` files against the new version.
 
-          - Bumped \`.github/aw/gh-aw-version\` to \`${VERSION}\`.
-          - Refreshed action-version pins in \`.github/aw/actions-lock.json\`.
-          - Recompiled all \`*.lock.yml\` files against the new version.
-
-          Safe to merge once \`check-drift\` passes; no manual review is
-          needed beyond that unless the CLI upgrade changed compiler
-          behavior in a way worth double-checking.
-          EOF
-          )"
-
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git checkout -B "$branch"
-          git commit -m "$title"
-          git push --force-with-lease origin "$branch"
-
-          existing=$(gh pr list --head "$branch" --state open --json number --jq '.[0].number // empty')
-          if [ -n "$existing" ]; then
-            gh pr edit "$existing" --title "$title" --body "$body"
-            echo "Updated existing PR #${existing}"
-          else
-            gh pr create --title "$title" --body "$body" --head "$branch"
-          fi
+            Safe to merge once `check-drift` passes; no manual review is
+            needed beyond that unless the CLI upgrade changed compiler
+            behavior in a way worth double-checking.
+          branch: automation/upgrade-gh-aw
+          committer: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+          author: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
