@@ -52,7 +52,7 @@ jobs:
           # whatever ends up in .github/aw/gh-aw-version, which this step
           # now updates, so both stay in sync with what gets compiled below.
           gh extension install --force github/gh-aw
-          version=$(gh aw version | awk '{print $NF}')
+          version=$(gh aw version 2>&1 | awk '{print $NF}')
           echo "Installed gh-aw ${version}"
           printf '%s\n' "$version" >.github/aw/gh-aw-version
           echo "version=${version}" >>"$GITHUB_OUTPUT"
