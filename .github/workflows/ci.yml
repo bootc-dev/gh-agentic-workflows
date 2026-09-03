@@ -17,6 +17,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
 
+      - name: Test workflow rerun safe output
+        run: |
+          node --check .github/workflows/shared/workflow-rerun.cjs
+          node --check tests/workflow-rerun.test.js
+          node tests/workflow-rerun.test.js
+
       - name: Install gh-aw extension
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
