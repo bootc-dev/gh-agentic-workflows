@@ -125,10 +125,12 @@ The PR body needs to carry the human follow-up steps, since none of this
 can be verified or completed from a sandboxed agent session (see below):
 
 - Cut/confirm the version tag this PR pins to actually exists.
-- Register or reuse a GitHub App for the bot identity (Roadmap item: "decide
-  the bot-identity model org-wide" — ask if unclear whether to reuse an
-  existing App or register a new one), then set `GH_AW_APP_CLIENT_ID`,
-  `GH_AW_APP_PRIVATE_KEY`, `GH_AW_APP_BOT_SLUG` on the target repo.
+- For a bootc-dev consumer, verify the shared App is installed on the target repository
+  and the required organization settings are available; do not create repository-level
+  duplicates. `GH_AW_APP_CLIENT_ID` and `GH_AW_APP_BOT_SLUG` are organization variables;
+  `GH_AW_APP_PRIVATE_KEY` and `ANTHROPIC_API_KEY` are organization secrets. Their
+  currently observed visibility is **All repositories**. If any are restricted to
+  selected repositories, obtain an organization-owner grant for the target repository.
 - If the target has a merge-queue ruleset, confirm "Allow auto-merge" is
   enabled in repo settings.
 - After merging: run the `install-labels.yml` workflow once (it also
