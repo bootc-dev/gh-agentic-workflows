@@ -58,6 +58,11 @@ const LABELS = [
     description: 'Marks the CI flake tracker issue the merge queue analyzer maintains',
     color: '1D76DB', // blue
   },
+  {
+    name: 'release',
+    description: 'Release PR created by the release agent',
+    color: '0075CA', // blue
+  },
 ];
 
 /**
