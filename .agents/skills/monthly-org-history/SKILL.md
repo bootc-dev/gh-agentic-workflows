@@ -16,6 +16,9 @@ Confirm that `gh auth status` works and `unzip` is installed. Run:
 node scripts/monthly-org-history.js ORG YYYY-MM --output /tmp/ORG-YYYY-MM-history.json --bot 'bootc-bot[bot]'
 ```
 
+Use `--repo REPO` to collect one non-archived, non-fork repository within `ORG` rather
+than every visible eligible repository. The snapshot records this repository filter.
+
 The script enumerates visible, non-archived, non-fork repositories in sorted order.
 It uses the visible `issues?since=` API (whose `since` is an update timestamp), with a
 one-millisecond lower-bound overlap, then locally filters timestamps against
@@ -26,8 +29,9 @@ GitHub's 1,000-result filter cap. Per-repository failures remain in `errors` and
 input, and organization listing failures stop collection. The snapshot deliberately has
 no collection timestamp. The collector refuses to overwrite an existing output path.
 
-Treat `agent/code`, `agent/fixme`, and `agent/lgtm`, `agent/*` PR branches, and only
-the drafter/review/fix (plus ci/queue triage) workflow names as pipeline signals.
+Treat `agent/code`, `agent/fixme`, and `agent/lgtm`, `agent/*` PR branches, and
+workflows whose canonical path ends in `.lock.yml` as pipeline signals. Plain `.yml`
+workflows are not gh-aw workflow signals.
 They are not evidence of AI authorship. `Assisted-by: AI` and `Generated-by: AI` are
 counted only when explicitly retained in bodies of items **created in the month**.
 AIC is reported from retained gh-aw usage artifacts attached to AIC-eligible

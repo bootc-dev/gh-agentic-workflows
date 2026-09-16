@@ -12,6 +12,9 @@ skill to draft `history/YYYY-MM.md`.
 node scripts/monthly-org-history.js ORG YYYY-MM --output /tmp/ORG-YYYY-MM-history.json --bot 'bootc-bot[bot]'
 ```
 
+Pass `--repo REPO` to collect one non-archived, non-fork repository within `ORG` instead
+of the full visible organization. The resulting snapshot records the repository filter.
+
 It requires authenticated `gh` and `unzip`. The snapshot is intentionally written to
 `/tmp` by default, not committed, and reports partial repository/artifact coverage.
 Current labels are snapshot state, not label history; explicit AI attribution markers

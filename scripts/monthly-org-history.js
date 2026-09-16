@@ -11,16 +11,6 @@ const path = require('path');
 
 const SCHEMA_VERSION = 3;
 const AGENT_LABELS = ['agent/code', 'agent/fixme', 'agent/lgtm'];
-const WORKFLOW_NAMES = new Map([
-  ['Drafter', 'drafter'], ['PR Review Agent', 'review'], ['PR Fix Agent', 'fix'],
-  ['PR CI Failure Analyzer', 'ci-triage'], ['Merge Queue Failure Analyzer', 'queue-triage'],
-]);
-const WORKFLOW_PATHS = new Map([
-  ['drafter.lock.yml', 'drafter'], ['review.lock.yml', 'review'], ['fix.lock.yml', 'fix'],
-  ['ci-triage.lock.yml', 'ci-triage'], ['queue-triage.lock.yml', 'queue-triage'],
-  ['drafter.yml', 'drafter'], ['review.yml', 'review'], ['fix.yml', 'fix'],
-  ['ci-triage.yml', 'ci-triage'], ['queue-triage.yml', 'queue-triage'],
-]);
 const AGGREGATE_USAGE_FILE = 'agent_usage.json';
 const TOKEN_USAGE_FILE = 'agent/token_usage.jsonl';
 
@@ -72,7 +62,8 @@ function classifyItems(items, repository, interval) {
 }
 
 function classifyWorkflow(run) {
-  return WORKFLOW_NAMES.get(run.name || run.workflow_name) || WORKFLOW_PATHS.get(path.posix.basename(run.path || '')) || null;
+  const match = path.posix.basename(run.path || '').match(/^(.+)\.lock\.yml$/);
+  return match ? match[1] : null;
 }
 
 function conclusionCounts(runs) {
@@ -329,13 +320,28 @@ function writeSnapshot(output, snapshot) {
   fs.writeFileSync(output, `${JSON.stringify(snapshot, null, 2)}\n`, { encoding: 'utf8', flag: 'wx', mode: 0o600 });
 }
 
-function collect(org, interval, bot) {
+function selectedRepositories(org, repositoryFilter) {
+  if (!repositoryFilter) return paged(`orgs/${org}/repos?type=all&per_page=100`)
+    .filter((repo) => !repo.archived && !repo.fork)
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  const repository = ghJson([`repos/${org}/${repositoryFilter}`]);
+  const resolvedOwner = repository.owner && repository.owner.login;
+  if (resolvedOwner !== org || repository.name !== repositoryFilter) {
+    throw new Error(`Requested repository ${org}/${repositoryFilter} resolved to ${resolvedOwner || 'unknown'}/${repository.name || 'unknown'}`);
+  }
+  if (repository.archived) throw new Error(`Requested repository ${org}/${repositoryFilter} is archived`);
+  if (repository.fork) throw new Error(`Requested repository ${org}/${repositoryFilter} is a fork`);
+  return [repository];
+}
+
+function collect(org, interval, bot, repositoryFilter) {
   // These are global prerequisites: do not turn a missing CLI/authentication
   // problem into misleading per-repository coverage gaps.
   exec('gh', ['auth', 'status']);
   exec('unzip', ['-v']);
-  const repositories = paged(`orgs/${org}/repos?type=all&per_page=100`).filter((repo) => !repo.archived && !repo.fork).sort((a, b) => a.name.localeCompare(b.name));
-  const snapshot = { schemaVersion: SCHEMA_VERSION, org, month: interval.month, bot: bot || null, interval: { start: interval.start, end: interval.end }, repositories: [], items: [], workflowRuns: [], commentAic: [], coverage: { repositories: { included: repositories.length, failed: [] }, aic: { relevantRuns: 0, eligibleRuns: 0, runsWithValues: 0, artifactBackedRuns: 0, commentBackedRuns: 0, ineligibleRuns: 0, missingOrExpired: 0, total: null } }, errors: [] };
+  const repositories = selectedRepositories(org, repositoryFilter);
+  const snapshot = { schemaVersion: SCHEMA_VERSION, org, month: interval.month, bot: bot || null, repositoryFilter: repositoryFilter || null, interval: { start: interval.start, end: interval.end }, repositories: [], items: [], workflowRuns: [], commentAic: [], coverage: { repositories: { included: repositories.length, failed: [] }, aic: { relevantRuns: 0, eligibleRuns: 0, runsWithValues: 0, artifactBackedRuns: 0, commentBackedRuns: 0, ineligibleRuns: 0, missingOrExpired: 0, total: null } }, errors: [] };
   for (const repo of repositories) {
     let repositoryAic;
     try {
@@ -384,29 +390,31 @@ function collect(org, interval, bot) {
 
 function parseArgs(argv) {
   if (argv.includes('--help') || argv.includes('-h')) return { help: true };
-  const positional = []; let output; let bot;
+  const positional = []; let output; let bot; let repo;
   for (let index = 0; index < argv.length; index++) {
     const argument = argv[index];
-    if (argument === '--output' || argument === '--bot') {
+    if (argument === '--output' || argument === '--bot' || argument === '--repo') {
       const value = argv[++index]; if (!value) throw new Error(help());
       if (argument === '--output') {
         if (output !== undefined) throw new Error(help());
         output = value;
-      } else {
+      } else if (argument === '--bot') {
         if (bot !== undefined) throw new Error(help());
         bot = value;
+      } else {
+        if (repo !== undefined) throw new Error(help());
+        repo = value;
       }
     } else if (argument.startsWith('--')) throw new Error(help()); else positional.push(argument);
   }
   if (positional.length !== 2) throw new Error(help());
-  return { org: positional[0], month: positional[1], output, bot };
+  return { org: positional[0], month: positional[1], output, bot, repo };
 }
-function help() { return "Usage: node scripts/monthly-org-history.js ORG YYYY-MM [--output PATH] [--bot LOGIN]\n\nCollect a deterministic UTC monthly GitHub-organization snapshot. --bot reads that bot's in-month issue/PR conversation comments as a human-formatted AIC fallback when retained artifacts are unavailable; artifacts remain authoritative. Hidden metadata verifies run identity only; it is not AIC without a generated footer. PR review bodies currently have no AIC metadata. Bot comments and retained artifacts may be unavailable. Requires authenticated gh and unzip. Refuses to overwrite an existing output path."; }
+function help() { return "Usage: node scripts/monthly-org-history.js ORG YYYY-MM [--output PATH] [--repo REPO] [--bot LOGIN]\n\nCollect a deterministic UTC monthly GitHub-organization snapshot. --repo limits collection to one non-archived, non-fork repository within ORG. --bot reads that bot's in-month issue/PR conversation comments as a human-formatted AIC fallback when retained artifacts are unavailable; artifacts remain authoritative. Hidden metadata verifies run identity only; it is not AIC without a generated footer. PR review bodies currently have no AIC metadata. Bot comments and retained artifacts may be unavailable. Requires authenticated gh and unzip. Refuses to overwrite an existing output path."; }
 function main(argv) {
   const args = parseArgs(argv); if (args.help) return console.log(help());
   const output = args.output || path.join(os.tmpdir(), `${args.org}-${args.month}-history.json`);
-  writeSnapshot(output, collect(args.org, parseMonth(args.month), args.bot));
+  writeSnapshot(output, collect(args.org, parseMonth(args.month), args.bot, args.repo));
   console.log(`Wrote ${output}`);
 }
 if (require.main === module) { try { main(process.argv.slice(2)); } catch (error) { console.error(`monthly-org-history: ${error.message}`); process.exitCode = 1; } }
-module.exports = { aggregateRepository, aicEligible, applyCommentAicFallback, botCommentsInInterval, boundedWorkflowRuns, classifyItems, classifyWorkflow, deduplicateCommentAic, extractAicFromFiles, finalizeAicCoverage, inInterval, integrateCommentAic, issueSince, markers, mergeAicCoverage, parseArgs, parseCommentAic, parseMonth, summarizeAicCoverage, writeSnapshot };
