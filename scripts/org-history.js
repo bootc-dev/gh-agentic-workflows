@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 
-// Collect a reproducible, machine-readable monthly snapshot.  Narrative belongs in
+// Collect a reproducible, machine-readable period snapshot. Narrative belongs in
 // the companion skill, not here, so that conclusions can be reviewed separately.
 const childProcess = require('child_process');
 const crypto = require('crypto');
@@ -9,7 +9,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
-const SCHEMA_VERSION = 3;
+const SCHEMA_VERSION = 4;
 const AGENT_LABELS = ['agent/code', 'agent/fixme', 'agent/lgtm'];
 const AGGREGATE_USAGE_FILE = 'agent_usage.json';
 const TOKEN_USAGE_FILE = 'agent/token_usage.jsonl';
@@ -20,7 +20,49 @@ function parseMonth(month) {
   if (year < 1000) throw new Error(`Year must be at least 1000, got ${year}`);
   const start = new Date(Date.UTC(year, number - 1, 1));
   const end = new Date(Date.UTC(year, number, 1));
-  return { month, start: start.toISOString(), end: end.toISOString() };
+  return { period: month, start: start.toISOString(), end: end.toISOString() };
+}
+
+function isoWeekParts(date) {
+  const utc = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+  const day = utc.getUTCDay() || 7;
+  utc.setUTCDate(utc.getUTCDate() + 4 - day);
+  const year = utc.getUTCFullYear();
+  const januaryFourth = new Date(Date.UTC(year, 0, 4));
+  const januaryFourthDay = januaryFourth.getUTCDay() || 7;
+  januaryFourth.setUTCDate(januaryFourth.getUTCDate() - januaryFourthDay + 1);
+  return { year, week: Math.floor((utc - januaryFourth) / 604800000) + 1 };
+}
+
+function parseIsoWeek(period) {
+  const match = /^(\d{4})-W(0[1-9]|[1-4]\d|5[0-3])$/.exec(period);
+  if (!match) throw new Error(`ISO week must be YYYY-Www, got ${period}`);
+  const year = Number(match[1]); const week = Number(match[2]);
+  if (year < 1000) throw new Error(`Year must be at least 1000, got ${year}`);
+  const januaryFourth = new Date(Date.UTC(year, 0, 4));
+  const day = januaryFourth.getUTCDay() || 7;
+  const start = new Date(Date.UTC(year, 0, 4 - day + 1 + (week - 1) * 7));
+  const resolved = isoWeekParts(start);
+  if (resolved.year !== year || resolved.week !== week) throw new Error(`ISO year ${year} does not have week ${week}`);
+  const end = new Date(start.getTime() + 7 * 86400000);
+  return { period, start: start.toISOString(), end: end.toISOString() };
+}
+
+function parsePeriod(period) {
+  return /^\d{4}-W/.test(period) ? parseIsoWeek(period) : parseMonth(period);
+}
+
+function historyFilename(period) {
+  return `${parseIsoWeek(period).period.replace('-W', '-')}.json`;
+}
+
+function previousCompleteIsoWeek(now) {
+  if (!(now instanceof Date) || !Number.isFinite(now.getTime())) throw new Error('Expected a valid date');
+  const midnight = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const daysSinceMonday = (midnight.getUTCDay() + 6) % 7;
+  const start = new Date(midnight.getTime() - (daysSinceMonday + 7) * 86400000);
+  const { year, week } = isoWeekParts(start);
+  return parseIsoWeek(`${year}-W${String(week).padStart(2, '0')}`);
 }
 
 function inInterval(value, interval) {
@@ -49,7 +91,7 @@ function itemRecord(item, repository, interval) {
     repository, number: item.number, url: item.html_url || item.url, type: isPullRequest ? 'pull_request' : 'issue',
     title: item.title || '', createdAt: item.created_at, updatedAt: item.updated_at,
     mergedAt: item.merged_at || null, labels, headRefName: item.head && item.head.ref || item.head_ref_name || null,
-    createdInMonth: inInterval(item.created_at, interval), mergedInMonth: isPullRequest && inInterval(item.merged_at, interval),
+    createdInPeriod: inInterval(item.created_at, interval), mergedInPeriod: isPullRequest && inInterval(item.merged_at, interval),
     agentLabels: labels.filter((label) => AGENT_LABELS.includes(label)),
     agentBranch: isPullRequest && /^agent\//.test(item.head && item.head.ref || item.head_ref_name || ''),
     attribution: markers(item.body),
@@ -76,14 +118,14 @@ function conclusionCounts(runs) {
 }
 
 function aggregateRepository(items, workflows) {
-  const result = { issuesCreated: 0, prsCreated: 0, prsMerged: 0, agentLabelSignals: {}, agentBranchPrs: 0, attribution: { cohort: 'items_created_in_month', items: 0, assistedByAi: 0, generatedByAi: 0 }, workflows: {} };
+  const result = { issuesCreated: 0, prsCreated: 0, prsMerged: 0, agentLabelSignals: {}, agentBranchPrs: 0, attribution: { cohort: 'items_created_in_period', items: 0, assistedByAi: 0, generatedByAi: 0 }, workflows: {} };
   for (const item of items) {
-    if (item.type === 'issue' && item.createdInMonth) result.issuesCreated++;
-    if (item.type === 'pull_request' && item.createdInMonth) result.prsCreated++;
-    if (item.mergedInMonth) result.prsMerged++;
+    if (item.type === 'issue' && item.createdInPeriod) result.issuesCreated++;
+    if (item.type === 'pull_request' && item.createdInPeriod) result.prsCreated++;
+    if (item.mergedInPeriod) result.prsMerged++;
     if (item.agentBranch) result.agentBranchPrs++;
     for (const label of item.agentLabels) result.agentLabelSignals[label] = (result.agentLabelSignals[label] || 0) + 1;
-    if (item.createdInMonth) {
+    if (item.createdInPeriod) {
       result.attribution.items++;
       result.attribution.assistedByAi += item.attribution.assistedByAi;
       result.attribution.generatedByAi += item.attribution.generatedByAi;
@@ -341,7 +383,7 @@ function collect(org, interval, bot, repositoryFilter) {
   exec('gh', ['auth', 'status']);
   exec('unzip', ['-v']);
   const repositories = selectedRepositories(org, repositoryFilter);
-  const snapshot = { schemaVersion: SCHEMA_VERSION, org, month: interval.month, bot: bot || null, repositoryFilter: repositoryFilter || null, interval: { start: interval.start, end: interval.end }, repositories: [], items: [], workflowRuns: [], commentAic: [], coverage: { repositories: { included: repositories.length, failed: [] }, aic: { relevantRuns: 0, eligibleRuns: 0, runsWithValues: 0, artifactBackedRuns: 0, commentBackedRuns: 0, ineligibleRuns: 0, missingOrExpired: 0, total: null } }, errors: [] };
+  const snapshot = { schemaVersion: SCHEMA_VERSION, org, period: interval.period, bot: bot || null, repositoryFilter: repositoryFilter || null, interval: { start: interval.start, end: interval.end }, repositories: [], items: [], workflowRuns: [], commentAic: [], coverage: { repositories: { included: repositories.length, failed: [] }, aic: { relevantRuns: 0, eligibleRuns: 0, runsWithValues: 0, artifactBackedRuns: 0, commentBackedRuns: 0, ineligibleRuns: 0, missingOrExpired: 0, total: null } }, errors: [] };
   for (const repo of repositories) {
     let repositoryAic;
     try {
@@ -357,7 +399,7 @@ function collect(org, interval, bot, repositoryFilter) {
       const items = classifyItems(rawItems.map((item) => {
         const pull = prByNumber.get(item.number);
         return pull ? { ...item, ...pull, pull_request: item.pull_request } : item;
-      }), name, interval).filter((item) => inInterval(item.updatedAt, interval) || item.createdInMonth || item.mergedInMonth);
+      }), name, interval).filter((item) => inInterval(item.updatedAt, interval) || item.createdInPeriod || item.mergedInPeriod);
       const runs = fetchWorkflowRuns(org, name, interval).filter((run) => inInterval(run.created_at, interval));
       const relevant = runs.filter(classifyWorkflow);
       for (const run of relevant) {
@@ -389,6 +431,12 @@ function collect(org, interval, bot, repositoryFilter) {
 }
 
 function parseArgs(argv) {
+  if (argv[0] === '--previous-iso-week') {
+    if (argv.length === 1) return { previousIsoWeek: true };
+    if (argv.length === 3 && argv[1] === '--as-of') return { previousIsoWeek: true, asOf: argv[2] };
+    throw new Error(help());
+  }
+  if (argv[0] === '--history-filename' && argv.length === 2) return { historyFilename: argv[1] };
   if (argv.includes('--help') || argv.includes('-h')) return { help: true };
   const positional = []; let output; let bot; let repo;
   for (let index = 0; index < argv.length; index++) {
@@ -408,13 +456,17 @@ function parseArgs(argv) {
     } else if (argument.startsWith('--')) throw new Error(help()); else positional.push(argument);
   }
   if (positional.length !== 2) throw new Error(help());
-  return { org: positional[0], month: positional[1], output, bot, repo };
+  return { org: positional[0], period: positional[1], output, bot, repo };
 }
-function help() { return "Usage: node scripts/monthly-org-history.js ORG YYYY-MM [--output PATH] [--repo REPO] [--bot LOGIN]\n\nCollect a deterministic UTC monthly GitHub-organization snapshot. --repo limits collection to one non-archived, non-fork repository within ORG. --bot reads that bot's in-month issue/PR conversation comments as a human-formatted AIC fallback when retained artifacts are unavailable; artifacts remain authoritative. Hidden metadata verifies run identity only; it is not AIC without a generated footer. PR review bodies currently have no AIC metadata. Bot comments and retained artifacts may be unavailable. Requires authenticated gh and unzip. Refuses to overwrite an existing output path."; }
+function help() { return "Usage: node scripts/org-history.js ORG PERIOD [--output PATH] [--repo REPO] [--bot LOGIN]\n       node scripts/org-history.js --previous-iso-week [--as-of ISO_TIMESTAMP]\n       node scripts/org-history.js --history-filename YYYY-Www\n\nCollect a deterministic UTC calendar-month (YYYY-MM) or ISO-week (YYYY-Www) GitHub-organization snapshot. --previous-iso-week prints the prior complete ISO Monday-Sunday week, optionally as of an ISO timestamp. --history-filename converts an ISO period to its canonical history/YYYY-WW.json basename. --repo limits collection to one non-archived, non-fork repository within ORG. --bot reads that bot's in-period issue/PR conversation comments as a human-formatted AIC fallback when retained artifacts are unavailable; artifacts remain authoritative. Hidden metadata verifies run identity only; it is not AIC without a generated footer. PR review bodies currently have no AIC metadata. Bot comments and retained artifacts may be unavailable. Requires authenticated gh and unzip. Refuses to overwrite an existing output path."; }
 function main(argv) {
   const args = parseArgs(argv); if (args.help) return console.log(help());
-  const output = args.output || path.join(os.tmpdir(), `${args.org}-${args.month}-history.json`);
-  writeSnapshot(output, collect(args.org, parseMonth(args.month), args.bot, args.repo));
+  if (args.historyFilename) return console.log(historyFilename(args.historyFilename));
+  if (args.previousIsoWeek) return console.log(previousCompleteIsoWeek(args.asOf === undefined ? new Date() : new Date(args.asOf)).period);
+  const output = args.output || path.join(os.tmpdir(), `${args.org}-${args.period}-history.json`);
+  writeSnapshot(output, collect(args.org, parsePeriod(args.period), args.bot, args.repo));
   console.log(`Wrote ${output}`);
 }
-if (require.main === module) { try { main(process.argv.slice(2)); } catch (error) { console.error(`monthly-org-history: ${error.message}`); process.exitCode = 1; } }
+if (require.main === module) { try { main(process.argv.slice(2)); } catch (error) { console.error(`org-history: ${error.message}`); process.exitCode = 1; } }
+
+module.exports = { parsePeriod, previousCompleteIsoWeek, historyFilename };

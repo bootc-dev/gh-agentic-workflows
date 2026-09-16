@@ -40,6 +40,13 @@ produced.
 
 ## Code Quality
 
+### GitHub Actions
+
+New or edited workflows should use a fixed runner image such as
+`ubuntu-24.04`, not `ubuntu-latest`. Use major-version action references such
+as `actions/checkout@v7` by default. Pin an action to a commit SHA only when
+the change explicitly calls for it.
+
 ### Parsing Structured Data
 
 Never parse structured data formats (JSON, YAML, XML) with text tools like `grep`

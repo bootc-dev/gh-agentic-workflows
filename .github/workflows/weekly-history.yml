@@ -1,0 +1,125 @@
+name: Collect weekly history
+
+# This is deliberately a plain workflow. It only collects GitHub metadata and opens
+# a normal PR; it does not invoke gh-aw or an AI agent.
+on:
+  schedule:
+    - cron: "15 8 * * 1" # Monday 08:15 UTC, after the completed week.
+  workflow_dispatch:
+    inputs:
+      period:
+        description: "ISO week to backfill (YYYY-Www); omit for the prior complete week"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: weekly-history
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Generate organization collection token
+        id: collection-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.GH_AW_APP_CLIENT_ID }}
+          private-key: ${{ secrets.GH_AW_APP_PRIVATE_KEY }}
+          owner: bootc-dev
+          permission-actions: read
+          permission-contents: read
+          permission-issues: read
+          permission-pull-requests: read
+
+      - name: Generate repository writer token
+        id: writer-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.GH_AW_APP_CLIENT_ID }}
+          private-key: ${{ secrets.GH_AW_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          token: ${{ steps.writer-token.outputs.token }}
+          persist-credentials: false
+
+      - name: Determine target ISO week
+        id: period
+        env:
+          GH_TOKEN: ${{ steps.collection-token.outputs.token }}
+          REQUESTED_PERIOD: ${{ inputs.period }}
+        run: |
+          set -euo pipefail
+          if test -n "$REQUESTED_PERIOD"; then
+            period="$REQUESTED_PERIOD"
+            node scripts/org-history.js --history-filename "$period" >/dev/null
+          else
+            created_at="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" --jq .created_at)"
+            period="$(node scripts/org-history.js --previous-iso-week --as-of "$created_at")"
+          fi
+          echo "period=$period" >> "$GITHUB_OUTPUT"
+          echo "filename=$(node scripts/org-history.js --history-filename "$period")" >> "$GITHUB_OUTPUT"
+
+      - name: Collect snapshot when absent
+        id: collect
+        env:
+          GH_TOKEN: ${{ steps.collection-token.outputs.token }}
+          PERIOD: ${{ steps.period.outputs.period }}
+          FILENAME: ${{ steps.period.outputs.filename }}
+        run: |
+          set -euo pipefail
+          output="history/$FILENAME"
+          if test -e "$output"; then
+            echo "The immutable snapshot already exists: $output"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          node scripts/org-history.js bootc-dev "$PERIOD" --bot 'bootc-bot[bot]' --output "$output"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Validate snapshot
+        if: steps.collect.outputs.changed == 'true'
+        env:
+          PERIOD: ${{ steps.period.outputs.period }}
+          FILENAME: ${{ steps.period.outputs.filename }}
+        run: |
+          set -euo pipefail
+          node - "history/$FILENAME" "$PERIOD" <<'NODE'
+          const assert = require('node:assert/strict');
+          const snapshot = require(process.argv[2]);
+          assert.equal(snapshot.schemaVersion, 4);
+          assert.equal(snapshot.org, 'bootc-dev');
+          assert.equal(snapshot.period, process.argv[3]);
+          assert.match(snapshot.period, /^\d{4}-W\d{2}$/);
+          for (const key of ['repositories', 'items', 'workflowRuns', 'commentAic', 'errors']) assert.ok(Array.isArray(snapshot[key]));
+          NODE
+
+      - name: Open or update history pull request
+        id: create-pr
+        if: steps.collect.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ steps.writer-token.outputs.token }}
+          branch: automation/history-${{ steps.period.outputs.period }}
+          commit-message: "history: Record ${{ steps.period.outputs.period }}"
+          title: "history: Record ${{ steps.period.outputs.period }}"
+          body: |
+            Automated canonical evidence for ISO week `${{ steps.period.outputs.period }}`.
+          committer: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+          author: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+
+      - name: Enable auto-merge
+        if: steps.create-pr.outputs.pull-request-number != ''
+        env:
+          GH_TOKEN: ${{ steps.writer-token.outputs.token }}
+          PR_NUMBER: ${{ steps.create-pr.outputs.pull-request-number }}
+        run: |
+          set -euo pipefail
+          gh pr merge "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --auto --squash

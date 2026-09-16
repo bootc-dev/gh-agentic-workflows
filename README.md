@@ -448,6 +448,12 @@ standard pipeline across `bootc-dev`'s other active repos. Roughly in order:
       stable summary JSON output, then move presentation into client-side rendering;
       tables, charts, and other visualization options can be evaluated later without
       choosing a design now.
+- [x] **Commit immutable weekly canonical history.** A plain Monday UTC workflow collects
+      the preceding complete ISO week as `history/YYYY-WW.json`, opens a PR, and enables
+      auto-merge once required branch protections are satisfied.
+      It does not run gh-aw or an AI agent; the retained-artifact and optional bot-comment
+      AIC evidence is collected as ordinary GitHub metadata. Monthly Markdown remains a
+      human-reviewed interpretation of period snapshots.
 - [ ] **Pilot on one low-traffic repo** via `gh aw add` (not copy-paste), with
       `merge.yml` initially disabled or manual, watching reviewer/fixer judgment quality
       for a couple of weeks before enabling auto-merge — following gh-aw's own "safe
@@ -476,8 +482,10 @@ with the result — see the Roadmap entry below for why this exists.
 opencode-compatible agent skill: the operational runbook for piloting this pipeline on a
 new consumer repo, referenced from the Roadmap items below.
 [`monthly-org-history`](.agents/skills/monthly-org-history/SKILL.md) and
-[`scripts/monthly-org-history.js`](scripts/monthly-org-history.js) collect a
-deterministic monthly organization snapshot and guide a human-reviewed history report.
+[`scripts/org-history.js`](scripts/org-history.js) collect deterministic period snapshots
+and guide a human-reviewed monthly history report. [`weekly-history.yml`](.github/workflows/weekly-history.yml)
+is a separate plain workflow that commits immutable ISO-week JSON evidence as
+`history/YYYY-WW.json`; it does not invoke gh-aw or an AI agent.
 
 ## Prior art
 
