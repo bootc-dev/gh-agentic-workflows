@@ -2,15 +2,23 @@
 
 This directory contains utility scripts for setting up and managing the gh-agentic-workflows pipeline.
 
-## monthly-org-history.js
+## org-history.js
 
-Collects a deterministic JSON snapshot for one UTC month across an organization; it is
-used by the human-run [`monthly-org-history`](../.agents/skills/monthly-org-history/SKILL.md)
-skill to draft `history/YYYY-MM.md`.
+Collects a deterministic JSON snapshot for one UTC calendar month (`YYYY-MM`) or ISO
+week (`YYYY-Www`) across an organization. The human-run
+[`monthly-org-history`](../.agents/skills/monthly-org-history/SKILL.md) skill uses
+calendar-month snapshots to draft human-reviewed `history/YYYY-MM.md` interpretation.
+The plain weekly workflow commits immutable canonical evidence as `history/YYYY-WW.json`.
 
 ```bash
-node scripts/monthly-org-history.js ORG YYYY-MM --output /tmp/ORG-YYYY-MM-history.json --bot 'bootc-bot[bot]'
+node scripts/org-history.js ORG 2026-W09 --output history/2026-09.json --bot 'bootc-bot[bot]'
+node scripts/org-history.js ORG 2026-09 --output /tmp/ORG-2026-09-history.json --bot 'bootc-bot[bot]'
+node scripts/org-history.js --previous-iso-week
 ```
+
+Schema v4 replaces `month` with `period`, `createdInMonth`/`mergedInMonth` with
+`createdInPeriod`/`mergedInPeriod`, and the attribution cohort
+`items_created_in_month` with `items_created_in_period`.
 
 Pass `--repo REPO` to collect one non-archived, non-fork repository within `ORG` instead
 of the full visible organization. The resulting snapshot records the repository filter.
@@ -18,7 +26,7 @@ of the full visible organization. The resulting snapshot records the repository 
 It requires authenticated `gh` and `unzip`. The snapshot is intentionally written to
 `/tmp` by default, not committed, and reports partial repository/artifact coverage.
 Current labels are snapshot state, not label history; explicit AI attribution markers
-are counted only on items created in the reported month. Output creation is exclusive:
+are counted only on items created in the reported period. Output creation is exclusive:
 choose a new path rather than overwriting an existing snapshot.
 
 `--bot LOGIN` additionally reads that bot's issue and PR conversation comments from the

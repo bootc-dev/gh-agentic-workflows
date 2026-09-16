@@ -7,13 +7,15 @@ description: Collect one UTC calendar month of GitHub organization activity and 
 
 This is a **human-run** reporting skill. First collect facts; then write a clearly
 labelled interpretation. Do not run it as an autonomous workflow or commit its JSON.
+Weekly `history/YYYY-WW.json` files are instead immutable canonical evidence collected
+by the plain scheduled workflow; monthly Markdown remains human-reviewed interpretation.
 
 ## Collect the snapshot
 
 Confirm that `gh auth status` works and `unzip` is installed. Run:
 
 ```bash
-node scripts/monthly-org-history.js ORG YYYY-MM --output /tmp/ORG-YYYY-MM-history.json --bot 'bootc-bot[bot]'
+node scripts/org-history.js ORG YYYY-MM --output /tmp/ORG-YYYY-MM-history.json --bot 'bootc-bot[bot]'
 ```
 
 Use `--repo REPO` to collect one non-archived, non-fork repository within `ORG` rather

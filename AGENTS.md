@@ -66,6 +66,15 @@ commit and especially when the agent thinks a task is complete
 to spawn a subagent to perform a review using guidelines (alongside
 looking for any other issues).
 
+### GitHub Actions
+
+When adding or editing workflows, use a fixed runner image such as
+`ubuntu-24.04`, not `ubuntu-latest`. Reference actions by their major-version
+tag (for example, `actions/checkout@v7`); do not pin actions to commit SHAs
+unless the human explicitly asks for that.
+Do not add `timeout-minutes` to jobs unless the human explicitly asks for a
+timeout.
+
 If the agent is performing a review of other's code, the same
 principles apply.
 

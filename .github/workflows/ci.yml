@@ -10,7 +10,7 @@ on:
 # are up to date with their .md sources.
 jobs:
   check-drift:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
     steps:
@@ -39,8 +39,8 @@ jobs:
             exit 1
           }
 
-  monthly-history-smoke:
-    runs-on: ubuntu-latest
+  weekly-history-smoke:
+    runs-on: ubuntu-24.04
     permissions:
       actions: read
       contents: read
@@ -50,25 +50,28 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
 
-      - name: Collect this month's repository history
+      - name: Test period calculations
+        run: node --test tests/org-history.test.js
+
+      - name: Collect the prior complete repository history week
         id: collect-history
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          month="$(date -u +%Y-%m)"
-          echo "month=$month" >> "$GITHUB_OUTPUT"
-          node scripts/monthly-org-history.js bootc-dev "$month" --repo gh-agentic-workflows --bot 'bootc-bot[bot]' --output "$RUNNER_TEMP/monthly-org-history.json"
+          period="$(node scripts/org-history.js --previous-iso-week)"
+          echo "period=$period" >> "$GITHUB_OUTPUT"
+          node scripts/org-history.js bootc-dev "$period" --repo gh-agentic-workflows --bot 'bootc-bot[bot]' --output "$RUNNER_TEMP/org-history.json"
 
       - name: Verify snapshot schema
         env:
-          SNAPSHOT_MONTH: ${{ steps.collect-history.outputs.month }}
+          SNAPSHOT_PERIOD: ${{ steps.collect-history.outputs.period }}
         run: |
-          node - "$RUNNER_TEMP/monthly-org-history.json" "$SNAPSHOT_MONTH" <<'NODE'
+          node - "$RUNNER_TEMP/org-history.json" "$SNAPSHOT_PERIOD" <<'NODE'
           const assert = require('node:assert/strict');
           const snapshot = require(process.argv[2]);
-          assert.equal(snapshot.schemaVersion, 3);
+          assert.equal(snapshot.schemaVersion, 4);
           assert.equal(snapshot.org, 'bootc-dev');
-          assert.equal(snapshot.month, process.argv[3]);
+          assert.equal(snapshot.period, process.argv[3]);
           assert.equal(snapshot.repositoryFilter, 'gh-agentic-workflows');
           for (const key of ['repositories', 'items', 'workflowRuns', 'commentAic', 'errors']) assert.ok(Array.isArray(snapshot[key]), `${key} is an array`);
           assert.equal(snapshot.repositories.length, 1);
@@ -80,4 +83,46 @@ jobs:
           assert.deepEqual(Object.keys(snapshot.coverage.aic).sort(), ['artifactBackedRuns', 'commentBackedRuns', 'eligibleRuns', 'ineligibleRuns', 'missingOrExpired', 'relevantRuns', 'runsWithValues', 'total']);
           for (const key of ['artifactBackedRuns', 'commentBackedRuns', 'eligibleRuns', 'ineligibleRuns', 'missingOrExpired', 'relevantRuns', 'runsWithValues']) assert.equal(typeof snapshot.coverage.aic[key], 'number');
           assert.ok(snapshot.coverage.aic.total === null || typeof snapshot.coverage.aic.total === 'number');
+          NODE
+
+  history-immutability:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout pull request
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+
+      - name: Verify weekly history is append-only
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin "$BASE_SHA"
+          node - "$BASE_SHA" <<'NODE'
+          const assert = require('node:assert/strict');
+          const childProcess = require('node:child_process');
+          const fs = require('node:fs');
+          const { historyFilename, parsePeriod } = require('./scripts/org-history.js');
+          const base = process.argv[2];
+          const fields = childProcess.execFileSync('git', ['diff', '--name-status', '-z', base, 'HEAD'], { encoding: 'utf8' }).split('\0');
+          const weekly = /^history\/\d{4}-\d{2}\.json$/;
+          for (let index = 0; index < fields.length - 1;) {
+            const status = fields[index++];
+            const paths = [fields[index++]];
+            if (/^[RC]/.test(status)) paths.push(fields[index++]);
+            const code = status[0];
+            if (code !== 'A' && code !== 'C' && weekly.test(paths[0])) throw new Error(`Weekly history is immutable: ${status} ${paths[0]}`);
+            const added = code === 'A' ? paths[0] : code === 'C' ? paths[1] : code === 'R' && !weekly.test(paths[0]) ? paths[1] : null;
+            if (!added || !weekly.test(added)) continue;
+            const snapshot = JSON.parse(fs.readFileSync(added, 'utf8'));
+            const period = added.slice('history/'.length, -'.json'.length).replace('-', '-W');
+            assert.equal(snapshot.schemaVersion, 4, `${added} schema version`);
+            assert.equal(snapshot.period, period, `${added} period`);
+            assert.equal(historyFilename(snapshot.period), added.slice('history/'.length), `${added} filename`);
+            parsePeriod(snapshot.period);
+          }
           NODE
