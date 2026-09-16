@@ -38,3 +38,46 @@ jobs:
             echo "::error::Compiled .lock.yml files are out of sync with their .md sources — run 'just setup && just compile' locally and commit the result."
             exit 1
           }
+
+  monthly-history-smoke:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      issues: read
+      pull-requests: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Collect this month's repository history
+        id: collect-history
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          month="$(date -u +%Y-%m)"
+          echo "month=$month" >> "$GITHUB_OUTPUT"
+          node scripts/monthly-org-history.js bootc-dev "$month" --repo gh-agentic-workflows --bot 'bootc-bot[bot]' --output "$RUNNER_TEMP/monthly-org-history.json"
+
+      - name: Verify snapshot schema
+        env:
+          SNAPSHOT_MONTH: ${{ steps.collect-history.outputs.month }}
+        run: |
+          node - "$RUNNER_TEMP/monthly-org-history.json" "$SNAPSHOT_MONTH" <<'NODE'
+          const assert = require('node:assert/strict');
+          const snapshot = require(process.argv[2]);
+          assert.equal(snapshot.schemaVersion, 3);
+          assert.equal(snapshot.org, 'bootc-dev');
+          assert.equal(snapshot.month, process.argv[3]);
+          assert.equal(snapshot.repositoryFilter, 'gh-agentic-workflows');
+          for (const key of ['repositories', 'items', 'workflowRuns', 'commentAic', 'errors']) assert.ok(Array.isArray(snapshot[key]), `${key} is an array`);
+          assert.equal(snapshot.repositories.length, 1);
+          assert.equal(snapshot.repositories[0].name, 'gh-agentic-workflows');
+          assert.deepEqual(Object.keys(snapshot.coverage).sort(), ['aic', 'repositories']);
+          assert.deepEqual(Object.keys(snapshot.coverage.repositories).sort(), ['failed', 'included']);
+          assert.deepEqual(snapshot.coverage.repositories.failed, []);
+          assert.equal(snapshot.coverage.repositories.included, 1);
+          assert.deepEqual(Object.keys(snapshot.coverage.aic).sort(), ['artifactBackedRuns', 'commentBackedRuns', 'eligibleRuns', 'ineligibleRuns', 'missingOrExpired', 'relevantRuns', 'runsWithValues', 'total']);
+          for (const key of ['artifactBackedRuns', 'commentBackedRuns', 'eligibleRuns', 'ineligibleRuns', 'missingOrExpired', 'relevantRuns', 'runsWithValues']) assert.equal(typeof snapshot.coverage.aic[key], 'number');
+          assert.ok(snapshot.coverage.aic.total === null || typeof snapshot.coverage.aic.total === 'number');
+          NODE

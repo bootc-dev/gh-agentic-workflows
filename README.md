@@ -438,6 +438,16 @@ standard pipeline across `bootc-dev`'s other active repos. Roughly in order:
       consuming repo, versus one App registration per repo. The former means less
       operational toil (one set of credentials to rotate) but a more centralized blast
       radius if compromised.
+- [ ] **Preserve AIC metadata on submitted PR reviews.** Drafter and fixer comments
+      include a generated footer with the workflow run and agent/threat-detection AIC,
+      but reviews submitted by `review.md` currently contain no equivalent metadata.
+      Determine whether the fix belongs in gh-aw's `submit_pull_request_review` safe
+      output and add durable run/AIC attribution so monthly reports can recover usage
+      after Actions artifacts expire.
+- [ ] **Render monthly report summaries from JSON in a client-side web app.** Add a
+      stable summary JSON output, then move presentation into client-side rendering;
+      tables, charts, and other visualization options can be evaluated later without
+      choosing a design now.
 - [ ] **Pilot on one low-traffic repo** via `gh aw add` (not copy-paste), with
       `merge.yml` initially disabled or manual, watching reviewer/fixer judgment quality
       for a couple of weeks before enabling auto-merge — following gh-aw's own "safe
@@ -465,6 +475,9 @@ with the result — see the Roadmap entry below for why this exists.
 [`.agents/skills/onboard-repo/`](.agents/skills/onboard-repo/SKILL.md) is an
 opencode-compatible agent skill: the operational runbook for piloting this pipeline on a
 new consumer repo, referenced from the Roadmap items below.
+[`monthly-org-history`](.agents/skills/monthly-org-history/SKILL.md) and
+[`scripts/monthly-org-history.js`](scripts/monthly-org-history.js) collect a
+deterministic monthly organization snapshot and guide a human-reviewed history report.
 
 ## Prior art
 
