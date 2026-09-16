@@ -1,0 +1,1681 @@
+{
+  "schemaVersion": 5,
+  "org": "bootc-dev",
+  "period": "2026-W37",
+  "bot": "bootc-bot[bot]",
+  "repositoryFilter": null,
+  "interval": {
+    "start": "2026-09-07T00:00:00.000Z",
+    "end": "2026-09-14T00:00:00.000Z"
+  },
+  "repositories": [
+    {
+      "name": ".github",
+      "url": "https://github.com/bootc-dev/.github",
+      "issuesCreated": 0,
+      "prsCreated": 0,
+      "prsMerged": 0,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 0,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {}
+    },
+    {
+      "name": ".project",
+      "url": "https://github.com/bootc-dev/.project",
+      "issuesCreated": 0,
+      "prsCreated": 0,
+      "prsMerged": 0,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 0,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {}
+    },
+    {
+      "name": "actions",
+      "url": "https://github.com/bootc-dev/actions",
+      "issuesCreated": 0,
+      "prsCreated": 5,
+      "prsMerged": 5,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 5,
+        "assistedByAi": 0,
+        "generatedByAi": 4
+      },
+      "workflows": {}
+    },
+    {
+      "name": "agent-skills",
+      "url": "https://github.com/bootc-dev/agent-skills",
+      "issuesCreated": 0,
+      "prsCreated": 0,
+      "prsMerged": 0,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 0,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {}
+    },
+    {
+      "name": "agentic-sandbox",
+      "url": "https://github.com/bootc-dev/agentic-sandbox",
+      "issuesCreated": 0,
+      "prsCreated": 0,
+      "prsMerged": 0,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 0,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {}
+    },
+    {
+      "name": "bcvk",
+      "url": "https://github.com/bootc-dev/bcvk",
+      "issuesCreated": 2,
+      "prsCreated": 6,
+      "prsMerged": 2,
+      "agentLabelSignals": {
+        "agent/code": 2,
+        "agent/fixme": 1
+      },
+      "agentBranchPrs": 1,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 8,
+        "assistedByAi": 0,
+        "generatedByAi": 1
+      },
+      "workflows": {
+        "review": {
+          "skipped": 8,
+          "success": 3
+        },
+        "fix": {
+          "skipped": 10,
+          "success": 3
+        },
+        "drafter": {
+          "skipped": 1,
+          "success": 1
+        }
+      }
+    },
+    {
+      "name": "bink",
+      "url": "https://github.com/bootc-dev/bink",
+      "issuesCreated": 2,
+      "prsCreated": 3,
+      "prsMerged": 5,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 5,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {}
+    },
+    {
+      "name": "bootc",
+      "url": "https://github.com/bootc-dev/bootc",
+      "issuesCreated": 6,
+      "prsCreated": 15,
+      "prsMerged": 9,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 21,
+        "assistedByAi": 0,
+        "generatedByAi": 1
+      },
+      "workflows": {}
+    },
+    {
+      "name": "bootc-dev.github.io",
+      "url": "https://github.com/bootc-dev/bootc-dev.github.io",
+      "issuesCreated": 0,
+      "prsCreated": 0,
+      "prsMerged": 0,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 0,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {}
+    },
+    {
+      "name": "bootc-operator",
+      "url": "https://github.com/bootc-dev/bootc-operator",
+      "issuesCreated": 0,
+      "prsCreated": 4,
+      "prsMerged": 8,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 4,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {}
+    },
+    {
+      "name": "canon-json-rs",
+      "url": "https://github.com/bootc-dev/canon-json-rs",
+      "issuesCreated": 0,
+      "prsCreated": 0,
+      "prsMerged": 0,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 0,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {}
+    },
+    {
+      "name": "cgwalters-ci-sandbox",
+      "url": "https://github.com/bootc-dev/cgwalters-ci-sandbox",
+      "issuesCreated": 0,
+      "prsCreated": 0,
+      "prsMerged": 0,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 0,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {}
+    },
+    {
+      "name": "cgwalters-devspace-sandbox",
+      "url": "https://github.com/bootc-dev/cgwalters-devspace-sandbox",
+      "issuesCreated": 0,
+      "prsCreated": 0,
+      "prsMerged": 0,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 0,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {}
+    },
+    {
+      "name": "community",
+      "url": "https://github.com/bootc-dev/community",
+      "issuesCreated": 2,
+      "prsCreated": 0,
+      "prsMerged": 0,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 2,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {}
+    },
+    {
+      "name": "containers-image-proxy-rs",
+      "url": "https://github.com/bootc-dev/containers-image-proxy-rs",
+      "issuesCreated": 0,
+      "prsCreated": 0,
+      "prsMerged": 0,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 0,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {}
+    },
+    {
+      "name": "gh-agentic-workflows",
+      "url": "https://github.com/bootc-dev/gh-agentic-workflows",
+      "issuesCreated": 0,
+      "prsCreated": 1,
+      "prsMerged": 1,
+      "agentLabelSignals": {
+        "agent/fixme": 1
+      },
+      "agentBranchPrs": 1,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 1,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {
+        "review": {
+          "skipped": 19
+        }
+      }
+    },
+    {
+      "name": "infra",
+      "url": "https://github.com/bootc-dev/infra",
+      "issuesCreated": 0,
+      "prsCreated": 2,
+      "prsMerged": 3,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 2,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {}
+    },
+    {
+      "name": "jsonrpc-fdpass",
+      "url": "https://github.com/bootc-dev/jsonrpc-fdpass",
+      "issuesCreated": 0,
+      "prsCreated": 0,
+      "prsMerged": 0,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 0,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {}
+    },
+    {
+      "name": "jsonrpc-fdpass-go",
+      "url": "https://github.com/bootc-dev/jsonrpc-fdpass-go",
+      "issuesCreated": 0,
+      "prsCreated": 0,
+      "prsMerged": 0,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 0,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {}
+    },
+    {
+      "name": "linux-kernel-cmdline",
+      "url": "https://github.com/bootc-dev/linux-kernel-cmdline",
+      "issuesCreated": 0,
+      "prsCreated": 0,
+      "prsMerged": 0,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 0,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {}
+    },
+    {
+      "name": "ocidir-rs",
+      "url": "https://github.com/bootc-dev/ocidir-rs",
+      "issuesCreated": 0,
+      "prsCreated": 1,
+      "prsMerged": 2,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 1,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {}
+    }
+  ],
+  "items": [
+    {
+      "repository": "bcvk",
+      "number": 356,
+      "type": "issue",
+      "aic": 208.341555,
+      "aicRunIds": [
+        34492205777
+      ]
+    },
+    {
+      "repository": "bcvk",
+      "number": 357,
+      "type": "pull_request",
+      "aic": 504.907215,
+      "aicRunIds": [
+        34493642054,
+        34494688968,
+        34495632257,
+        34498422338,
+        34499390453,
+        34500382346
+      ]
+    }
+  ],
+  "workflowRuns": [
+    {
+      "repository": "bcvk",
+      "id": 34096697064,
+      "url": "https://github.com/bootc-dev/bcvk/actions/runs/34096697064",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-09-07T07:41:20Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 362,
+          "url": "https://github.com/bootc-dev/bcvk/pull/362"
+        }
+      ],
+      "aic": null,
+      "aicSource": null,
+      "aicRecords": null,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "bcvk",
+      "id": 34491409755,
+      "url": "https://github.com/bootc-dev/bcvk/actions/runs/34491409755",
+      "name": "PR Fix Agent",
+      "path": ".github/workflows/fix.lock.yml",
+      "createdAt": "2026-09-10T14:47:46Z",
+      "conclusion": "skipped",
+      "kind": "fix",
+      "pullRequests": [],
+      "aic": null,
+      "aicSource": null,
+      "aicRecords": null,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "bcvk",
+      "id": 34491731125,
+      "url": "https://github.com/bootc-dev/bcvk/actions/runs/34491731125",
+      "name": "PR Fix Agent",
+      "path": ".github/workflows/fix.lock.yml",
+      "createdAt": "2026-09-10T14:50:42Z",
+      "conclusion": "skipped",
+      "kind": "fix",
+      "pullRequests": [],
+      "aic": null,
+      "aicSource": null,
+      "aicRecords": null,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "bcvk",
+      "id": 34491737357,
+      "url": "https://github.com/bootc-dev/bcvk/actions/runs/34491737357",
+      "name": "PR Fix Agent",
+      "path": ".github/workflows/fix.lock.yml",
+      "createdAt": "2026-09-10T14:50:46Z",
+      "conclusion": "skipped",
+      "kind": "fix",
+      "pullRequests": [],
+      "aic": null,
+      "aicSource": null,
+      "aicRecords": null,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "bcvk",
+      "id": 34492205777,
+      "url": "https://github.com/bootc-dev/bcvk/actions/runs/34492205777",
+      "name": "Drafter",
+      "path": ".github/workflows/drafter.lock.yml",
+      "createdAt": "2026-09-10T14:55:03Z",
+      "conclusion": "success",
+      "kind": "drafter",
+      "pullRequests": [],
+      "aic": 208.34155500000003,
+      "aicSource": "aggregate+detection_token_total",
+      "aicRecords": 23,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "bcvk",
+      "id": 34492270935,
+      "url": "https://github.com/bootc-dev/bcvk/actions/runs/34492270935",
+      "name": "Drafter",
+      "path": ".github/workflows/drafter.lock.yml",
+      "createdAt": "2026-09-10T14:55:38Z",
+      "conclusion": "skipped",
+      "kind": "drafter",
+      "pullRequests": [],
+      "aic": null,
+      "aicSource": null,
+      "aicRecords": null,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "bcvk",
+      "id": 34493642054,
+      "url": "https://github.com/bootc-dev/bcvk/actions/runs/34493642054",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-09-10T15:08:04Z",
+      "conclusion": "success",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 357,
+          "url": "https://github.com/bootc-dev/bcvk/pull/357"
+        }
+      ],
+      "aic": 80.42187,
+      "aicSource": "aggregate+detection_token_total",
+      "aicRecords": 4,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "bcvk",
+      "id": 34493801148,
+      "url": "https://github.com/bootc-dev/bcvk/actions/runs/34493801148",
+      "name": "PR Fix Agent",
+      "path": ".github/workflows/fix.lock.yml",
+      "createdAt": "2026-09-10T15:09:35Z",
+      "conclusion": "skipped",
+      "kind": "fix",
+      "pullRequests": [
+        {
+          "number": 357,
+          "url": "https://github.com/bootc-dev/bcvk/pull/357"
+        }
+      ],
+      "aic": null,
+      "aicSource": null,
+      "aicRecords": null,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "bcvk",
+      "id": 34494688968,
+      "url": "https://github.com/bootc-dev/bcvk/actions/runs/34494688968",
+      "name": "PR Fix Agent",
+      "path": ".github/workflows/fix.lock.yml",
+      "createdAt": "2026-09-10T15:17:42Z",
+      "conclusion": "success",
+      "kind": "fix",
+      "pullRequests": [
+        {
+          "number": 357,
+          "url": "https://github.com/bootc-dev/bcvk/pull/357"
+        }
+      ],
+      "aic": 104.77177499999999,
+      "aicSource": "aggregate+detection_token_total",
+      "aicRecords": 5,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "bcvk",
+      "id": 34494782035,
+      "url": "https://github.com/bootc-dev/bcvk/actions/runs/34494782035",
+      "name": "PR Fix Agent",
+      "path": ".github/workflows/fix.lock.yml",
+      "createdAt": "2026-09-10T15:18:32Z",
+      "conclusion": "skipped",
+      "kind": "fix",
+      "pullRequests": [
+        {
+          "number": 357,
+          "url": "https://github.com/bootc-dev/bcvk/pull/357"
+        }
+      ],
+      "aic": null,
+      "aicSource": null,
+      "aicRecords": null,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "bcvk",
+      "id": 34495632257,
+      "url": "https://github.com/bootc-dev/bcvk/actions/runs/34495632257",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-09-10T15:26:20Z",
+      "conclusion": "success",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 357,
+          "url": "https://github.com/bootc-dev/bcvk/pull/357"
+        }
+      ],
+      "aic": 85.00731,
+      "aicSource": "aggregate+detection_token_total",
+      "aicRecords": 5,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "bcvk",
+      "id": 34495693231,
+      "url": "https://github.com/bootc-dev/bcvk/actions/runs/34495693231",
+      "name": "PR Fix Agent",
+      "path": ".github/workflows/fix.lock.yml",
+      "createdAt": "2026-09-10T15:26:54Z",
+      "conclusion": "skipped",
+      "kind": "fix",
+      "pullRequests": [
+        {
+          "number": 357,
+          "url": "https://github.com/bootc-dev/bcvk/pull/357"
+        }
+      ],
+      "aic": null,
+      "aicSource": null,
+      "aicRecords": null,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "bcvk",
+      "id": 34496582843,
+      "url": "https://github.com/bootc-dev/bcvk/actions/runs/34496582843",
+      "name": "PR Fix Agent",
+      "path": ".github/workflows/fix.lock.yml",
+      "createdAt": "2026-09-10T15:34:59Z",
+      "conclusion": "skipped",
+      "kind": "fix",
+      "pullRequests": [
+        {
+          "number": 357,
+          "url": "https://github.com/bootc-dev/bcvk/pull/357"
+        }
+      ],
+      "aic": null,
+      "aicSource": null,
+      "aicRecords": null,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "bcvk",
+      "id": 34498422338,
+      "url": "https://github.com/bootc-dev/bcvk/actions/runs/34498422338",
+      "name": "PR Fix Agent",
+      "path": ".github/workflows/fix.lock.yml",
+      "createdAt": "2026-09-10T15:51:54Z",
+      "conclusion": "success",
+      "kind": "fix",
+      "pullRequests": [
+        {
+          "number": 357,
+          "url": "https://github.com/bootc-dev/bcvk/pull/357"
+        }
+      ],
+      "aic": 106.560105,
+      "aicSource": "aggregate+detection_token_total",
+      "aicRecords": 7,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "bcvk",
+      "id": 34498491961,
+      "url": "https://github.com/bootc-dev/bcvk/actions/runs/34498491961",
+      "name": "PR Fix Agent",
+      "path": ".github/workflows/fix.lock.yml",
+      "createdAt": "2026-09-10T15:52:32Z",
+      "conclusion": "skipped",
+      "kind": "fix",
+      "pullRequests": [
+        {
+          "number": 357,
+          "url": "https://github.com/bootc-dev/bcvk/pull/357"
+        }
+      ],
+      "aic": null,
+      "aicSource": null,
+      "aicRecords": null,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "bcvk",
+      "id": 34499390453,
+      "url": "https://github.com/bootc-dev/bcvk/actions/runs/34499390453",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-09-10T16:00:59Z",
+      "conclusion": "success",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 357,
+          "url": "https://github.com/bootc-dev/bcvk/pull/357"
+        }
+      ],
+      "aic": 70.603335,
+      "aicSource": "aggregate+detection_token_total",
+      "aicRecords": 5,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "bcvk",
+      "id": 34499518293,
+      "url": "https://github.com/bootc-dev/bcvk/actions/runs/34499518293",
+      "name": "PR Fix Agent",
+      "path": ".github/workflows/fix.lock.yml",
+      "createdAt": "2026-09-10T16:02:10Z",
+      "conclusion": "skipped",
+      "kind": "fix",
+      "pullRequests": [
+        {
+          "number": 357,
+          "url": "https://github.com/bootc-dev/bcvk/pull/357"
+        }
+      ],
+      "aic": null,
+      "aicSource": null,
+      "aicRecords": null,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "bcvk",
+      "id": 34500382346,
+      "url": "https://github.com/bootc-dev/bcvk/actions/runs/34500382346",
+      "name": "PR Fix Agent",
+      "path": ".github/workflows/fix.lock.yml",
+      "createdAt": "2026-09-10T16:10:16Z",
+      "conclusion": "success",
+      "kind": "fix",
+      "pullRequests": [
+        {
+          "number": 357,
+          "url": "https://github.com/bootc-dev/bcvk/pull/357"
+        }
+      ],
+      "aic": 57.54282,
+      "aicSource": "aggregate+detection_token_total",
+      "aicRecords": 4,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "bcvk",
+      "id": 34500550619,
+      "url": "https://github.com/bootc-dev/bcvk/actions/runs/34500550619",
+      "name": "PR Fix Agent",
+      "path": ".github/workflows/fix.lock.yml",
+      "createdAt": "2026-09-10T16:11:51Z",
+      "conclusion": "skipped",
+      "kind": "fix",
+      "pullRequests": [
+        {
+          "number": 357,
+          "url": "https://github.com/bootc-dev/bcvk/pull/357"
+        }
+      ],
+      "aic": null,
+      "aicSource": null,
+      "aicRecords": null,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "bcvk",
+      "id": 34729554339,
+      "url": "https://github.com/bootc-dev/bcvk/actions/runs/34729554339",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-09-13T01:03:18Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [],
+      "aic": null,
+      "aicSource": null,
+      "aicRecords": null,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "bcvk",
+      "id": 34729558811,
+      "url": "https://github.com/bootc-dev/bcvk/actions/runs/34729558811",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-09-13T01:03:25Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [],
+      "aic": null,
+      "aicSource": null,
+      "aicRecords": null,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "bcvk",
+      "id": 34733291142,
+      "url": "https://github.com/bootc-dev/bcvk/actions/runs/34733291142",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-09-13T02:32:13Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [],
+      "aic": null,
+      "aicSource": null,
+      "aicRecords": null,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "bcvk",
+      "id": 34733302412,
+      "url": "https://github.com/bootc-dev/bcvk/actions/runs/34733302412",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-09-13T02:32:29Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [],
+      "aic": null,
+      "aicSource": null,
+      "aicRecords": null,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "bcvk",
+      "id": 34735545186,
+      "url": "https://github.com/bootc-dev/bcvk/actions/runs/34735545186",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-09-13T03:27:55Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [],
+      "aic": null,
+      "aicSource": null,
+      "aicRecords": null,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "bcvk",
+      "id": 34780568287,
+      "url": "https://github.com/bootc-dev/bcvk/actions/runs/34780568287",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-09-13T20:22:36Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [],
+      "aic": null,
+      "aicSource": null,
+      "aicRecords": null,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "bcvk",
+      "id": 34789421427,
+      "url": "https://github.com/bootc-dev/bcvk/actions/runs/34789421427",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-09-13T23:20:31Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [],
+      "aic": null,
+      "aicSource": null,
+      "aicRecords": null,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "gh-agentic-workflows",
+      "id": 34083438901,
+      "url": "https://github.com/bootc-dev/gh-agentic-workflows/actions/runs/34083438901",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-09-07T04:31:47Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 90,
+          "url": "https://github.com/bootc-dev/gh-agentic-workflows/pull/90"
+        }
+      ],
+      "aic": null,
+      "aicSource": null,
+      "aicRecords": null,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "gh-agentic-workflows",
+      "id": 34096657511,
+      "url": "https://github.com/bootc-dev/gh-agentic-workflows/actions/runs/34096657511",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-09-07T07:40:51Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 92,
+          "url": "https://github.com/bootc-dev/gh-agentic-workflows/pull/92"
+        }
+      ],
+      "aic": null,
+      "aicSource": null,
+      "aicRecords": null,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "gh-agentic-workflows",
+      "id": 34169905315,
+      "url": "https://github.com/bootc-dev/gh-agentic-workflows/actions/runs/34169905315",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-09-07T23:24:03Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 90,
+          "url": "https://github.com/bootc-dev/gh-agentic-workflows/pull/90"
+        }
+      ],
+      "aic": null,
+      "aicSource": null,
+      "aicRecords": null,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "gh-agentic-workflows",
+      "id": 34251535725,
+      "url": "https://github.com/bootc-dev/gh-agentic-workflows/actions/runs/34251535725",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-09-08T16:31:05Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 90,
+          "url": "https://github.com/bootc-dev/gh-agentic-workflows/pull/90"
+        }
+      ],
+      "aic": null,
+      "aicSource": null,
+      "aicRecords": null,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "gh-agentic-workflows",
+      "id": 34297364576,
+      "url": "https://github.com/bootc-dev/gh-agentic-workflows/actions/runs/34297364576",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-09-09T01:00:10Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 90,
+          "url": "https://github.com/bootc-dev/gh-agentic-workflows/pull/90"
+        }
+      ],
+      "aic": null,
+      "aicSource": null,
+      "aicRecords": null,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "gh-agentic-workflows",
+      "id": 34357178059,
+      "url": "https://github.com/bootc-dev/gh-agentic-workflows/actions/runs/34357178059",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-09-09T13:27:23Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 90,
+          "url": "https://github.com/bootc-dev/gh-agentic-workflows/pull/90"
+        }
+      ],
+      "aic": null,
+      "aicSource": null,
+      "aicRecords": null,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "gh-agentic-workflows",
+      "id": 34441166503,
+      "url": "https://github.com/bootc-dev/gh-agentic-workflows/actions/runs/34441166503",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-09-10T05:27:53Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 90,
+          "url": "https://github.com/bootc-dev/gh-agentic-workflows/pull/90"
+        }
+      ],
+      "aic": null,
+      "aicSource": null,
+      "aicRecords": null,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "gh-agentic-workflows",
+      "id": 34502184276,
+      "url": "https://github.com/bootc-dev/gh-agentic-workflows/actions/runs/34502184276",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-09-10T16:27:13Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 90,
+          "url": "https://github.com/bootc-dev/gh-agentic-workflows/pull/90"
+        }
+      ],
+      "aic": null,
+      "aicSource": null,
+      "aicRecords": null,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "gh-agentic-workflows",
+      "id": 34508019026,
+      "url": "https://github.com/bootc-dev/gh-agentic-workflows/actions/runs/34508019026",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-09-10T17:24:25Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 90,
+          "url": "https://github.com/bootc-dev/gh-agentic-workflows/pull/90"
+        }
+      ],
+      "aic": null,
+      "aicSource": null,
+      "aicRecords": null,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "gh-agentic-workflows",
+      "id": 34555196254,
+      "url": "https://github.com/bootc-dev/gh-agentic-workflows/actions/runs/34555196254",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-09-11T02:35:22Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 90,
+          "url": "https://github.com/bootc-dev/gh-agentic-workflows/pull/90"
+        }
+      ],
+      "aic": null,
+      "aicSource": null,
+      "aicRecords": null,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "gh-agentic-workflows",
+      "id": 34584382062,
+      "url": "https://github.com/bootc-dev/gh-agentic-workflows/actions/runs/34584382062",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-09-11T09:28:33Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 90,
+          "url": "https://github.com/bootc-dev/gh-agentic-workflows/pull/90"
+        }
+      ],
+      "aic": null,
+      "aicSource": null,
+      "aicRecords": null,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "gh-agentic-workflows",
+      "id": 34616312654,
+      "url": "https://github.com/bootc-dev/gh-agentic-workflows/actions/runs/34616312654",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-09-11T15:28:19Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 90,
+          "url": "https://github.com/bootc-dev/gh-agentic-workflows/pull/90"
+        }
+      ],
+      "aic": null,
+      "aicSource": null,
+      "aicRecords": null,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "gh-agentic-workflows",
+      "id": 34633551901,
+      "url": "https://github.com/bootc-dev/gh-agentic-workflows/actions/runs/34633551901",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-09-11T18:29:28Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 90,
+          "url": "https://github.com/bootc-dev/gh-agentic-workflows/pull/90"
+        }
+      ],
+      "aic": null,
+      "aicSource": null,
+      "aicRecords": null,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "gh-agentic-workflows",
+      "id": 34663299263,
+      "url": "https://github.com/bootc-dev/gh-agentic-workflows/actions/runs/34663299263",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-09-12T00:57:11Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 90,
+          "url": "https://github.com/bootc-dev/gh-agentic-workflows/pull/90"
+        }
+      ],
+      "aic": null,
+      "aicSource": null,
+      "aicRecords": null,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "gh-agentic-workflows",
+      "id": 34678555470,
+      "url": "https://github.com/bootc-dev/gh-agentic-workflows/actions/runs/34678555470",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-09-12T06:36:07Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 90,
+          "url": "https://github.com/bootc-dev/gh-agentic-workflows/pull/90"
+        }
+      ],
+      "aic": null,
+      "aicSource": null,
+      "aicRecords": null,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "gh-agentic-workflows",
+      "id": 34719811975,
+      "url": "https://github.com/bootc-dev/gh-agentic-workflows/actions/runs/34719811975",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-09-12T21:23:20Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 90,
+          "url": "https://github.com/bootc-dev/gh-agentic-workflows/pull/90"
+        }
+      ],
+      "aic": null,
+      "aicSource": null,
+      "aicRecords": null,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "gh-agentic-workflows",
+      "id": 34735681888,
+      "url": "https://github.com/bootc-dev/gh-agentic-workflows/actions/runs/34735681888",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-09-13T03:31:03Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 90,
+          "url": "https://github.com/bootc-dev/gh-agentic-workflows/pull/90"
+        }
+      ],
+      "aic": null,
+      "aicSource": null,
+      "aicRecords": null,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "gh-agentic-workflows",
+      "id": 34780725876,
+      "url": "https://github.com/bootc-dev/gh-agentic-workflows/actions/runs/34780725876",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-09-13T20:25:40Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 90,
+          "url": "https://github.com/bootc-dev/gh-agentic-workflows/pull/90"
+        }
+      ],
+      "aic": null,
+      "aicSource": null,
+      "aicRecords": null,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    },
+    {
+      "repository": "gh-agentic-workflows",
+      "id": 34789588112,
+      "url": "https://github.com/bootc-dev/gh-agentic-workflows/actions/runs/34789588112",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-09-13T23:23:57Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 90,
+          "url": "https://github.com/bootc-dev/gh-agentic-workflows/pull/90"
+        }
+      ],
+      "aic": null,
+      "aicSource": null,
+      "aicRecords": null,
+      "aicAgent": null,
+      "aicDetection": null,
+      "aicCommentActor": null,
+      "aicCommentCreatedAt": null,
+      "aicCommentUpdatedAt": null,
+      "aicFooterRunUrl": null,
+      "aicCommentUrl": null,
+      "aicCommentId": null,
+      "aicCommentBodySha256": null
+    }
+  ],
+  "commentAic": [
+    {
+      "repository": "bcvk",
+      "runId": 34492205777,
+      "agentAic": 132.6,
+      "detectionAic": 75.8,
+      "aic": 208.4,
+      "actor": "bootc-bot[bot]",
+      "createdAt": "2026-09-10T15:08:01Z",
+      "updatedAt": "2026-09-10T15:08:01Z",
+      "footerRunUrl": "https://github.com/bootc-dev/bcvk/actions/runs/34492205777",
+      "commentUrl": "https://github.com/bootc-dev/bcvk/issues/356#issuecomment-5620882238",
+      "commentId": 5620882238,
+      "itemNumber": 356,
+      "itemUrl": "https://github.com/bootc-dev/bcvk/issues/356",
+      "bodySha256": "45df4491eafb9f3af135c15dff1813d43be3e51ab02609ca94a4361902db4c87"
+    },
+    {
+      "repository": "bcvk",
+      "runId": 34494688968,
+      "agentAic": 73.1,
+      "detectionAic": 31.7,
+      "aic": 104.8,
+      "actor": "bootc-bot[bot]",
+      "createdAt": "2026-09-10T15:26:15Z",
+      "updatedAt": "2026-09-10T15:26:15Z",
+      "footerRunUrl": "https://github.com/bootc-dev/bcvk/actions/runs/34494688968",
+      "commentUrl": "https://github.com/bootc-dev/bcvk/pull/357#issuecomment-5621143062",
+      "commentId": 5621143062,
+      "itemNumber": 357,
+      "itemUrl": "https://github.com/bootc-dev/bcvk/pull/357",
+      "bodySha256": "f77b30333a52719d4cd3d24b08ff8763e4b8399a5e238fb312f585329e4d054d"
+    },
+    {
+      "repository": "bcvk",
+      "runId": 34498422338,
+      "agentAic": 69.6,
+      "detectionAic": 37,
+      "aic": 106.6,
+      "actor": "bootc-bot[bot]",
+      "createdAt": "2026-09-10T16:00:54Z",
+      "updatedAt": "2026-09-10T16:00:54Z",
+      "footerRunUrl": "https://github.com/bootc-dev/bcvk/actions/runs/34498422338",
+      "commentUrl": "https://github.com/bootc-dev/bcvk/pull/357#issuecomment-5621633483",
+      "commentId": 5621633483,
+      "itemNumber": 357,
+      "itemUrl": "https://github.com/bootc-dev/bcvk/pull/357",
+      "bodySha256": "961ae81b712b67d65d1c5b5de2a396538845f6d9dda395a56e58db3cc6e27082"
+    },
+    {
+      "repository": "bcvk",
+      "runId": 34500382346,
+      "agentAic": 31.3,
+      "detectionAic": 26.3,
+      "aic": 57.6,
+      "actor": "bootc-bot[bot]",
+      "createdAt": "2026-09-10T16:16:33Z",
+      "updatedAt": "2026-09-10T16:16:33Z",
+      "footerRunUrl": "https://github.com/bootc-dev/bcvk/actions/runs/34500382346",
+      "commentUrl": "https://github.com/bootc-dev/bcvk/pull/357#issuecomment-5621851071",
+      "commentId": 5621851071,
+      "itemNumber": 357,
+      "itemUrl": "https://github.com/bootc-dev/bcvk/pull/357",
+      "bodySha256": "60b2773df275042e35133038f11a4b166e1846316713017f1a66091862d9a27d"
+    }
+  ],
+  "coverage": {
+    "repositories": {
+      "included": 21,
+      "failed": []
+    },
+    "aic": {
+      "relevantRuns": 45,
+      "eligibleRuns": 7,
+      "runsWithValues": 7,
+      "artifactBackedRuns": 7,
+      "commentBackedRuns": 0,
+      "ineligibleRuns": 38,
+      "missingOrExpired": 0,
+      "total": 713.24877
+    }
+  },
+  "errors": []
+}
