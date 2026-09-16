@@ -93,7 +93,8 @@ jobs:
           set -euo pipefail
           node - "history/$FILENAME" "$PERIOD" <<'NODE'
           const assert = require('node:assert/strict');
-          const snapshot = require(process.argv[2]);
+          const fs = require('node:fs');
+          const snapshot = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
           assert.equal(snapshot.schemaVersion, 4);
           assert.equal(snapshot.org, 'bootc-dev');
           assert.equal(snapshot.period, process.argv[3]);
