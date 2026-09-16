@@ -11,6 +11,7 @@ const path = require('path');
 
 const SCHEMA_VERSION = 5;
 const AGENT_LABELS = ['agent/code', 'agent/fixme', 'agent/lgtm'];
+const DETAILED_ITEM_FIELDS = ['repository', 'number', 'type', 'aic', 'aicRunIds'];
 const AGGREGATE_USAGE_FILE = 'agent_usage.json';
 const TOKEN_USAGE_FILE = 'agent/token_usage.jsonl';
 
@@ -326,7 +327,10 @@ function aicLinkedItems(items, runs, commentAic, org) {
     ids.add(runId);
     links.set(item, ids);
   };
-  for (const evidence of commentAic) link(evidence.repository, evidence.itemNumber, evidence.runId);
+  for (const evidence of commentAic) {
+    const item = itemsByKey.get(`${evidence.repository}/${evidence.itemNumber}`);
+    if (item && evidence.itemUrl === item.url) link(evidence.repository, evidence.itemNumber, evidence.runId);
+  }
   for (const run of runById.values()) {
     for (const pullRequest of normalizedPullRequests(run, org, run.repository)) {
       const candidate = itemsByKey.get(`${run.repository}/${pullRequest.number}`);
@@ -335,26 +339,43 @@ function aicLinkedItems(items, runs, commentAic, org) {
       }
     }
   }
-  return [...links.entries()].map(([item, runIds]) => ({ ...item, aicRunIds: [...runIds].sort((a, b) => a - b) }))
+  return [...links.entries()].map(([item, runIds]) => {
+    const aicRunIds = [...runIds].sort((a, b) => a - b);
+    return {
+      repository: item.repository,
+      number: item.number,
+      type: item.type,
+      aic: normalizeAic(aicRunIds.reduce((total, runId) => total + runById.get(runId).aic, 0)),
+      aicRunIds,
+    };
+  })
     .sort((a, b) => a.repository.localeCompare(b.repository) || a.number - b.number);
 }
 
 function validateDetailedItems(items, workflowRuns, commentAic, org) {
-  const runById = new Map(workflowRuns.map((run) => [run.id, run]));
+  const identities = new Set();
   for (const item of items) {
-    if (!Array.isArray(item.aicRunIds) || !item.aicRunIds.length) throw new Error(`Detailed item ${item.repository}#${item.number} has no AIC runs`);
-    const itemPath = item.type === 'pull_request' ? 'pull' : item.type === 'issue' ? 'issues' : null;
-    const canonicalItemUrl = itemPath && `https://github.com/${org}/${item.repository}/${itemPath}/${item.number}`;
-    if (item.url !== canonicalItemUrl) throw new Error(`Detailed item ${item.repository}#${item.number} has a mismatched canonical URL`);
+    if (!item || typeof item !== 'object' || Array.isArray(item) || Object.keys(item).length !== DETAILED_ITEM_FIELDS.length || Object.keys(item).some((field) => !DETAILED_ITEM_FIELDS.includes(field))) throw new Error('Detailed item has unexpected fields');
+    if (typeof item.repository !== 'string' || !/^[A-Za-z0-9_.-]+$/.test(item.repository) || !Number.isSafeInteger(item.number) || item.number <= 0 || !['issue', 'pull_request'].includes(item.type)) throw new Error('Detailed item has an invalid identity');
+    const identity = `${item.repository}/${item.number}`;
+    if (identities.has(identity)) throw new Error(`Detailed item ${item.repository}#${item.number} is duplicated`);
+    identities.add(identity);
+    if (!finiteNonnegative(item.aic)) throw new Error(`Detailed item ${item.repository}#${item.number} has invalid AIC`);
+    if (!Array.isArray(item.aicRunIds) || !item.aicRunIds.length || item.aicRunIds.some((runId) => !Number.isSafeInteger(runId) || runId <= 0)) throw new Error(`Detailed item ${item.repository}#${item.number} has no valid AIC runs`);
     const sortedUnique = [...new Set(item.aicRunIds)].sort((a, b) => a - b);
     if (JSON.stringify(item.aicRunIds) !== JSON.stringify(sortedUnique)) throw new Error(`Detailed item ${item.repository}#${item.number} has unsorted or duplicate AIC runs`);
+    const itemPath = item.type === 'pull_request' ? 'pull' : 'issues';
+    const canonicalItemUrl = `https://github.com/${org}/${item.repository}/${itemPath}/${item.number}`;
+    let total = 0;
     for (const runId of item.aicRunIds) {
-      const run = runById.get(runId);
+      const run = workflowRuns.find((candidate) => candidate && candidate.id === runId && candidate.repository === item.repository);
       if (!run || run.repository !== item.repository || !finiteNonnegative(run.aic)) throw new Error(`Detailed item ${item.repository}#${item.number} references unknown-AIC run ${runId}`);
-      const commentEvidence = (commentAic || []).some((record) => record.repository === item.repository && record.runId === runId && record.itemNumber === item.number && record.itemUrl === item.url);
-      const pullRequestEvidence = item.type === 'pull_request' && (run.pullRequests || []).some((reference) => reference.number === item.number && reference.url === item.url);
+      total += run.aic;
+      const commentEvidence = (commentAic || []).some((record) => record.repository === item.repository && record.runId === runId && record.itemNumber === item.number && record.itemUrl === canonicalItemUrl);
+      const pullRequestEvidence = item.type === 'pull_request' && (run.pullRequests || []).some((reference) => reference.number === item.number && reference.url === canonicalItemUrl);
       if (!commentEvidence && !pullRequestEvidence) throw new Error(`Detailed item ${item.repository}#${item.number} lacks exact evidence for run ${runId}`);
     }
+    if (item.aic !== normalizeAic(total)) throw new Error(`Detailed item ${item.repository}#${item.number} has an incorrect AIC total`);
   }
 }
 
