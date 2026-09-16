@@ -69,11 +69,13 @@ jobs:
           node - "$RUNNER_TEMP/org-history.json" "$SNAPSHOT_PERIOD" <<'NODE'
           const assert = require('node:assert/strict');
           const snapshot = require(process.argv[2]);
-          assert.equal(snapshot.schemaVersion, 4);
+          assert.equal(snapshot.schemaVersion, 5);
           assert.equal(snapshot.org, 'bootc-dev');
           assert.equal(snapshot.period, process.argv[3]);
           assert.equal(snapshot.repositoryFilter, 'gh-agentic-workflows');
           for (const key of ['repositories', 'items', 'workflowRuns', 'commentAic', 'errors']) assert.ok(Array.isArray(snapshot[key]), `${key} is an array`);
+          const { validateDetailedItems } = require('./scripts/org-history.js');
+          validateDetailedItems(snapshot.items, snapshot.workflowRuns, snapshot.commentAic, snapshot.org);
           assert.equal(snapshot.repositories.length, 1);
           assert.equal(snapshot.repositories[0].name, 'gh-agentic-workflows');
           assert.deepEqual(Object.keys(snapshot.coverage).sort(), ['aic', 'repositories']);
@@ -106,7 +108,7 @@ jobs:
           const assert = require('node:assert/strict');
           const childProcess = require('node:child_process');
           const fs = require('node:fs');
-          const { historyFilename, parsePeriod } = require('./scripts/org-history.js');
+          const { historyFilename, parsePeriod, validateDetailedItems } = require('./scripts/org-history.js');
           const base = process.argv[2];
           const fields = childProcess.execFileSync('git', ['diff', '--name-status', '-z', base, 'HEAD'], { encoding: 'utf8' }).split('\0');
           const weekly = /^history\/\d{4}-\d{2}\.json$/;
@@ -120,9 +122,10 @@ jobs:
             if (!added || !weekly.test(added)) continue;
             const snapshot = JSON.parse(fs.readFileSync(added, 'utf8'));
             const period = added.slice('history/'.length, -'.json'.length).replace('-', '-W');
-            assert.equal(snapshot.schemaVersion, 4, `${added} schema version`);
+            assert.equal(snapshot.schemaVersion, 5, `${added} schema version`);
             assert.equal(snapshot.period, period, `${added} period`);
             assert.equal(historyFilename(snapshot.period), added.slice('history/'.length), `${added} filename`);
             parsePeriod(snapshot.period);
+            validateDetailedItems(snapshot.items, snapshot.workflowRuns, snapshot.commentAic, snapshot.org);
           }
           NODE

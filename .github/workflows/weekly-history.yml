@@ -95,11 +95,13 @@ jobs:
           const assert = require('node:assert/strict');
           const fs = require('node:fs');
           const snapshot = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
-          assert.equal(snapshot.schemaVersion, 4);
+          assert.equal(snapshot.schemaVersion, 5);
           assert.equal(snapshot.org, 'bootc-dev');
           assert.equal(snapshot.period, process.argv[3]);
           assert.match(snapshot.period, /^\d{4}-W\d{2}$/);
           for (const key of ['repositories', 'items', 'workflowRuns', 'commentAic', 'errors']) assert.ok(Array.isArray(snapshot[key]));
+          const { validateDetailedItems } = require('./scripts/org-history.js');
+          validateDetailedItems(snapshot.items, snapshot.workflowRuns, snapshot.commentAic, snapshot.org);
           NODE
 
       - name: Open or update history pull request

@@ -16,9 +16,11 @@ node scripts/org-history.js ORG 2026-09 --output /tmp/ORG-2026-09-history.json -
 node scripts/org-history.js --previous-iso-week
 ```
 
-Schema v4 replaces `month` with `period`, `createdInMonth`/`mergedInMonth` with
-`createdInPeriod`/`mergedInPeriod`, and the attribution cohort
-`items_created_in_month` with `items_created_in_period`.
+Schema v5 retains the v4 period field names and changes detailed `items`: it contains
+only items with exact evidence linking them to a relevant workflow run with known AIC.
+Each detailed item has sorted, unique `aicRunIds`. Repository aggregates still describe
+the full collected activity cohort, not just these AIC-linked detailed items; the linked
+run evidence is serialized for audit.
 
 Pass `--repo REPO` to collect one non-archived, non-fork repository within `ORG` instead
 of the full visible organization. The resulting snapshot records the repository filter.
