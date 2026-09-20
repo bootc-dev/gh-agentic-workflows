@@ -10,7 +10,7 @@ on:
 # are up to date with their .md sources.
 jobs:
   check-drift:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -40,7 +40,7 @@ jobs:
           }
 
   weekly-history-smoke:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       actions: read
       contents: read
@@ -89,7 +89,7 @@ jobs:
 
   history-immutability:
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
