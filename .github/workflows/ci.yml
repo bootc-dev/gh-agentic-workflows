@@ -101,7 +101,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
 
-      - name: Test label definitions
+      - name: Test label installer
         run: node --test tests/install-labels.test.js
 
   history-immutability:
