@@ -93,6 +93,17 @@ jobs:
           assert.ok(snapshot.coverage.aic.total === null || typeof snapshot.coverage.aic.total === 'number');
           NODE
 
+  install-labels:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Test label definitions
+        run: node --test tests/install-labels.test.js
+
   history-immutability:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-24.04

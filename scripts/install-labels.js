@@ -14,7 +14,8 @@
  * `gh label create`, `gh api`).
  *
  * Keep LABELS here in sync with the copy in
- * .github/workflows/install-labels.yml.
+ * .github/workflows/install-labels.yml; tests/install-labels.test.js fails
+ * if they differ.
  */
 
 const LABELS = [

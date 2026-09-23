@@ -68,6 +68,8 @@ The script creates or updates the following labels:
 
 - **`agent/workflow-edits-allowed`** (purple) — Pre-authorizes an agent run to edit protected files (workflows, README, etc.) without triggering the request_review gate. Apply this to an issue before labeling it `agent/code`, or to a PR before applying `agent/fixme`.
 
+- **`agent/flake-tracker`** (blue) — Marks the CI flake tracker issue that the merge queue analyzer (`queue-triage.md`) maintains.
+
 ### Usage
 
 #### Via GitHub Actions
@@ -137,5 +139,6 @@ gh api repos/:owner/:repo/labels/agent/code -X PATCH \
 ### Customizing Labels
 
 To customize the labels (change colors, descriptions, or add new ones), edit the `LABELS` array in
-`install-labels.js` **and** the matching copy in `.github/workflows/install-labels.yml`, then rerun the
-installation workflow to update the labels on your repository.
+`install-labels.js` **and** the matching copy in `.github/workflows/install-labels.yml`
+(`tests/install-labels.test.js` fails if they differ), then rerun the installation workflow to update
+the labels on your repository.
