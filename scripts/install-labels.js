@@ -1,3 +1,6 @@
+#!/usr/bin/env node
+'use strict';
+
 /**
  * Install gh-agentic-workflows labels
  *
@@ -15,7 +18,15 @@
  * Keep LABELS here in sync with the copy in
  * .github/workflows/install-labels.yml; tests/install-labels.test.js fails
  * if they differ.
+ *
+ * Run as a script, this installs LABELS on every repository of an
+ * organization that runs the pipeline (see `--help`), which
+ * `.github/workflows/install-labels-org.yml` does on every push to main. Labels every
+ * bootc-dev repository should have regardless of the pipeline belong in
+ * bootc-dev/infra's labels.toml instead.
  */
+
+const childProcess = require('child_process');
 
 const LABELS = [
   {
@@ -145,4 +156,190 @@ async function installLabels(github, context) {
   console.log(lines.length === 0 ? 'All labels already up to date.' : 'All labels installed successfully.');
 }
 
-module.exports = { LABELS, describePlan, installLabels, octokitLabelApi, planLabelChanges, syncRepositoryLabels };
+/** Where `gh aw add` installs the pipeline's compiled workflows. */
+const WORKFLOWS_DIR = '.github/workflows';
+
+/**
+ * Compiled pipeline workflows in WORKFLOWS_DIR. A repository with any of them
+ * has adopted (at least part of) the pipeline, and only those repositories get
+ * LABELS from the org-wide installer.
+ */
+const PIPELINE_MARKERS = ['drafter.lock.yml', 'review.lock.yml', 'fix.lock.yml'];
+
+/** Whether the file names found in WORKFLOWS_DIR include a PIPELINE_MARKERS entry. */
+function isPipelineRepository(workflowFiles) {
+  return workflowFiles.some((name) => PIPELINE_MARKERS.includes(name));
+}
+
+/**
+ * Select the repositories worth checking for PIPELINE_MARKERS: every
+ * non-archived one, skipping dot-named repositories such as `.github` the
+ * same way bootc-dev/actions' discover-repos does. Returned sorted for stable
+ * output.
+ */
+function candidateRepositories(repos) {
+  return repos
+    .filter((repo) => !repo.archived && !repo.name.startsWith('.'))
+    .map((repo) => repo.name)
+    .sort();
+}
+
+function ghApi(args) {
+  const stdout = childProcess.execFileSync('gh', ['api', ...args], { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024, stdio: ['ignore', 'pipe', 'pipe'] });
+  return stdout.trim() === '' ? null : JSON.parse(stdout);
+}
+
+/** All pages of a paginated endpoint, each page passed through `items`. */
+function ghPaged(endpoint, items = (page) => page) {
+  return ghApi(['--paginate', '--slurp', endpoint]).flatMap(items);
+}
+
+function isNotFound(error) {
+  return /HTTP 404/.test(String(error.stderr || ''));
+}
+
+/**
+ * The organization-level client syncOrganization() uses, backed by the `gh`
+ * CLI so it works with whatever token `gh` is authenticated with.
+ */
+const ghCliClient = {
+  /**
+   * With `installation`, the repositories the App installation behind the
+   * token can access (so repositories it isn't installed on are never
+   * tried); otherwise every repository of `org` the token can see.
+   */
+  async listRepositories(org, { installation = false } = {}) {
+    if (!installation) return ghPaged(`orgs/${org}/repos?type=all&per_page=100`);
+    let repos;
+    try {
+      repos = ghPaged('installation/repositories?per_page=100', (page) => page.repositories);
+    } catch (error) {
+      throw new Error(`listing the App installation's repositories failed (--installation needs a GitHub App installation token): ${String(error.stderr || error.message).trim()}`);
+    }
+    return repos.filter((repo) => repo.owner.login.toLowerCase() === org.toLowerCase());
+  },
+  /** Names of the entries in directory `path`, or [] if it doesn't exist. */
+  async listDirectory(owner, repo, path) {
+    let entries;
+    try {
+      entries = ghApi([`repos/${owner}/${repo}/contents/${path}`]);
+    } catch (error) {
+      if (isNotFound(error)) return [];
+      throw error;
+    }
+    return Array.isArray(entries) ? entries.map((entry) => entry.name) : [];
+  },
+  async listLabels(owner, repo) {
+    return ghPaged(`repos/${owner}/${repo}/labels?per_page=100`);
+  },
+  async createLabel(owner, repo, { name, color, description }) {
+    ghApi(['-X', 'POST', `repos/${owner}/${repo}/labels`, '-f', `name=${name}`, '-f', `color=${color}`, '-f', `description=${description}`]);
+  },
+  async updateLabel(owner, repo, currentName, label) {
+    ghApi(['-X', 'PATCH', `repos/${owner}/${repo}/labels/${encodeURIComponent(currentName)}`,
+      '-f', `new_name=${label.name}`, '-f', `color=${label.color}`, '-f', `description=${label.description}`]);
+  },
+};
+
+/**
+ * Install `labels` on every repository of `org` whose WORKFLOWS_DIR contains
+ * any of PIPELINE_MARKERS.
+ *
+ * `client` provides listRepositories() and listDirectory() plus the label methods
+ * syncRepositoryLabels() needs; see ghCliClient. With `dryRun`, only reads
+ * and logs the plan. A failure on one repository is logged and the rest still
+ * proceed; the returned `failed` list lets the caller exit non-zero.
+ */
+async function syncOrganization(client, org, { dryRun = false, installation = false, labels = LABELS, log = console.log } = {}) {
+  const candidates = candidateRepositories(await client.listRepositories(org, { installation }));
+  log(`${dryRun ? 'Dry run: planning' : 'Installing'} ${labels.length} labels on ${org} repositories with any of ${PIPELINE_MARKERS.join(', ')} (${candidates.length} candidates${installation ? ' from the App installation' : ''})`);
+  const pipeline = [];
+  const skipped = [];
+  const failed = [];
+  let changed = 0;
+  for (const repo of candidates) {
+    try {
+      if (!isPipelineRepository(await client.listDirectory(org, repo, WORKFLOWS_DIR))) {
+        skipped.push(repo);
+        continue;
+      }
+      pipeline.push(repo);
+      const lines = describePlan(await syncRepositoryLabels(client, org, repo, { labels, dryRun }));
+      if (lines.length === 0) {
+        log(`${org}/${repo}: up to date`);
+        continue;
+      }
+      changed++;
+      log(`${org}/${repo}: ${dryRun ? 'would change' : 'changed'} ${lines.length} label(s)`);
+      for (const line of lines) log(line);
+    } catch (error) {
+      failed.push(repo);
+      log(`${org}/${repo}: FAILED: ${String(error.stderr || error.message).trim()}`);
+    }
+  }
+  if (skipped.length > 0) log(`Skipped ${skipped.length} without the pipeline: ${skipped.join(', ')}`);
+  log(`${pipeline.length} pipeline repositories, ${changed} ${dryRun ? 'would change' : 'changed'}, ${failed.length} failed`);
+  return { pipeline, skipped, changed, failed };
+}
+
+function help() {
+  return `Usage: node scripts/install-labels.js --org ORG [--installation] [--dry-run]
+
+Create missing gh-agentic-workflows labels and fix the color, description and
+name case of existing ones on every non-archived repository in ORG whose
+${WORKFLOWS_DIR} contains any of ${PIPELINE_MARKERS.join(', ')}. Labels are
+never deleted.
+
+  --installation  Only consider repositories the GitHub App installation behind
+                  the token can access (requires an installation token).
+  --dry-run       Only read, and print what would change.
+
+Requires an authenticated gh CLI; without --dry-run the token needs
+issues: write on every pipeline repository.`;
+}
+
+function parseArgs(argv) {
+  const args = { dryRun: false, installation: false };
+  for (let index = 0; index < argv.length; index++) {
+    const argument = argv[index];
+    if (argument === '--help' || argument === '-h') args.help = true;
+    else if (argument === '--dry-run') args.dryRun = true;
+    else if (argument === '--installation') args.installation = true;
+    else if (argument === '--org') {
+      args.org = argv[++index];
+      if (!args.org || args.org.startsWith('-')) throw new Error(`--org requires a value\n\n${help()}`);
+    } else throw new Error(`Unexpected argument ${argument}\n\n${help()}`);
+  }
+  if (!args.help && !args.org) throw new Error(`--org is required\n\n${help()}`);
+  return args;
+}
+
+async function main(argv) {
+  const args = parseArgs(argv);
+  if (args.help) return console.log(help());
+  const { failed } = await syncOrganization(ghCliClient, args.org, { dryRun: args.dryRun, installation: args.installation });
+  if (failed.length > 0) throw new Error(`failed on: ${failed.join(', ')}`);
+}
+
+if (require.main === module) {
+  main(process.argv.slice(2)).catch((error) => {
+    console.error(`install-labels: ${error.message}`);
+    process.exitCode = 1;
+  });
+}
+
+module.exports = {
+  LABELS,
+  PIPELINE_MARKERS,
+  WORKFLOWS_DIR,
+  candidateRepositories,
+  describePlan,
+  ghCliClient,
+  installLabels,
+  isPipelineRepository,
+  octokitLabelApi,
+  parseArgs,
+  planLabelChanges,
+  syncOrganization,
+  syncRepositoryLabels,
+};

@@ -5,7 +5,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 const test = require('node:test');
 const vm = require('node:vm');
-const { LABELS, describePlan, installLabels, planLabelChanges } = require('../scripts/install-labels.js');
+const {
+  LABELS, WORKFLOWS_DIR, candidateRepositories, describePlan, installLabels, isPipelineRepository, parseArgs, planLabelChanges, syncOrganization,
+} = require('../scripts/install-labels.js');
 
 const workflow = path.join(__dirname, '..', '.github', 'workflows', 'install-labels.yml');
 
@@ -112,4 +114,97 @@ test('installLabels writes only what the plan says', async (t) => {
     ...rest.map(({ name, color, description }) => ['create', { owner: 'o', repo: 'r', name, color, description }]),
     ['update', { owner: 'o', repo: 'r', name: lgtm.name.toUpperCase(), new_name: lgtm.name, color: lgtm.color, description: lgtm.description }],
   ]);
+});
+
+test('candidates are non-archived, non-dot repositories in stable order', () => {
+  assert.deepEqual(candidateRepositories([
+    { name: 'zeta', archived: false },
+    { name: 'old', archived: true },
+    { name: '.github', archived: false },
+    { name: 'alpha', archived: false },
+  ]), ['alpha', 'zeta']);
+});
+
+test('a repository with any compiled pipeline workflow runs the pipeline', () => {
+  for (const [workflows, expected] of [
+    [['drafter.lock.yml'], true],
+    [['review.lock.yml'], true],
+    [['ci.yml', 'fix.lock.yml'], true],
+    [['drafter.md', 'review.md', 'fix.md'], false],
+    [['ci-triage.lock.yml', 'ci.yml'], false],
+    [[], false],
+  ]) {
+    assert.equal(isPipelineRepository(workflows), expected, JSON.stringify(workflows));
+  }
+});
+
+/**
+ * An organization client stand-in: `repos` maps each repository name to
+ * `{ workflows, labels }`, or to an Error its label listing throws (such a
+ * repository counts as running the pipeline).
+ */
+function fakeOrg(repos) {
+  const calls = [];
+  const labelsOf = (repo) => {
+    if (repos[repo] instanceof Error) throw repos[repo];
+    return repos[repo].labels;
+  };
+  return {
+    calls,
+    async listRepositories(org, options) {
+      calls.push(['repos', org, options]);
+      return Object.keys(repos).map((name) => ({ name, archived: false }));
+    },
+    async listDirectory(owner, repo, path) {
+      assert.equal(path, WORKFLOWS_DIR);
+      return repos[repo] instanceof Error ? ['drafter.lock.yml'] : repos[repo].workflows;
+    },
+    async listLabels(owner, repo) { return labelsOf(repo); },
+    async createLabel(owner, repo, label) { calls.push(['create', repo, label.name]); },
+    async updateLabel(owner, repo, name, label) { calls.push(['update', repo, name, label.name]); },
+  };
+}
+
+test('syncOrganization only touches pipeline repositories', async () => {
+  const repos = {
+    fresh: { workflows: ['review.lock.yml'], labels: [] },
+    synced: { workflows: ['drafter.lock.yml', 'drafter.md'], labels: IN_SYNC },
+    drifted: { workflows: ['fix.lock.yml'], labels: DRIFTED },
+    unrelated: { workflows: ['ci.yml'], labels: [] },
+    broken: Object.assign(new Error('boom'), { stderr: 'HTTP 502' }),
+  };
+  for (const [name, dryRun, installation, writes] of [
+    ['dry run writes nothing', true, false, []],
+    ['apply writes to pipeline repositories only', false, true, [
+      // Repositories are processed in sorted order.
+      ['create', 'drifted', 'agent/new'],
+      ['update', 'drifted', 'agent/code', 'agent/code'],
+      ['update', 'drifted', 'agent/lgtm', 'agent/lgtm'],
+      ['update', 'drifted', 'Agent/Fixme', 'agent/fixme'],
+      ...DESIRED.map((label) => ['create', 'fresh', label.name]),
+    ]],
+  ]) {
+    const client = fakeOrg(repos);
+    const log = [];
+    const result = await syncOrganization(client, 'org', { dryRun, installation, labels: DESIRED, log: (line) => log.push(line) });
+    assert.deepEqual(client.calls, [['repos', 'org', { installation }], ...writes], name);
+    assert.deepEqual(result, { pipeline: ['broken', 'drifted', 'fresh', 'synced'], skipped: ['unrelated'], changed: 2, failed: ['broken'] }, name);
+    assert.ok(log.includes('org/broken: FAILED: HTTP 502'), `${name}: failure is logged`);
+    assert.ok(log.includes('org/synced: up to date'), `${name}: in-sync repository is logged`);
+  }
+});
+
+test('parses CLI arguments', () => {
+  const defaults = { dryRun: false, installation: false };
+  for (const [argv, expected] of [
+    [['--org', 'bootc-dev'], { ...defaults, org: 'bootc-dev' }],
+    [['--dry-run', '--org', 'bootc-dev'], { ...defaults, dryRun: true, org: 'bootc-dev' }],
+    [['--org', 'bootc-dev', '--installation'], { ...defaults, installation: true, org: 'bootc-dev' }],
+    [['--help'], { ...defaults, help: true }],
+  ]) {
+    assert.deepEqual(parseArgs(argv), expected, JSON.stringify(argv));
+  }
+  for (const argv of [[], ['--org'], ['--org', '--dry-run'], ['--org', 'x', 'extra'], ['--bogus']]) {
+    assert.throws(() => parseArgs(argv), undefined, JSON.stringify(argv));
+  }
 });
