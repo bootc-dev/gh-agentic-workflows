@@ -264,8 +264,9 @@ now at least readable by the agent, but it was never the intended recovery path.
 2. Register a GitHub App to act as the pipeline's bot identity (this must be a real App,
    not the default `GITHUB_TOKEN`, which cannot trigger subsequent workflows):
    - Go to Settings → Developer settings → GitHub Apps → New GitHub App.
-   - Grant repository permissions: Contents (Read & Write), Issues (Read & Write), Pull
-     requests (Read & Write), Workflows (Read & Write). Metadata (Read) is auto-granted.
+   - Grant repository permissions: Actions (Read & Write), Contents (Read & Write),
+     Issues (Read & Write), Pull requests (Read & Write), Workflows (Read & Write).
+     Metadata (Read) is auto-granted.
      Workflows is easy to miss since nothing in this repo's own `permissions:` blocks
      needs it — it's only required because `drafter.md`/`fix.md`/`upgrade.yml` push
      commits that touch `.github/workflows/*` (see "The App token also needs an
