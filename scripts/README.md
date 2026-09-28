@@ -18,13 +18,17 @@ node scripts/org-history.js --previous-iso-week
 
 Schema v5 retains the v4 period field names and changes detailed `items`: it contains
 only items with exact evidence linking them to a relevant workflow run with known AIC.
-Each record contains only `repository`, `number`, `type`, `aic`, and sorted, unique
-`aicRunIds`; generic GitHub metadata is intentionally omitted. `aic` is the normalized
-sum for its linked runs, including zero. A run linked exactly to multiple items contributes
-its full AIC to each association, so item AIC values are not additive; use
+Each record contains `repository`, `number`, `type`, `aic`, and sorted, unique
+`aicRunIds`; generic GitHub metadata is intentionally omitted. When every linked run has
+a known component breakdown, `agentAic` and `detectionAic` are also present as normalized
+sums; otherwise both are omitted. `aic` is the normalized sum for its linked runs,
+including zero. A run linked exactly to multiple items contributes its full AIC to each
+association, so item AIC values are not additive; use
 `coverage.aic.total` for the organization-wide total. Repository aggregates still describe
 the full collected activity cohort, not just these AIC-linked detailed items; the linked
 run evidence is serialized for audit.
+Unavailable properties on `workflowRuns` records, including component AIC values, are
+omitted rather than serialized as `null`.
 
 Pass `--repo REPO` to collect one non-archived, non-fork repository within `ORG` instead
 of the full visible organization. The resulting snapshot records the repository filter.

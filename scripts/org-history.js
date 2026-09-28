@@ -11,7 +11,9 @@ const path = require('path');
 
 const SCHEMA_VERSION = 5;
 const AGENT_LABELS = ['agent/code', 'agent/fixme', 'agent/lgtm'];
-const DETAILED_ITEM_FIELDS = ['repository', 'number', 'type', 'aic', 'aicRunIds'];
+const DETAILED_ITEM_REQUIRED_FIELDS = ['repository', 'number', 'type', 'aic', 'aicRunIds'];
+const DETAILED_ITEM_COMPONENT_FIELDS = ['agentAic', 'detectionAic'];
+const DETAILED_ITEM_FIELDS = [...DETAILED_ITEM_REQUIRED_FIELDS, ...DETAILED_ITEM_COMPONENT_FIELDS];
 const AGGREGATE_USAGE_FILE = 'agent_usage.json';
 const TOKEN_USAGE_FILE = 'agent/token_usage.jsonl';
 
@@ -230,6 +232,24 @@ function extractAicFromFiles(files) {
 
 function normalizeAic(value) { return Number(value.toFixed(6)); }
 
+function sparseProperties(properties) {
+  const record = {};
+  for (const [key, value] of Object.entries(properties)) if (value !== null && value !== undefined) record[key] = value;
+  return record;
+}
+
+function artifactAicProperties(usage) {
+  const properties = {
+    aic: usage.known ? normalizeAic(usage.aic) : null,
+    aicArtifactKnown: usage.known,
+    aicSource: usage.source,
+    aicRecords: usage.records,
+  };
+  if (usage.agent && usage.agent.known) properties.aicAgent = normalizeAic(usage.agent.aic);
+  if (usage.detection && usage.detection.known) properties.aicDetection = normalizeAic(usage.detection.aic);
+  return properties;
+}
+
 // Only read the machine-produced footer, not arbitrary discussion of AIC in a
 // comment.  The optional hidden marker is emitted by newer gh-aw versions and
 // gives an independently labelled run identity.
@@ -293,8 +313,16 @@ function applyCommentAicFallback(runs, records) {
   for (const run of runs) {
     const record = byRun.get(run.id);
     if (!record || run.aic !== null && run.aic !== undefined) continue;
-    run.aic = record.aic; run.aicSource = 'comment_footer'; run.aicRecords = 1;
-    run.aicAgent = record.agentAic; run.aicDetection = record.detectionAic;
+    const retainedArtifactComponent = finiteNonnegative(run.aicAgent) || finiteNonnegative(run.aicDetection);
+    if (record.detectionAic === null) {
+      // A footer without a detection value reports a total, not an agent allocation.
+      run.aic = record.aic;
+    } else {
+      if (!finiteNonnegative(run.aicAgent)) run.aicAgent = normalizeAic(record.agentAic);
+      if (!finiteNonnegative(run.aicDetection)) run.aicDetection = normalizeAic(record.detectionAic);
+      run.aic = normalizeAic(run.aicAgent + run.aicDetection);
+    }
+    run.aicSource = retainedArtifactComponent ? 'partial_artifact+comment_footer' : 'comment_footer'; run.aicRecords = 1;
     run.aicCommentActor = record.actor; run.aicCommentCreatedAt = record.createdAt; run.aicCommentUpdatedAt = record.updatedAt;
     run.aicFooterRunUrl = record.footerRunUrl; run.aicCommentUrl = record.commentUrl; run.aicCommentId = record.commentId;
     run.aicCommentBodySha256 = record.bodySha256;
@@ -341,13 +369,19 @@ function aicLinkedItems(items, runs, commentAic, org) {
   }
   return [...links.entries()].map(([item, runIds]) => {
     const aicRunIds = [...runIds].sort((a, b) => a - b);
-    return {
+    const linkedRuns = aicRunIds.map((runId) => runById.get(runId));
+    const detailedItem = {
       repository: item.repository,
       number: item.number,
       type: item.type,
-      aic: normalizeAic(aicRunIds.reduce((total, runId) => total + runById.get(runId).aic, 0)),
+      aic: normalizeAic(linkedRuns.reduce((total, run) => total + run.aic, 0)),
       aicRunIds,
     };
+    if (linkedRuns.every((run) => finiteNonnegative(run.aicAgent) && finiteNonnegative(run.aicDetection))) {
+      detailedItem.agentAic = normalizeAic(linkedRuns.reduce((total, run) => total + run.aicAgent, 0));
+      detailedItem.detectionAic = normalizeAic(linkedRuns.reduce((total, run) => total + run.aicDetection, 0));
+    }
+    return detailedItem;
   })
     .sort((a, b) => a.repository.localeCompare(b.repository) || a.number - b.number);
 }
@@ -355,7 +389,9 @@ function aicLinkedItems(items, runs, commentAic, org) {
 function validateDetailedItems(items, workflowRuns, commentAic, org) {
   const identities = new Set();
   for (const item of items) {
-    if (!item || typeof item !== 'object' || Array.isArray(item) || Object.keys(item).length !== DETAILED_ITEM_FIELDS.length || Object.keys(item).some((field) => !DETAILED_ITEM_FIELDS.includes(field))) throw new Error('Detailed item has unexpected fields');
+    const fields = item && typeof item === 'object' && !Array.isArray(item) ? Object.keys(item) : [];
+    const hasComponents = DETAILED_ITEM_COMPONENT_FIELDS.every((field) => fields.includes(field));
+    if (!item || typeof item !== 'object' || Array.isArray(item) || fields.some((field) => !DETAILED_ITEM_FIELDS.includes(field)) || DETAILED_ITEM_REQUIRED_FIELDS.some((field) => !fields.includes(field)) || DETAILED_ITEM_COMPONENT_FIELDS.some((field) => fields.includes(field)) !== hasComponents) throw new Error('Detailed item has unexpected fields');
     if (typeof item.repository !== 'string' || !/^[A-Za-z0-9_.-]+$/.test(item.repository) || !Number.isSafeInteger(item.number) || item.number <= 0 || !['issue', 'pull_request'].includes(item.type)) throw new Error('Detailed item has an invalid identity');
     const identity = `${item.repository}/${item.number}`;
     if (identities.has(identity)) throw new Error(`Detailed item ${item.repository}#${item.number} is duplicated`);
@@ -367,15 +403,25 @@ function validateDetailedItems(items, workflowRuns, commentAic, org) {
     const itemPath = item.type === 'pull_request' ? 'pull' : 'issues';
     const canonicalItemUrl = `https://github.com/${org}/${item.repository}/${itemPath}/${item.number}`;
     let total = 0;
+    let agentTotal = 0;
+    let detectionTotal = 0;
+    let componentsKnown = true;
     for (const runId of item.aicRunIds) {
       const run = workflowRuns.find((candidate) => candidate && candidate.id === runId && candidate.repository === item.repository);
       if (!run || run.repository !== item.repository || !finiteNonnegative(run.aic)) throw new Error(`Detailed item ${item.repository}#${item.number} references unknown-AIC run ${runId}`);
       total += run.aic;
+      if (finiteNonnegative(run.aicAgent) && finiteNonnegative(run.aicDetection)) {
+        agentTotal += run.aicAgent;
+        detectionTotal += run.aicDetection;
+      } else componentsKnown = false;
       const commentEvidence = (commentAic || []).some((record) => record.repository === item.repository && record.runId === runId && record.itemNumber === item.number && record.itemUrl === canonicalItemUrl);
       const pullRequestEvidence = item.type === 'pull_request' && (run.pullRequests || []).some((reference) => reference.number === item.number && reference.url === canonicalItemUrl);
       if (!commentEvidence && !pullRequestEvidence) throw new Error(`Detailed item ${item.repository}#${item.number} lacks exact evidence for run ${runId}`);
     }
     if (item.aic !== normalizeAic(total)) throw new Error(`Detailed item ${item.repository}#${item.number} has an incorrect AIC total`);
+    if (componentsKnown) {
+      if (!hasComponents || !finiteNonnegative(item.agentAic) || !finiteNonnegative(item.detectionAic) || item.agentAic !== normalizeAic(agentTotal) || item.detectionAic !== normalizeAic(detectionTotal)) throw new Error(`Detailed item ${item.repository}#${item.number} has incorrect AIC components`);
+    } else if (hasComponents) throw new Error(`Detailed item ${item.repository}#${item.number} has incomplete AIC components`);
   }
 }
 
@@ -387,7 +433,7 @@ function summarizeAicCoverage(runs) {
     if (run.aic === null || run.aic === undefined) { coverage.missingOrExpired++; continue; }
     coverage.runsWithValues++;
     if (run.aicArtifactKnown) coverage.artifactBackedRuns++;
-    if (run.aicSource === 'comment_footer') coverage.commentBackedRuns++;
+    if (typeof run.aicSource === 'string' && run.aicSource.split('+').includes('comment_footer')) coverage.commentBackedRuns++;
   }
   finalizeAicCoverage(coverage, runs);
   return coverage;
@@ -467,6 +513,32 @@ function mergeAicCoverage(aggregate, repository) {
   return merged;
 }
 
+function workflowRunRecord(run, org, repository) {
+  return sparseProperties({
+    repository,
+    id: run.id,
+    url: run.html_url,
+    name: run.name,
+    path: run.path,
+    createdAt: run.created_at,
+    conclusion: run.conclusion,
+    kind: classifyWorkflow(run),
+    pullRequests: normalizedPullRequests(run, org, repository),
+    aic: run.aic,
+    aicSource: run.aicSource,
+    aicRecords: run.aicRecords,
+    aicAgent: run.aicAgent,
+    aicDetection: run.aicDetection,
+    aicCommentActor: run.aicCommentActor,
+    aicCommentCreatedAt: run.aicCommentCreatedAt,
+    aicCommentUpdatedAt: run.aicCommentUpdatedAt,
+    aicFooterRunUrl: run.aicFooterRunUrl,
+    aicCommentUrl: run.aicCommentUrl,
+    aicCommentId: run.aicCommentId,
+    aicCommentBodySha256: run.aicCommentBodySha256,
+  });
+}
+
 function writeSnapshot(output, snapshot) {
   fs.writeFileSync(output, `${JSON.stringify(snapshot, null, 2)}\n`, { encoding: 'utf8', flag: 'wx', mode: 0o600 });
 }
@@ -513,7 +585,7 @@ function collect(org, interval, bot, repositoryFilter) {
       const relevant = runs.filter(classifyWorkflow);
       for (const run of relevant) {
         if (!aicEligible(run)) continue;
-        try { const usage = collectRunUsage(org, name, run); if (usage.error) repositoryErrors.push({ repository: name, operation: `artifact/${run.id}`, message: usage.error }); run.aic = usage.known ? usage.aic : null; run.aicArtifactKnown = usage.known; run.aicSource = usage.source; run.aicRecords = usage.records; }
+        try { const usage = collectRunUsage(org, name, run); if (usage.error) repositoryErrors.push({ repository: name, operation: `artifact/${run.id}`, message: usage.error }); Object.assign(run, artifactAicProperties(usage)); }
         catch (error) { run.aic = null; repositoryErrors.push({ repository: name, operation: `artifact/${run.id}`, message: error.message }); }
       }
       if (bot) {
@@ -524,7 +596,7 @@ function collect(org, interval, bot, repositoryFilter) {
         } catch (error) { repositoryErrors.push({ repository: name, operation: 'comments', message: error.message }); }
       }
       repositoryAic = summarizeAicCoverage(relevant);
-      const workflowRuns = runs.map((run) => ({ repository: name, id: run.id, url: run.html_url, name: run.name, path: run.path, createdAt: run.created_at, conclusion: run.conclusion, kind: classifyWorkflow(run), pullRequests: normalizedPullRequests(run, org, name), aic: run.aic === undefined ? null : run.aic, aicSource: run.aicSource || null, aicRecords: run.aicRecords === undefined ? null : run.aicRecords, aicAgent: run.aicAgent === undefined ? null : run.aicAgent, aicDetection: run.aicDetection === undefined ? null : run.aicDetection, aicCommentActor: run.aicCommentActor || null, aicCommentCreatedAt: run.aicCommentCreatedAt || null, aicCommentUpdatedAt: run.aicCommentUpdatedAt || null, aicFooterRunUrl: run.aicFooterRunUrl || null, aicCommentUrl: run.aicCommentUrl || null, aicCommentId: run.aicCommentId === undefined ? null : run.aicCommentId, aicCommentBodySha256: run.aicCommentBodySha256 || null })).filter((run) => run.kind);
+      const workflowRuns = runs.map((run) => workflowRunRecord(run, org, name)).filter((run) => run.kind);
       snapshot.items.push(...aicLinkedItems(items, runs, snapshot.commentAic.filter((record) => record.repository === name), org));
       snapshot.workflowRuns.push(...workflowRuns);
       snapshot.repositories.push({ name, url: repo.html_url, ...aggregateRepository(items, runs) });
@@ -578,4 +650,4 @@ function main(argv) {
 }
 if (require.main === module) { try { main(process.argv.slice(2)); } catch (error) { console.error(`org-history: ${error.message}`); process.exitCode = 1; } }
 
-module.exports = { aicLinkedItems, deduplicateCommentAic, historyFilename, normalizedPullRequests, parseCommentAic, parsePeriod, previousCompleteIsoWeek, validateDetailedItems };
+module.exports = { aicLinkedItems, applyCommentAicFallback, artifactAicProperties, deduplicateCommentAic, historyFilename, normalizedPullRequests, parseCommentAic, parsePeriod, previousCompleteIsoWeek, summarizeAicCoverage, validateDetailedItems, workflowRunRecord };

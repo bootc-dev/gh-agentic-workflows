@@ -4,7 +4,7 @@ const assert = require('node:assert/strict');
 const childProcess = require('node:child_process');
 const path = require('node:path');
 const test = require('node:test');
-const { aicLinkedItems, deduplicateCommentAic, historyFilename, normalizedPullRequests, parseCommentAic, parsePeriod, previousCompleteIsoWeek, validateDetailedItems } = require('../scripts/org-history.js');
+const { aicLinkedItems, applyCommentAicFallback, artifactAicProperties, deduplicateCommentAic, historyFilename, normalizedPullRequests, parseCommentAic, parsePeriod, previousCompleteIsoWeek, summarizeAicCoverage, validateDetailedItems, workflowRunRecord } = require('../scripts/org-history.js');
 
 const script = path.join(__dirname, '..', 'scripts', 'org-history.js');
 
@@ -59,7 +59,7 @@ test('projects compact AIC-linked items from exact known-AIC evidence', () => {
     { repository: 'repo', number: 2, type: 'pull_request', url: 'https://github.com/org/repo/pull/2', title: 'metadata' },
     { repository: 'repo', number: 3, type: 'issue', url: 'https://github.com/org/repo/issues/3' },
   ];
-  const run = (id, aic, pullRequests = []) => ({ id, repository: 'repo', kind: 'drafter', aic, pull_requests: pullRequests });
+  const run = (id, aic, pullRequests = [], components = {}) => ({ id, repository: 'repo', kind: 'drafter', aic, pull_requests: pullRequests, ...components });
   const pull = (number, repository = 'repo') => ({ url: `https://api.github.com/repos/org/${repository}/pulls/${number}` });
   const comment = (runId, itemNumber) => ({ repository: 'repo', runId, itemNumber, itemUrl: items.find((item) => item.number === itemNumber).url });
   for (const scenario of [
@@ -70,6 +70,8 @@ test('projects compact AIC-linked items from exact known-AIC evidence', () => {
     { name: 'deduplicates evidence', runs: [run(14, 4, [pull(2), pull(2)])], comments: [comment(14, 2), comment(14, 2)], expected: [{ repository: 'repo', number: 2, type: 'pull_request', aic: 4, aicRunIds: [14] }] },
     { name: 'attributes one run fully to multiple items', runs: [run(16, 5)], comments: [comment(16, 1), comment(16, 3)], expected: [{ repository: 'repo', number: 1, type: 'issue', aic: 5, aicRunIds: [16] }, { repository: 'repo', number: 3, type: 'issue', aic: 5, aicRunIds: [16] }] },
     { name: 'retains zero AIC', runs: [run(15, 0)], comments: [comment(15, 1)], expected: [{ repository: 'repo', number: 1, type: 'issue', aic: 0, aicRunIds: [15] }] },
+    { name: 'sums complete component breakdowns including zero', runs: [run(10, 1.25, [], { aicAgent: 1.25, aicDetection: 0 }), run(14, 2.5, [], { aicAgent: 2, aicDetection: 0.5 })], comments: [comment(10, 1), comment(14, 1)], expected: [{ repository: 'repo', number: 1, type: 'issue', aic: 3.75, aicRunIds: [10, 14], agentAic: 3.25, detectionAic: 0.5 }] },
+    { name: 'omits partial component breakdowns', runs: [run(10, 1, [], { aicAgent: 1, aicDetection: 0 }), run(14, 2)], comments: [comment(10, 1), comment(14, 1)], expected: [{ repository: 'repo', number: 1, type: 'issue', aic: 3, aicRunIds: [10, 14] }] },
   ]) assert.deepEqual(aicLinkedItems(items, scenario.runs, scenario.comments, 'org'), scenario.expected, scenario.name);
 });
 
@@ -92,6 +94,55 @@ test('normalizes only same-repository workflow PR references', () => {
   assert.deepEqual(normalizedPullRequests({ pull_requests: [{ url: 'https://api.github.com/repos/org/repo/pulls/2' }, { url: 'https://api.github.com/repos/org/repo/pulls/1' }, { url: 'https://api.github.com/repos/org/repo/pulls/2' }, { url: 'https://api.github.com/repos/org/other/pulls/3' }] }, 'org', 'repo'), [{ number: 1, url: 'https://github.com/org/repo/pull/1' }, { number: 2, url: 'https://github.com/org/repo/pull/2' }]);
 });
 
+test('serializes sparse workflow-run AIC properties without losing zero values', () => {
+  const record = workflowRunRecord({
+    id: 1, path: 'drafter.lock.yml', aic: 0, aicRecords: 0, aicAgent: 0,
+    aicDetection: 0, aicCommentId: 0, aicSource: null, aicCommentUrl: undefined,
+  }, 'org', 'repo');
+  assert.deepEqual(record, {
+    repository: 'repo', id: 1, path: 'drafter.lock.yml', kind: 'drafter', pullRequests: [],
+    aic: 0, aicRecords: 0, aicAgent: 0, aicDetection: 0, aicCommentId: 0,
+  });
+  for (const property of ['aicSource', 'aicCommentUrl', 'aicCommentActor']) assert.equal(property in record, false);
+});
+
+test('propagates normalized artifact AIC components when the extraction is complete', () => {
+  for (const [name, usage, expected] of [
+    ['known values', { known: true, aic: 1.2345678, records: 2, source: 'aggregate+detection', agent: { known: true, aic: 1.2 }, detection: { known: true, aic: 0.0345678 } }, { aic: 1.234568, aicArtifactKnown: true, aicSource: 'aggregate+detection', aicRecords: 2, aicAgent: 1.2, aicDetection: 0.034568 }],
+    ['zero values', { known: true, aic: 0, records: 0, source: 'aggregate_empty+detection_empty', agent: { known: true, aic: 0 }, detection: { known: true, aic: 0 } }, { aic: 0, aicArtifactKnown: true, aicSource: 'aggregate_empty+detection_empty', aicRecords: 0, aicAgent: 0, aicDetection: 0 }],
+    ['incomplete extraction', { known: false, aic: null, records: 0, source: 'agent_missing+detection_empty', agent: { known: false, aic: null }, detection: { known: true, aic: 0 } }, { aic: null, aicArtifactKnown: false, aicSource: 'agent_missing+detection_empty', aicRecords: 0, aicDetection: 0 }],
+  ]) assert.deepEqual(artifactAicProperties(usage), expected, name);
+});
+
+test('merges comment AIC fallback with partial artifact components', () => {
+  const footer = (agentAic, detectionAic, aic = detectionAic === null ? agentAic : agentAic + detectionAic) => ({ runId: 1, agentAic, detectionAic, aic, actor: 'bot', createdAt: 'created', updatedAt: 'updated', footerRunUrl: 'run', commentUrl: 'comment', commentId: 1, bodySha256: 'body' });
+  for (const [name, artifact, record, expected] of [
+    ['no artifact with split footer', {}, footer(1.2, 0.0345678), { aic: 1.234568, aicAgent: 1.2, aicDetection: 0.034568, aicSource: 'comment_footer' }],
+    ['partial detection with split footer', { aicDetection: 2 }, footer(1.2, 9, 10.2), { aic: 3.2, aicAgent: 1.2, aicDetection: 2, aicSource: 'partial_artifact+comment_footer' }],
+    ['partial agent with split footer', { aicAgent: 3 }, footer(1, 4), { aic: 7, aicAgent: 3, aicDetection: 4, aicSource: 'partial_artifact+comment_footer' }],
+    ['partial detection with total-only footer', { aicDetection: 2 }, footer(9, null), { aic: 9, aicAgent: undefined, aicDetection: 2, aicSource: 'partial_artifact+comment_footer' }],
+    ['no artifact with total-only footer', {}, footer(9, null), { aic: 9, aicAgent: undefined, aicDetection: undefined, aicSource: 'comment_footer' }],
+    ['zero component footer', {}, footer(0, 0), { aic: 0, aicAgent: 0, aicDetection: 0, aicSource: 'comment_footer' }],
+  ]) {
+    const run = { id: 1, ...artifact };
+    assert.equal(applyCommentAicFallback([run], [record]), 1, name);
+    assert.deepEqual({ aic: run.aic, aicAgent: run.aicAgent, aicDetection: run.aicDetection, aicSource: run.aicSource, aicRecords: run.aicRecords }, { ...expected, aicRecords: 1 }, name);
+    assert.equal(run.aicCommentUrl, 'comment', name);
+  }
+});
+
+test('counts pure and hybrid comment-footer AIC coverage', () => {
+  assert.deepEqual(summarizeAicCoverage([
+    { aic: 1, aicSource: 'comment_footer' },
+    { aic: 2, aicSource: 'partial_artifact+comment_footer' },
+    { aic: 3, aicSource: 'aggregate+detection', aicArtifactKnown: true },
+    { aic: null, aicSource: 'artifacts_missing' },
+  ]), {
+    relevantRuns: 4, eligibleRuns: 4, ineligibleRuns: 0, runsWithValues: 3,
+    artifactBackedRuns: 1, commentBackedRuns: 2, missingOrExpired: 1, total: null,
+  });
+});
+
 test('validates compact detailed item records and exact serialized evidence', () => {
   const issue = { repository: 'repo', number: 1, type: 'issue', aic: 0, aicRunIds: [1] };
   const pullRequest = { repository: 'repo', number: 2, type: 'pull_request', aic: 1, aicRunIds: [2] };
@@ -100,15 +151,22 @@ test('validates compact detailed item records and exact serialized evidence', ()
   const commentAic = [{ repository: 'repo', runId: 1, itemNumber: 1, itemUrl: issueUrl }];
   const workflowRuns = [{ id: 1, repository: 'repo', aic: 0, pullRequests: [] }, { id: 2, repository: 'repo', aic: 1, pullRequests: [{ number: 2, url: pullRequestUrl }] }];
   assert.doesNotThrow(() => validateDetailedItems([issue, pullRequest], workflowRuns, commentAic, 'org'));
+  const componentIssue = { ...issue, agentAic: 0, detectionAic: 0 };
+  const componentRuns = [{ id: 1, repository: 'repo', aic: 0, aicAgent: 0, aicDetection: 0, pullRequests: [] }];
+  assert.doesNotThrow(() => validateDetailedItems([componentIssue], componentRuns, commentAic, 'org'));
   for (const [name, items, runs, comments] of [
     ['missing evidence', [issue], [{ id: 1, repository: 'repo', aic: 0, pullRequests: [] }], []],
     ['wrong PR evidence', [pullRequest], [{ id: 2, repository: 'repo', aic: 1, pullRequests: [{ number: 2, url: issueUrl }] }], []],
     ['wrong type', [{ ...issue, type: 'pull_request' }], workflowRuns, commentAic],
     ['cross-repository comment URL', [issue], workflowRuns, [{ ...commentAic[0], itemUrl: 'https://github.com/other/repo/issues/1' }]],
     ['duplicate run ID', [{ ...issue, aicRunIds: [1, 1] }], workflowRuns, commentAic],
-    ['unknown AIC', [{ ...issue, aicRunIds: [2] }], [{ id: 2, repository: 'repo', aic: null, pullRequests: [] }], commentAic],
+    ['missing AIC', [{ ...issue, aicRunIds: [2] }], [{ id: 2, repository: 'repo', pullRequests: [] }], commentAic],
     ['cross-repository run', [{ ...issue, aicRunIds: [3] }], [{ id: 3, repository: 'other', aic: 1, pullRequests: [] }], commentAic],
     ['wrong total', [{ ...pullRequest, aic: 2 }], workflowRuns, commentAic],
+    ['missing known components', [issue], componentRuns, commentAic],
+    ['incorrect agent component', [{ ...componentIssue, agentAic: 1 }], componentRuns, commentAic],
+    ['one component field', [{ ...issue, agentAic: 0 }], componentRuns, commentAic],
+    ['components for partial breakdown', [{ ...componentIssue }], workflowRuns, commentAic],
     ['duplicate item identity', [issue, { ...issue, type: 'pull_request' }], workflowRuns, commentAic],
     ['unexpected metadata', [{ ...issue, updatedAt: '2026-09-01T00:00:00Z' }], workflowRuns, commentAic],
     ['non-finite AIC', [{ ...issue, aic: Number.NaN }], workflowRuns, commentAic],
