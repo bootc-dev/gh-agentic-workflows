@@ -95,9 +95,11 @@ permissions:
   issues: read
   pull-requests: read
 
-model: claude-sonnet-4-5-20250929
+model: claude-opus-5
 engine:
   id: claude
+  subagents:
+    model: claude-sonnet-5
 network: defaults
 
 tools:
