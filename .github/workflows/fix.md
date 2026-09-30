@@ -51,6 +51,8 @@ engine:
   id: claude
 imports:
   - shared/network.md
+  # just and the gh-aw CLI, for recompiling lock files
+  - shared/workflow-tools.md
 tools:
   bash: ["*"]
   github:
@@ -214,6 +216,8 @@ manually: this workflow removes `agent/fixme` itself via `remove-labels`
    workflows, not just the one you touched — every `.lock.yml` must stay in
    sync with its `.md` source). Include the resulting `.lock.yml` changes in
    your commit.
+   `just` and the pinned gh-aw CLI are already installed; the sandbox
+   can't install them itself.
 8. Push your fix as a new commit on the same branch via the
    `push-to-pull-request-branch` safe-output. Do not open a new PR.
 
