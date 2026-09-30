@@ -20,6 +20,8 @@ engine:
   id: claude
 imports:
   - shared/network.md
+  # just and the gh-aw CLI, for recompiling lock files
+  - shared/workflow-tools.md
 tools:
   bash: ["*"]
   github:
@@ -151,6 +153,8 @@ implementation.
    lockfiles before opening the pull request: run `just setup && just
    compile` (this recompiles *all* workflows, not just the one you touched —
    every `.lock.yml` must stay in sync with its `.md` source).
+   `just` and the pinned gh-aw CLI are already installed; the sandbox
+   can't install them itself.
 6. Check if the originating issue #${{ github.event.issue.number }} has the
    `agent/workflow-edits-allowed` label by reading its labels. If it does,
    you must propagate this label to the pull request so that subsequent
