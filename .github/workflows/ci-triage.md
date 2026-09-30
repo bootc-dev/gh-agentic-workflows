@@ -106,7 +106,14 @@ permissions:
 model: claude-sonnet-4-5-20250929
 engine:
   id: claude
-network: defaults
+network:
+  allowed:
+    - defaults
+    - rust
+    - github
+    - github-actions
+    - containers
+    - "just.systems"
 
 tools:
   # The agent runs in a sandboxed container. Keep the write-capable Actions
