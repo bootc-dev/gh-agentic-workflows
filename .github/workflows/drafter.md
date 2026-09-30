@@ -18,6 +18,8 @@ permissions:
 model: claude-sonnet-4-5-20250929
 engine:
   id: claude
+network: defaults
+
 tools:
   bash: ["*"]
   github:
