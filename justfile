@@ -8,13 +8,16 @@ setup:
     #!/usr/bin/env bash
     set -euo pipefail
     wanted="{{ gh_aw_version }}"
-    if gh extension list 2>/dev/null | grep -q 'github/gh-aw'; then
-        installed=$(gh aw version 2>&1 | awk '{print $NF}')
+    # Ask gh-aw itself: `gh extension list` needs gh to be logged in, and it
+    # isn't in the agent sandbox, where the CLI is pre-installed (see
+    # .github/workflows/shared/workflow-tools.md).
+    if version=$(gh aw version 2>&1); then
+        installed=$(awk '{print $NF}' <<<"$version")
         if [ "$installed" = "$wanted" ]; then
             echo "gh-aw $wanted already installed."
             exit 0
         fi
-        echo "gh-aw installed at ${installed:-unknown}, re-pinning to $wanted..."
+        echo "gh-aw installed at $installed, re-pinning to $wanted..."
         gh extension remove gh-aw
     fi
     gh extension install github/gh-aw --pin "$wanted"
