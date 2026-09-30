@@ -46,11 +46,8 @@ permissions:
   issues: read
   pull-requests: read
 
-model: claude-opus-5-5
-engine:
-  id: claude
 imports:
-  - shared/network.md
+  - shared/defaults.md
   # just and the gh-aw CLI, for recompiling lock files
   - shared/workflow-tools.md
 tools:

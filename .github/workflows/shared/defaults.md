@@ -1,5 +1,8 @@
 ---
-description: Shared network allowlist for all workflows
+description: Shared defaults for all workflows
+model: claude-opus-5-5
+engine:
+  id: claude
 network:
   allowed:
     - defaults
