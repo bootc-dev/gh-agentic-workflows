@@ -558,13 +558,17 @@ function selectedRepositories(org, repositoryFilter) {
   return [repository];
 }
 
+function snapshotHeader(org, interval, bot, repositoryFilter) {
+  return sparseProperties({ schemaVersion: SCHEMA_VERSION, org, period: interval.period, bot, repositoryFilter, interval: { start: interval.start, end: interval.end } });
+}
+
 function collect(org, interval, bot, repositoryFilter) {
   // These are global prerequisites: do not turn a missing CLI/authentication
   // problem into misleading per-repository coverage gaps.
   exec('gh', ['auth', 'status']);
   exec('unzip', ['-v']);
   const repositories = selectedRepositories(org, repositoryFilter);
-  const snapshot = { schemaVersion: SCHEMA_VERSION, org, period: interval.period, bot: bot || null, repositoryFilter: repositoryFilter || null, interval: { start: interval.start, end: interval.end }, repositories: [], items: [], workflowRuns: [], commentAic: [], coverage: { repositories: { included: repositories.length, failed: [] }, aic: { relevantRuns: 0, eligibleRuns: 0, runsWithValues: 0, artifactBackedRuns: 0, commentBackedRuns: 0, ineligibleRuns: 0, missingOrExpired: 0, total: null } }, errors: [] };
+  const snapshot = { ...snapshotHeader(org, interval, bot, repositoryFilter), repositories: [], items: [], workflowRuns: [], commentAic: [], coverage: { repositories: { included: repositories.length, failed: [] }, aic: { relevantRuns: 0, eligibleRuns: 0, runsWithValues: 0, artifactBackedRuns: 0, commentBackedRuns: 0, ineligibleRuns: 0, missingOrExpired: 0, total: null } }, errors: [] };
   for (const repo of repositories) {
     let repositoryAic;
     try {
@@ -650,4 +654,4 @@ function main(argv) {
 }
 if (require.main === module) { try { main(process.argv.slice(2)); } catch (error) { console.error(`org-history: ${error.message}`); process.exitCode = 1; } }
 
-module.exports = { aicLinkedItems, applyCommentAicFallback, artifactAicProperties, deduplicateCommentAic, historyFilename, normalizedPullRequests, parseCommentAic, parsePeriod, previousCompleteIsoWeek, summarizeAicCoverage, validateDetailedItems, workflowRunRecord };
+module.exports = { aicLinkedItems, applyCommentAicFallback, artifactAicProperties, deduplicateCommentAic, historyFilename, normalizedPullRequests, parseCommentAic, parsePeriod, previousCompleteIsoWeek, snapshotHeader, summarizeAicCoverage, validateDetailedItems, workflowRunRecord };
