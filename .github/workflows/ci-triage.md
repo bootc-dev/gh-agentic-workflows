@@ -104,6 +104,8 @@ permissions:
   issues: read
   pull-requests: read
 
+runs-on: ubuntu-26.04
+
 tools:
   # The agent runs in a sandboxed container. Keep the write-capable Actions
   # token isolated in the custom safe-output job rather than restricting the
@@ -137,6 +139,9 @@ tools:
     integrity-proxy: false
 
 safe-outputs:
+  # The detection job defaults to ubuntu-latest rather than following runs-on.
+  threat-detection:
+    runs-on: ubuntu-26.04
   github-app:
     client-id: ${{ vars.GH_AW_APP_CLIENT_ID }}
     private-key: ${{ secrets.GH_AW_APP_PRIVATE_KEY }}

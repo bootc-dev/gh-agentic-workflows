@@ -15,6 +15,7 @@ permissions:
   contents: read
   issues: read
 
+runs-on: ubuntu-26.04
 imports:
   - shared/defaults.md
   # just and the gh-aw CLI, for recompiling lock files
@@ -25,6 +26,9 @@ tools:
     toolsets: [issues]
 
 safe-outputs:
+  # The detection job defaults to ubuntu-latest rather than following runs-on.
+  threat-detection:
+    runs-on: ubuntu-26.04
   github-app:
     client-id: ${{ vars.GH_AW_APP_CLIENT_ID }}
     private-key: ${{ secrets.GH_AW_APP_PRIVATE_KEY }}
@@ -67,7 +71,7 @@ jobs:
   add_working_label:
     needs: pre_activation
     if: needs.pre_activation.outputs.activated == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       issues: write
     steps:
@@ -104,7 +108,7 @@ jobs:
     # PRs -- a bare `if: always()` there was found to strip a *different*,
     # still-running workflow's label out from under it.
     if: always() && needs.pre_activation.outputs.activated == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       issues: write
     steps:
