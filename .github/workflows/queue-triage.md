@@ -25,7 +25,7 @@ description: |
   automatically rerun failed jobs, with a cap of three total attempts.
 
 imports:
-  - shared/network.md
+  - shared/defaults.md
   - uses: shared/workflow-rerun.md
     with:
       expected-event: merge_group
@@ -95,10 +95,6 @@ permissions:
   actions: read
   issues: read
   pull-requests: read
-
-model: claude-opus-5-5
-engine:
-  id: claude
 
 tools:
   # The agent runs in a sandboxed container. Keep the write-capable Actions

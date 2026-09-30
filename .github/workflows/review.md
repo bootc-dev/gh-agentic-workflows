@@ -16,11 +16,8 @@ permissions:
   issues: read
   pull-requests: read
 
-model: claude-opus-5-5
-engine:
-  id: claude
 imports:
-  - shared/network.md
+  - shared/defaults.md
 tools:
   bash: ["*"]
   github:
