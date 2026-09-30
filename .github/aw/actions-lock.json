@@ -1,5 +1,10 @@
 {
   "entries": {
+    "bootc-dev/actions/bootc-ubuntu-setup@main": {
+      "repo": "bootc-dev/actions/bootc-ubuntu-setup",
+      "version": "main",
+      "sha": "40859f0934be02542d553a24e8384c693e43e4a8"
+    },
     "github/gh-aw-actions/setup-cli@v0.90.1": {
       "repo": "github/gh-aw-actions/setup-cli",
       "version": "v0.90.1",
