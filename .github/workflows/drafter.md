@@ -18,6 +18,14 @@ permissions:
 model: claude-sonnet-4-5-20250929
 engine:
   id: claude
+network:
+  allowed:
+    - defaults
+    - rust
+    - github
+    - github-actions
+    - containers
+    - "just.systems"
 tools:
   bash: ["*"]
   github:
