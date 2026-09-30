@@ -26,6 +26,7 @@ description: |
   three total attempts.
 
 imports:
+  - shared/network.md
   - uses: shared/workflow-rerun.md
     with:
       expected-event: pull_request
@@ -106,14 +107,6 @@ permissions:
 model: claude-opus-5-5
 engine:
   id: claude
-network:
-  allowed:
-    - defaults
-    - rust
-    - github
-    - github-actions
-    - containers
-    - "just.systems"
 
 tools:
   # The agent runs in a sandboxed container. Keep the write-capable Actions

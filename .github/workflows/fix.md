@@ -49,14 +49,8 @@ permissions:
 model: claude-opus-5-5
 engine:
   id: claude
-network:
-  allowed:
-    - defaults
-    - rust
-    - github
-    - github-actions
-    - containers
-    - "just.systems"
+imports:
+  - shared/network.md
 tools:
   bash: ["*"]
   github:
