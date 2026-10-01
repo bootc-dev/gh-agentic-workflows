@@ -68,6 +68,8 @@ The script creates or updates the following labels:
 
 - **`agent/workflow-edits-allowed`** (purple) — Pre-authorizes an agent run to edit protected files (workflows, README, etc.) without triggering the request_review gate. Apply this to an issue before labeling it `agent/code`, or to a PR before applying `agent/fixme`.
 
+- **`agent/retro`** (light blue) — Applied to improvement issues filed by the retrospective analyzer (`retro.md`). Only needed in the repository that runs it.
+
 ### Usage
 
 #### Via GitHub Actions

@@ -228,15 +228,38 @@ The right way to retry a rejected task is still to fix the label order (see abov
 apply the bundle manually on the *original* issue/PR — relabeling the fallback issue is
 now at least readable by the agent, but it was never the intended recovery path.
 
+## Retrospective analyzer
+
+[`retro.md`](.github/workflows/retro.md) runs only in this repository, every six hours
+over the last 8 hours of runs (or on `workflow_dispatch` with a `lookback_hours` input).
+It is deliberately not in `aw.yml`'s `includes:` list, so `gh aw add` consumers never
+install it. A plain pre-fetch step, running outside the agent sandbox, treats every
+public, non-archived, non-fork `bootc-dev` repository (this one included) with at least
+one `.github/workflows/*.lock.yml` as a deployment, so new adopters are picked up
+automatically. For each one it collects the gh-aw runs in the window with per-job
+conclusions, so a run that concluded `success` while its `agent` job was skipped (see the
+`pre_activation` gotcha above) still stands out, plus bounded log hints for failed jobs
+and the titles of this repository's open issues. The agent then files at most three
+`[retro]`-prefixed, `agent/retro`-labeled issues here, each proposing a concrete change to
+a workflow in this repository, after checking every open issue (not only earlier `[retro]`
+ones) for duplicates. There is no checkpoint state: the 8-hour window deliberately
+overlaps the 6-hour schedule so runs still in progress at one fetch are seen at the next,
+and the duplicate check absorbs the overlap. Anything the pre-fetch couldn't fetch is
+reported through `missing-data` rather than treated as healthy. Nothing downstream is
+automated — a human triages the issues, and can label one `agent/code` to hand it to
+`drafter.md`. Since the evidence comes from logs of other repositories, check any quoted
+excerpts before doing so.
+
 ## Repository setup checklist
 
-1. Create eight labels: `agent/code`, `agent/fixme`, `agent/lgtm`, `agent/drafter-working`,
+1. Create nine labels: `agent/code`, `agent/fixme`, `agent/lgtm`, `agent/drafter-working`,
    `agent/review-working`, `agent/fix-working`, `agent/workflow-edits-allowed`,
-   `agent/flake-tracker` (see "Letting the agent edit protected files" above). The three
+   `agent/flake-tracker`, `agent/retro` (see "Letting the agent edit protected files" above). The three
    `agent/*-working` labels just need to exist; their color is cosmetic (see "a per-workflow
    `agent/*-working` label is added and removed via frontmatter `jobs:`" above).
    `agent/flake-tracker` is only needed for merge-queue CI failure analysis (see
-   "Overview" above).
+   "Overview" above). `agent/retro` is only needed in the repository that runs
+   `retro.md` (see "Retrospective analyzer" above).
 
    The easiest way is to run the included install script via the **Install Labels** workflow
    in the Actions tab, or manually via:
@@ -258,6 +281,8 @@ now at least readable by the agent, but it was never the intended recovery path.
      --description "Pre-authorizes agent runs to edit protected files without the request_review gate"
    gh label create "agent/flake-tracker" --color 1D76DB \
      --description "Marks the CI flake tracker issue the merge queue analyzer maintains"
+   gh label create "agent/retro" --color C5DEF5 \
+     --description "Improvement issue filed by the retrospective analyzer"
    ```
 
    See [`scripts/README.md`](scripts/README.md) for more installation options.
