@@ -18,7 +18,7 @@ safe-outputs:
         transient infrastructure failure. Choose failed to rerun only failed
         jobs, or all to rerun every job. The target run is derived from this
         workflow's trigger and cannot be selected by the agent.
-      runs-on: ubuntu-latest
+      runs-on: ubuntu-26.04
       permissions:
         actions: read
         contents: read

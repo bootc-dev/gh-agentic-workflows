@@ -16,6 +16,7 @@ permissions:
   issues: read
   pull-requests: read
 
+runs-on: ubuntu-26.04
 imports:
   - shared/defaults.md
 tools:
@@ -28,6 +29,9 @@ tools:
     trusted-users: ["${{ vars.GH_AW_APP_BOT_SLUG }}"]
 
 safe-outputs:
+  # The detection job defaults to ubuntu-latest rather than following runs-on.
+  threat-detection:
+    runs-on: ubuntu-26.04
   github-app:
     client-id: ${{ vars.GH_AW_APP_CLIENT_ID }}
     private-key: ${{ secrets.GH_AW_APP_PRIVATE_KEY }}
@@ -48,7 +52,7 @@ jobs:
   add_working_label:
     needs: pre_activation
     if: needs.pre_activation.outputs.activated == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       pull-requests: write
     steps:
@@ -79,7 +83,7 @@ jobs:
     # never started from clearing an in-progress signal it never set. See
     # fix.md's equivalent job for the live incident this defends against.
     if: always() && needs.pre_activation.outputs.activated == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       pull-requests: write
     steps:

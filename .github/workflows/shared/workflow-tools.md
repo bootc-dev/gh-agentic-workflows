@@ -1,5 +1,5 @@
 ---
-description: just and the gh-aw CLI for recompiling lock files, installed before the agent starts
+description: just (via bootc-ubuntu-setup) and the gh-aw CLI for recompiling lock files, installed before the agent starts
 # Tools the drafter and fix agents need to recompile lock files
 # (`just setup && just compile`). They're installed on the runner before the
 # agent starts because the agent can't install them from inside the AWF
@@ -15,10 +15,10 @@ runtimes:
   gh-aw: {}
 # Custom steps run outside the sandbox, after checkout; see
 # https://github.github.com/gh-aw/reference/steps-jobs/
+# bootc-ubuntu-setup is the org's standard host setup; it installs just
+# (among other things) and fails on runners other than Ubuntu 24.04/26.04,
+# so importing workflows run on ubuntu-26.04.
 steps:
-  - name: Install just
-    run: |
-      set -euo pipefail
-      sudo apt-get update -q
-      sudo apt-get install -y -q just
+  - name: Bootc Ubuntu setup
+    uses: bootc-dev/actions/bootc-ubuntu-setup@main
 ---
