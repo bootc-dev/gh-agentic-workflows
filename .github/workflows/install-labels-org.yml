@@ -1,0 +1,71 @@
+name: Install labels on pipeline repositories
+
+# This is a plain (non-gh-aw) workflow: installs the pipeline's labels
+# (scripts/install-labels.js LABELS) on every repository in the organization
+# that runs the pipeline, i.e. contains any of drafter.lock.yml,
+# review.lock.yml or fix.lock.yml in .github/workflows, so they pick up new or
+# renamed labels without waiting for their own copy of install-labels.yml to
+# be updated. It only creates labels and fixes their color, description and
+# name case; it never deletes one.
+#
+# Labels every repository should have regardless of the pipeline are synced by
+# bootc-dev/infra (labels.toml) instead; this workflow owns only the agent/*
+# labels. It is not part of the gh-aw package (aw.yml): it's specific to the
+# organization hosting this repository.
+
+on:
+  # Every push to main syncs, not only those changing the label set: a run
+  # that finds nothing to change costs one label listing per pipeline
+  # repository, and it repairs labels changed by hand or reverted by a
+  # repository's outdated install-labels.yml without polling for drift.
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: "Only print the planned label changes (uncheck to apply them)"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: install-labels-org
+  cancel-in-progress: false
+
+jobs:
+  install-labels:
+    # Forks have neither the App credentials nor any business editing the
+    # organization's labels.
+    if: github.repository == 'bootc-dev/gh-agentic-workflows'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      # The pipeline's own App: it is installed wherever the pipeline runs,
+      # and --installation below only considers repositories it can access.
+      - name: Generate label token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.GH_AW_APP_CLIENT_ID }}
+          private-key: ${{ secrets.GH_AW_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          # Labels are managed through the Issues API; contents: read is for
+          # detecting the pipeline marker file.
+          permission-issues: write
+          permission-contents: read
+
+      - name: Install labels
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          ORG: ${{ github.repository_owner }}
+          DRY_RUN: ${{ inputs.dry-run && '--dry-run' || '' }}
+        run: |
+          set -euo pipefail
+          # shellcheck disable=SC2086 # DRY_RUN is empty or a single flag.
+          node scripts/install-labels.js --org "$ORG" --installation $DRY_RUN
