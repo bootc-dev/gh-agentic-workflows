@@ -37,7 +37,7 @@ safe-outputs:
       max: 1
       steps:
         - name: Checkout trusted rerun handler
-          uses: actions/checkout@v7
+          uses: actions/checkout@v7.0.1
           with:
             ref: ${{ github.event.repository.default_branch }}
             token: ${{ github.token }}
@@ -50,7 +50,7 @@ safe-outputs:
             private-key: ${{ secrets.GH_AW_APP_PRIVATE_KEY }}
             permission-actions: write
         - name: Validate and rerun monitored workflow
-          uses: actions/github-script@v9
+          uses: actions/github-script@v9.0.0
           with:
             github-token: ${{ steps.app-token.outputs.token }}
             script: |
