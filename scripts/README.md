@@ -31,7 +31,8 @@ Unavailable properties on `workflowRuns` records, including component AIC values
 omitted rather than serialized as `null`.
 
 Pass `--repo REPO` to collect one non-archived, non-fork repository within `ORG` instead
-of the full visible organization. The resulting snapshot records the repository filter.
+of the full visible organization. The resulting snapshot records the repository filter as
+`repositoryFilter`; like `bot`, it is omitted when the corresponding option is not given.
 
 It requires authenticated `gh` and `unzip`. The snapshot is intentionally written to
 `/tmp` by default, not committed, and reports partial repository/artifact coverage.

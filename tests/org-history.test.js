@@ -4,7 +4,7 @@ const assert = require('node:assert/strict');
 const childProcess = require('node:child_process');
 const path = require('node:path');
 const test = require('node:test');
-const { aicLinkedItems, applyCommentAicFallback, artifactAicProperties, deduplicateCommentAic, historyFilename, normalizedPullRequests, parseCommentAic, parsePeriod, previousCompleteIsoWeek, summarizeAicCoverage, validateDetailedItems, workflowRunRecord } = require('../scripts/org-history.js');
+const { aicLinkedItems, applyCommentAicFallback, artifactAicProperties, deduplicateCommentAic, historyFilename, normalizedPullRequests, parseCommentAic, parsePeriod, previousCompleteIsoWeek, snapshotHeader, summarizeAicCoverage, validateDetailedItems, workflowRunRecord } = require('../scripts/org-history.js');
 
 const script = path.join(__dirname, '..', 'scripts', 'org-history.js');
 
@@ -92,6 +92,14 @@ test('retains consistent comment evidence for every exact item target', () => {
 
 test('normalizes only same-repository workflow PR references', () => {
   assert.deepEqual(normalizedPullRequests({ pull_requests: [{ url: 'https://api.github.com/repos/org/repo/pulls/2' }, { url: 'https://api.github.com/repos/org/repo/pulls/1' }, { url: 'https://api.github.com/repos/org/repo/pulls/2' }, { url: 'https://api.github.com/repos/org/other/pulls/3' }] }, 'org', 'repo'), [{ number: 1, url: 'https://github.com/org/repo/pull/1' }, { number: 2, url: 'https://github.com/org/repo/pull/2' }]);
+});
+
+test('omits unset optional snapshot header properties', () => {
+  const interval = parsePeriod('2026-W38');
+  const expected = { schemaVersion: 5, org: 'org', period: '2026-W38', interval: { start: interval.start, end: interval.end } };
+  assert.deepEqual(snapshotHeader('org', interval, undefined, undefined), expected);
+  assert.deepEqual(Object.keys(snapshotHeader('org', interval, 'bot[bot]', 'repo')), ['schemaVersion', 'org', 'period', 'bot', 'repositoryFilter', 'interval']);
+  assert.deepEqual(snapshotHeader('org', interval, 'bot[bot]', 'repo'), { ...expected, bot: 'bot[bot]', repositoryFilter: 'repo' });
 });
 
 test('serializes sparse workflow-run AIC properties without losing zero values', () => {
