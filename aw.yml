@@ -8,6 +8,7 @@ includes:
   - .github/workflows/drafter.md
   - .github/workflows/review.md
   - .github/workflows/fix.md
+  - .github/workflows/release.md
   - .github/workflows/merge.yml
   - .github/workflows/install-labels.yml
   - .github/workflows/upgrade.yml
