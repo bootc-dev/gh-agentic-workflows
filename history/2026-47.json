@@ -1,0 +1,1302 @@
+{
+  "schemaVersion": 5,
+  "org": "bootc-dev",
+  "period": "2026-W47",
+  "bot": "bootc-bot[bot]",
+  "repositoryFilter": null,
+  "interval": {
+    "start": "2026-11-16T00:00:00.000Z",
+    "end": "2026-11-23T00:00:00.000Z"
+  },
+  "repositories": [
+    {
+      "name": ".github",
+      "url": "https://github.com/bootc-dev/.github",
+      "issuesCreated": 0,
+      "prsCreated": 0,
+      "prsMerged": 0,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 0,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {}
+    },
+    {
+      "name": ".project",
+      "url": "https://github.com/bootc-dev/.project",
+      "issuesCreated": 0,
+      "prsCreated": 0,
+      "prsMerged": 0,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 0,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {}
+    },
+    {
+      "name": "actions",
+      "url": "https://github.com/bootc-dev/actions",
+      "issuesCreated": 0,
+      "prsCreated": 2,
+      "prsMerged": 1,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 2,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {
+        "review": {
+          "skipped": 4
+        }
+      }
+    },
+    {
+      "name": "agent-skills",
+      "url": "https://github.com/bootc-dev/agent-skills",
+      "issuesCreated": 0,
+      "prsCreated": 0,
+      "prsMerged": 0,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 0,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {}
+    },
+    {
+      "name": "agentic-sandbox",
+      "url": "https://github.com/bootc-dev/agentic-sandbox",
+      "issuesCreated": 0,
+      "prsCreated": 0,
+      "prsMerged": 0,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 0,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {}
+    },
+    {
+      "name": "bcvk",
+      "url": "https://github.com/bootc-dev/bcvk",
+      "issuesCreated": 0,
+      "prsCreated": 3,
+      "prsMerged": 2,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 3,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {
+        "review": {
+          "skipped": 6
+        },
+        "fix": {
+          "skipped": 1
+        }
+      }
+    },
+    {
+      "name": "bink",
+      "url": "https://github.com/bootc-dev/bink",
+      "issuesCreated": 0,
+      "prsCreated": 0,
+      "prsMerged": 1,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 0,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {}
+    },
+    {
+      "name": "bootc",
+      "url": "https://github.com/bootc-dev/bootc",
+      "issuesCreated": 6,
+      "prsCreated": 17,
+      "prsMerged": 9,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 23,
+        "assistedByAi": 0,
+        "generatedByAi": 3
+      },
+      "workflows": {
+        "review": {
+          "skipped": 53
+        }
+      }
+    },
+    {
+      "name": "bootc-dev.github.io",
+      "url": "https://github.com/bootc-dev/bootc-dev.github.io",
+      "issuesCreated": 0,
+      "prsCreated": 0,
+      "prsMerged": 0,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 0,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {}
+    },
+    {
+      "name": "bootc-operator",
+      "url": "https://github.com/bootc-dev/bootc-operator",
+      "issuesCreated": 0,
+      "prsCreated": 7,
+      "prsMerged": 6,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 7,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {}
+    },
+    {
+      "name": "canon-json-rs",
+      "url": "https://github.com/bootc-dev/canon-json-rs",
+      "issuesCreated": 0,
+      "prsCreated": 0,
+      "prsMerged": 0,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 0,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {}
+    },
+    {
+      "name": "cgwalters-ci-sandbox",
+      "url": "https://github.com/bootc-dev/cgwalters-ci-sandbox",
+      "issuesCreated": 0,
+      "prsCreated": 0,
+      "prsMerged": 0,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 0,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {}
+    },
+    {
+      "name": "cgwalters-devspace-sandbox",
+      "url": "https://github.com/bootc-dev/cgwalters-devspace-sandbox",
+      "issuesCreated": 1,
+      "prsCreated": 4,
+      "prsMerged": 0,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 5,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {}
+    },
+    {
+      "name": "community",
+      "url": "https://github.com/bootc-dev/community",
+      "issuesCreated": 0,
+      "prsCreated": 0,
+      "prsMerged": 0,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 0,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {}
+    },
+    {
+      "name": "containers-image-proxy-rs",
+      "url": "https://github.com/bootc-dev/containers-image-proxy-rs",
+      "issuesCreated": 0,
+      "prsCreated": 1,
+      "prsMerged": 0,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 1,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {}
+    },
+    {
+      "name": "gh-agentic-workflows",
+      "url": "https://github.com/bootc-dev/gh-agentic-workflows",
+      "issuesCreated": 0,
+      "prsCreated": 1,
+      "prsMerged": 0,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 1,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {
+        "review": {
+          "skipped": 2
+        }
+      }
+    },
+    {
+      "name": "infra",
+      "url": "https://github.com/bootc-dev/infra",
+      "issuesCreated": 0,
+      "prsCreated": 5,
+      "prsMerged": 3,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 5,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {
+        "review": {
+          "skipped": 6
+        }
+      }
+    },
+    {
+      "name": "jmarrero-devspace-sandbox",
+      "url": "https://github.com/bootc-dev/jmarrero-devspace-sandbox",
+      "issuesCreated": 0,
+      "prsCreated": 1,
+      "prsMerged": 1,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 1,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {}
+    },
+    {
+      "name": "jsonrpc-fdpass",
+      "url": "https://github.com/bootc-dev/jsonrpc-fdpass",
+      "issuesCreated": 0,
+      "prsCreated": 0,
+      "prsMerged": 0,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 0,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {}
+    },
+    {
+      "name": "jsonrpc-fdpass-go",
+      "url": "https://github.com/bootc-dev/jsonrpc-fdpass-go",
+      "issuesCreated": 0,
+      "prsCreated": 0,
+      "prsMerged": 0,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 0,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {}
+    },
+    {
+      "name": "linux-kernel-cmdline",
+      "url": "https://github.com/bootc-dev/linux-kernel-cmdline",
+      "issuesCreated": 0,
+      "prsCreated": 0,
+      "prsMerged": 0,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 0,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {}
+    },
+    {
+      "name": "ocidir-rs",
+      "url": "https://github.com/bootc-dev/ocidir-rs",
+      "issuesCreated": 0,
+      "prsCreated": 1,
+      "prsMerged": 2,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 1,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {}
+    },
+    {
+      "name": "operator-ci-sandbox",
+      "url": "https://github.com/bootc-dev/operator-ci-sandbox",
+      "issuesCreated": 0,
+      "prsCreated": 0,
+      "prsMerged": 0,
+      "agentLabelSignals": {},
+      "agentBranchPrs": 0,
+      "attribution": {
+        "cohort": "items_created_in_period",
+        "items": 0,
+        "assistedByAi": 0,
+        "generatedByAi": 0
+      },
+      "workflows": {}
+    }
+  ],
+  "items": [],
+  "workflowRuns": [
+    {
+      "repository": "actions",
+      "id": 44752455570,
+      "url": "https://github.com/bootc-dev/actions/actions/runs/44752455570",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-20T14:20:11Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "actions",
+      "id": 44752705268,
+      "url": "https://github.com/bootc-dev/actions/actions/runs/44752705268",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-20T14:21:44Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "actions",
+      "id": 44967963730,
+      "url": "https://github.com/bootc-dev/actions/actions/runs/44967963730",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-22T00:42:54Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 68,
+          "url": "https://github.com/bootc-dev/actions/pull/68"
+        }
+      ]
+    },
+    {
+      "repository": "actions",
+      "id": 44967972916,
+      "url": "https://github.com/bootc-dev/actions/actions/runs/44967972916",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-22T00:43:01Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 62,
+          "url": "https://github.com/bootc-dev/actions/pull/62"
+        }
+      ]
+    },
+    {
+      "repository": "bcvk",
+      "id": 43829805574,
+      "url": "https://github.com/bootc-dev/bcvk/actions/runs/43829805574",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-16T08:15:39Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 421,
+          "url": "https://github.com/bootc-dev/bcvk/pull/421"
+        }
+      ]
+    },
+    {
+      "repository": "bcvk",
+      "id": 43829806646,
+      "url": "https://github.com/bootc-dev/bcvk/actions/runs/43829806646",
+      "name": "PR Fix Agent",
+      "path": ".github/workflows/fix.lock.yml",
+      "createdAt": "2026-11-16T08:15:40Z",
+      "conclusion": "skipped",
+      "kind": "fix",
+      "pullRequests": [
+        {
+          "number": 421,
+          "url": "https://github.com/bootc-dev/bcvk/pull/421"
+        }
+      ]
+    },
+    {
+      "repository": "bcvk",
+      "id": 43910407916,
+      "url": "https://github.com/bootc-dev/bcvk/actions/runs/43910407916",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-16T16:42:12Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bcvk",
+      "id": 43910560913,
+      "url": "https://github.com/bootc-dev/bcvk/actions/runs/43910560913",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-16T16:43:03Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bcvk",
+      "id": 43919690621,
+      "url": "https://github.com/bootc-dev/bcvk/actions/runs/43919690621",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-16T17:33:55Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bcvk",
+      "id": 44967729122,
+      "url": "https://github.com/bootc-dev/bcvk/actions/runs/44967729122",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-22T00:40:01Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 423,
+          "url": "https://github.com/bootc-dev/bcvk/pull/423"
+        }
+      ]
+    },
+    {
+      "repository": "bcvk",
+      "id": 44967758983,
+      "url": "https://github.com/bootc-dev/bcvk/actions/runs/44967758983",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-22T00:40:22Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 420,
+          "url": "https://github.com/bootc-dev/bcvk/pull/420"
+        }
+      ]
+    },
+    {
+      "repository": "bootc",
+      "id": 43829577613,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/43829577613",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-16T08:13:57Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 43833287612,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/43833287612",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-16T08:41:31Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 43879508798,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/43879508798",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-16T13:49:30Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 43909129482,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/43909129482",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-16T16:35:14Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 43931300764,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/43931300764",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-16T18:40:29Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 43939648005,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/43939648005",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-16T19:28:12Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44062767621,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44062767621",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-17T10:13:12Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44133040430,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44133040430",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-17T17:05:10Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44150353809,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44150353809",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-17T18:40:17Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44189022666,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44189022666",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-17T22:20:09Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44281842895,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44281842895",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-18T10:04:16Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44288089197,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44288089197",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-18T10:43:33Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44288302282,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44288302282",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-18T10:44:55Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44288699024,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44288699024",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-18T10:47:28Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44293086055,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44293086055",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-18T11:15:51Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44368000946,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44368000946",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-18T18:17:05Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44376268686,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44376268686",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-18T19:02:51Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44456669111,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44456669111",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-19T04:12:08Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44457676706,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44457676706",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-19T04:20:46Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44474500911,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44474500911",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-19T06:45:26Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44474977257,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44474977257",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-19T06:49:21Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44481260338,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44481260338",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-19T07:39:08Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44493826760,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44493826760",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-19T09:09:33Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44514148451,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44514148451",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-19T11:21:53Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44551878831,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44551878831",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-19T15:10:55Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44552539009,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44552539009",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-19T15:14:27Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44594758625,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44594758625",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-19T19:06:00Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44601746263,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44601746263",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-19T19:46:12Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44699283433,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44699283433",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-20T08:01:32Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44699304654,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44699304654",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-20T08:01:42Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44712315090,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44712315090",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-20T09:37:34Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44721834318,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44721834318",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-20T10:44:57Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44764635859,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44764635859",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-20T15:34:30Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44776686299,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44776686299",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-20T16:46:17Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44776756174,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44776756174",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-20T16:46:43Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44863233263,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44863233263",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-21T03:51:39Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44863282687,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44863282687",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-21T03:52:16Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44917648996,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44917648996",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-21T15:09:14Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44918289995,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44918289995",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-21T15:16:24Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44919670953,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44919670953",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-21T15:31:57Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44919863175,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44919863175",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-21T15:34:01Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44920402388,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44920402388",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-21T15:40:09Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44923690666,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44923690666",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-21T16:16:44Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44930243135,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44930243135",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-21T17:28:37Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44955706691,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44955706691",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-21T22:14:27Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 44967626114,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44967626114",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-22T00:38:44Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 2676,
+          "url": "https://github.com/bootc-dev/bootc/pull/2676"
+        }
+      ]
+    },
+    {
+      "repository": "bootc",
+      "id": 44967634368,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44967634368",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-22T00:38:51Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 2677,
+          "url": "https://github.com/bootc-dev/bootc/pull/2677"
+        }
+      ]
+    },
+    {
+      "repository": "bootc",
+      "id": 44967645939,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44967645939",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-22T00:39:00Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 2638,
+          "url": "https://github.com/bootc-dev/bootc/pull/2638"
+        }
+      ]
+    },
+    {
+      "repository": "bootc",
+      "id": 44973658583,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/44973658583",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-22T01:55:05Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 45016061079,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/45016061079",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-22T11:11:07Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 45061689182,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/45061689182",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-22T19:36:08Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 45062122273,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/45062122273",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-22T19:40:52Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "bootc",
+      "id": 45063134392,
+      "url": "https://github.com/bootc-dev/bootc/actions/runs/45063134392",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-22T19:51:42Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": []
+    },
+    {
+      "repository": "gh-agentic-workflows",
+      "id": 43832801412,
+      "url": "https://github.com/bootc-dev/gh-agentic-workflows/actions/runs/43832801412",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-16T08:37:57Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 134,
+          "url": "https://github.com/bootc-dev/gh-agentic-workflows/pull/134"
+        }
+      ]
+    },
+    {
+      "repository": "gh-agentic-workflows",
+      "id": 44968490424,
+      "url": "https://github.com/bootc-dev/gh-agentic-workflows/actions/runs/44968490424",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-22T00:49:27Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 90,
+          "url": "https://github.com/bootc-dev/gh-agentic-workflows/pull/90"
+        }
+      ]
+    },
+    {
+      "repository": "infra",
+      "id": 44967890446,
+      "url": "https://github.com/bootc-dev/infra/actions/runs/44967890446",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-22T00:41:59Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 306,
+          "url": "https://github.com/bootc-dev/infra/pull/306"
+        }
+      ]
+    },
+    {
+      "repository": "infra",
+      "id": 44967898871,
+      "url": "https://github.com/bootc-dev/infra/actions/runs/44967898871",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-22T00:42:05Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 307,
+          "url": "https://github.com/bootc-dev/infra/pull/307"
+        }
+      ]
+    },
+    {
+      "repository": "infra",
+      "id": 44970915234,
+      "url": "https://github.com/bootc-dev/infra/actions/runs/44970915234",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-22T01:19:31Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 308,
+          "url": "https://github.com/bootc-dev/infra/pull/308"
+        }
+      ]
+    },
+    {
+      "repository": "infra",
+      "id": 44971037916,
+      "url": "https://github.com/bootc-dev/infra/actions/runs/44971037916",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-22T01:20:57Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 309,
+          "url": "https://github.com/bootc-dev/infra/pull/309"
+        }
+      ]
+    },
+    {
+      "repository": "infra",
+      "id": 44975891189,
+      "url": "https://github.com/bootc-dev/infra/actions/runs/44975891189",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-22T02:23:49Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 310,
+          "url": "https://github.com/bootc-dev/infra/pull/310"
+        }
+      ]
+    },
+    {
+      "repository": "infra",
+      "id": 45021973291,
+      "url": "https://github.com/bootc-dev/infra/actions/runs/45021973291",
+      "name": "PR Review Agent",
+      "path": ".github/workflows/review.lock.yml",
+      "createdAt": "2026-11-22T12:22:50Z",
+      "conclusion": "skipped",
+      "kind": "review",
+      "pullRequests": [
+        {
+          "number": 306,
+          "url": "https://github.com/bootc-dev/infra/pull/306"
+        }
+      ]
+    }
+  ],
+  "commentAic": [],
+  "coverage": {
+    "repositories": {
+      "included": 23,
+      "failed": []
+    },
+    "aic": {
+      "relevantRuns": 72,
+      "eligibleRuns": 0,
+      "runsWithValues": 0,
+      "artifactBackedRuns": 0,
+      "commentBackedRuns": 0,
+      "ineligibleRuns": 72,
+      "missingOrExpired": 0,
+      "total": null
+    }
+  },
+  "errors": []
+}
